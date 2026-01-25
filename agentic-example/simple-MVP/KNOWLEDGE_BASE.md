@@ -85,14 +85,14 @@ Route to different nodes based on state:
 def router(state: MyState) -> str:
     if state["intent"] == "SCALP":
         return "scalp_agent"
-    return "general_responder"
+    return "fallback_agent"
 
 workflow.add_conditional_edges(
     "classifier",           # From node
     router,                 # Router function
     {                       # Mapping
         "scalp_agent": "scalp_agent",
-        "general_responder": "general_responder"
+        "fallback_agent": "fallback_agent"
     }
 )
 ```
@@ -117,6 +117,7 @@ from langchain_core.messages import HumanMessage, AIMessage
 from langgraph.graph import StateGraph, START, END
 
 from agents.scalp_agent import get_scalp_agent
+from agents.fallback_agent import get_fallback_agent
 
 load_dotenv()
 
@@ -200,14 +201,14 @@ Respond with ONLY the intent label."""
 # ============================================================
 # ROUTER FUNCTION
 # ============================================================
-def route_to_agent(state: OrchestratorState) -> Literal["scalp_agent", "general_responder"]:
+def route_to_agent(state: OrchestratorState) -> Literal["scalp_agent", "fallback_agent"]:
     """
     Conditional routing based on classified intent.
     Returns the name of the next node to execute.
     """
     if state.get("intent") == "SCALP_ANALYSIS":
         return "scalp_agent"
-    return "general_responder"
+    return "fallback_agent"
 
 
 # ============================================================
@@ -235,17 +236,20 @@ async def scalp_agent_node(state: OrchestratorState) -> dict:
     }
 
 
-def general_responder(state: OrchestratorState) -> dict:
-    """Handle non-trading queries with a helpful message."""
-    response = """I'm the Scalp Trading Assistant using V2.1 methodology.
+async def fallback_agent_node(state: OrchestratorState) -> dict:
+    """Execute the fallback agent for general queries."""
+    agent = get_fallback_agent()
+    result = await agent.ainvoke({"messages": state["messages"]})
 
-Try asking:
-- "Analyze NVDA for a scalp entry"
-- "Check TSLA setup with RSI 35, volume 1.2x"
-"""
+    analysis_result = None
+    for msg in reversed(result.get("messages", [])):
+        if hasattr(msg, "content") and msg.content:
+            analysis_result = {"response": msg.content}
+            break
+
     return {
-        "messages": [AIMessage(content=response)],
-        "analysis_result": {"response": response}
+        "messages": result.get("messages", []),
+        "analysis_result": analysis_result
     }
 
 
@@ -262,24 +266,24 @@ def create_orchestrator():
     Build the LangGraph StateGraph.
 
     Flow:
-    START → classifier → [scalp_agent | general_responder] → format_response → END
+    START → classifier → [scalp_agent | fallback_agent] → format_response → END
     """
     workflow = StateGraph(OrchestratorState)
 
     # Add nodes
     workflow.add_node("classifier", classify_intent)
     workflow.add_node("scalp_agent", scalp_agent_node)
-    workflow.add_node("general_responder", general_responder)
+    workflow.add_node("fallback_agent", fallback_agent_node)
     workflow.add_node("format_response", format_response)
 
     # Add edges
     workflow.add_edge(START, "classifier")
     workflow.add_conditional_edges("classifier", route_to_agent, {
         "scalp_agent": "scalp_agent",
-        "general_responder": "general_responder"
+        "fallback_agent": "fallback_agent"
     })
     workflow.add_edge("scalp_agent", "format_response")
-    workflow.add_edge("general_responder", "format_response")
+    workflow.add_edge("fallback_agent", "format_response")
     workflow.add_edge("format_response", END)
 
     return workflow.compile()

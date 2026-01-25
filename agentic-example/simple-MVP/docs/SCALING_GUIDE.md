@@ -135,7 +135,7 @@ User message: "{user_message}"
 Respond with ONLY the intent label."""
 
 # 3. Update the router function
-def route_to_agent(state: OrchestratorState) -> Literal["scalp_agent", "swing_agent", "general_responder"]:
+def route_to_agent(state: OrchestratorState) -> Literal["scalp_agent", "swing_agent", "fallback_agent"]:
     """Route to appropriate agent based on intent."""
     intent = state.get("intent", "UNKNOWN")
 
@@ -144,7 +144,7 @@ def route_to_agent(state: OrchestratorState) -> Literal["scalp_agent", "swing_ag
     elif intent == "SWING_ANALYSIS":
         return "swing_agent"
     else:
-        return "general_responder"
+        return "fallback_agent"  # Handles GENERAL and UNKNOWN
 
 # 4. Create the agent node function
 async def swing_agent_node(state: OrchestratorState) -> dict:
@@ -171,7 +171,7 @@ def create_orchestrator():
     workflow.add_node("classifier", classify_intent)
     workflow.add_node("scalp_agent", scalp_agent_node)
     workflow.add_node("swing_agent", swing_agent_node)  # ← NEW
-    workflow.add_node("general_responder", general_responder)
+    workflow.add_node("fallback_agent", fallback_agent_node)
     workflow.add_node("format_response", format_response)
 
     # Add edges
@@ -182,50 +182,72 @@ def create_orchestrator():
         {
             "scalp_agent": "scalp_agent",
             "swing_agent": "swing_agent",  # ← NEW
-            "general_responder": "general_responder"
+            "fallback_agent": "fallback_agent"
         }
     )
     workflow.add_edge("scalp_agent", "format_response")
     workflow.add_edge("swing_agent", "format_response")  # ← NEW
-    workflow.add_edge("general_responder", "format_response")
+    workflow.add_edge("fallback_agent", "format_response")
     workflow.add_edge("format_response", END)
 
     return workflow.compile()
 ```
 
-### Step 3: Update General Responder (Optional)
+### Step 3: Fallback Agent Pattern (Recommended)
 
-Update the help message to include the new capability:
+Instead of a simple responder function, use a proper ReAct agent for the fallback.
+This provides better responses and can use tools for calculations, terminology lookup, etc.
 
 ```python
-def general_responder(state: OrchestratorState) -> dict:
-    response_text = """I'm the Trading Assistant. I can help with:
+# agents/fallback_agent.py
+"""
+Fallback Agent - Handles general queries with tools
+"""
+from langchain_anthropic import ChatAnthropic
+from langgraph.prebuilt import create_react_agent
+from langchain_core.tools import tool
 
-**Scalp Trading** (minutes to hours):
-- "Analyze NVDA for a scalp entry"
-- "Check TSLA setup with RSI 35, volume 1.2x"
+@tool
+def get_system_info() -> dict:
+    """Get information about system capabilities."""
+    return {"capabilities": [...], "supported_intents": [...]}
 
-**Swing Trading** (days to weeks):
-- "What's the swing setup for AAPL?"
-- "Analyze AMD for a swing trade entry"
+@tool
+def get_trading_terminology(term: str) -> dict:
+    """Explain trading terms like RSI, VWAP, etc."""
+    glossary = {"rsi": {...}, "vwap": {...}}
+    return glossary.get(term.lower(), {"error": "Term not found"})
 
-What would you like to analyze?"""
+FALLBACK_PROMPT = """You are a helpful assistant for the trading platform.
+Answer general questions, explain terminology, and guide users."""
 
-    return {
-        "messages": [AIMessage(content=response_text)],
-        "analysis_result": {"response": response_text}
-    }
+def create_fallback_agent():
+    # Use Haiku for cost efficiency - simple queries don't need Sonnet
+    model = ChatAnthropic(model="claude-3-5-haiku-latest", max_tokens=1024)
+    tools = [get_system_info, get_trading_terminology]
+    return create_react_agent(model=model, tools=tools, prompt=FALLBACK_PROMPT)
 ```
+
+**Key insight:** Use Haiku for fallback/simple agents, Sonnet for complex analysis agents.
+This optimizes cost while maintaining quality where it matters.
 
 ### Summary: Adding an Agent
 
 | Step | File | Changes |
 |------|------|---------|
 | 1 | `agents/new_agent.py` | Create agent with prompt + tools |
-| 2 | `orchestrator.py` | Add intent, router case, node, edges |
-| 3 | `orchestrator.py` | Update help message (optional) |
+| 2 | `orchestrator.py` | Add import, intent, router case, node, edges |
+| 3 | `agents/fallback_agent.py` | Update fallback to mention new capability (optional) |
 
 **Total: ~50 lines of code**
+
+### Model Selection Guide
+
+| Agent Type | Recommended Model | Reasoning |
+|------------|-------------------|-----------|
+| Complex analysis (scalp, swing) | Claude Sonnet | Requires deep reasoning |
+| Simple queries (fallback, help) | Claude Haiku | Fast, cost-efficient |
+| Classification/routing | Claude Haiku | Pattern matching only |
 
 ---
 

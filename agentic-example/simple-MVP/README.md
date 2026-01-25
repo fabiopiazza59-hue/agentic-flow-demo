@@ -20,7 +20,7 @@ A minimal but complete agentic AI system demonstrating the supervisor pattern wi
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                        USER REQUEST                              │
-│            "Analyze NVDA for scalp, RSI 35, volume 1.3x"        │
+│     "Analyze NVDA..." or "What is RSI?" or "Hello"              │
 └─────────────────────────────┬───────────────────────────────────┘
                               │
                               ▼
@@ -36,27 +36,19 @@ A minimal but complete agentic AI system demonstrating the supervisor pattern wi
 │                             │                                    │
 └─────────────────────────────┼───────────────────────────────────┘
                               │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    SCALP AGENT (ReAct)                          │
-│                       Claude Sonnet                              │
-│                                                                  │
-│  ┌────────────────────────────────────────────────────────┐    │
-│  │                    TOOL CALLS                           │    │
-│  │                                                         │    │
-│  │  ┌─────────────────┐  ┌─────────────────┐             │    │
-│  │  │ get_stock_quote │  │  get_spy_change │             │    │
-│  │  │    (Finnhub)    │  │    (Finnhub)    │             │    │
-│  │  └─────────────────┘  └─────────────────┘             │    │
-│  │                                                         │    │
-│  │  ┌─────────────────────────────────────┐              │    │
-│  │  │      calculate_confluence           │              │    │
-│  │  │         (V2.1 Scoring)              │              │    │
-│  │  └─────────────────────────────────────┘              │    │
-│  └────────────────────────────────────────────────────────┘    │
-│                                                                  │
-└─────────────────────────────────────────────────────────────────┘
-                              │
+              ┌───────────────┴───────────────┐
+              ▼                               ▼
+┌─────────────────────────────┐ ┌─────────────────────────────────┐
+│     SCALP AGENT (ReAct)     │ │     FALLBACK AGENT (ReAct)      │
+│       Claude Sonnet         │ │        Claude Haiku             │
+│                             │ │                                 │
+│  Tools:                     │ │  Tools:                         │
+│  - get_stock_quote          │ │  - get_system_info              │
+│  - get_spy_change           │ │  - get_trading_terminology      │
+│  - calculate_confluence     │ │  - calculate_basic_math         │
+└─────────────────────────────┘ └─────────────────────────────────┘
+              │                               │
+              └───────────────┬───────────────┘
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                    PHOENIX TRACING                               │
@@ -71,7 +63,8 @@ A minimal but complete agentic AI system demonstrating the supervisor pattern wi
 |----------|--------|-----------|
 | Orchestration | LangGraph StateGraph | Type-safe state management, conditional routing |
 | Classifier LLM | Claude Haiku | Cost-efficient ($0.001/call), fast routing |
-| Agent LLM | Claude Sonnet | Better reasoning for analysis ($0.01/call) |
+| Scalp Agent LLM | Claude Sonnet | Better reasoning for complex analysis ($0.01/call) |
+| Fallback Agent LLM | Claude Haiku | Cost-efficient for simple queries ($0.001/call) |
 | Agent Pattern | ReAct | Reasoning + Acting loop with tool calls |
 | Market Data | Finnhub API | Free tier, real-time quotes |
 | Observability | Arize Phoenix | Open-source, self-hosted, full trace visibility |
@@ -304,7 +297,8 @@ simple-MVP/
 ├── cli.py                  # CLI test script
 ├── test_flow.py            # Test without LLM
 ├── agents/
-│   └── scalp_agent.py      # ReAct scalp trading agent
+│   ├── scalp_agent.py      # ReAct scalp trading agent (Sonnet)
+│   └── fallback_agent.py   # ReAct general queries agent (Haiku)
 ├── skills/
 │   └── confluence.py       # V2.1 confluence calculator
 ├── mcp_servers/
@@ -313,6 +307,8 @@ simple-MVP/
 │   └── tracing.py          # Phoenix tracing setup
 ├── static/
 │   └── index.html          # Demo web UI
+├── docs/
+│   └── SCALING_GUIDE.md    # Guide for adding agents
 ├── requirements.txt        # Python dependencies
 ├── .env                    # Environment config
 └── docker-compose.yml      # Phoenix container (optional)
