@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCP Server Factory</title>
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --error: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--bg-tertiary);
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-primary);
+            background: var(--bg-secondary);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: var(--bg-secondary);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            border: 1px solid var(--bg-tertiary);
+        }
+
+        .card-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-description {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.625rem 1.25rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+        }
+
+        .servers-list {
+            background: var(--bg-secondary);
+            border-radius: 0.75rem;
+            border: 1px solid var(--bg-tertiary);
+            overflow: hidden;
+        }
+
+        .servers-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--bg-tertiary);
+        }
+
+        .server-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--bg-tertiary);
+        }
+
+        .server-item:last-child {
+            border-bottom: none;
+        }
+
+        .server-info h3 {
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .server-info p {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .server-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            margin-right: 0.25rem;
+        }
+
+        .tag-success {
+            background: rgba(34, 197, 94, 0.2);
+            color: var(--success);
+        }
+
+        .tag-warning {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            border-radius: 0.75rem;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--bg-tertiary);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 0.875rem;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        pre {
+            background: var(--bg-primary);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-size: 0.75rem;
+            line-height: 1.5;
+        }
+
+        code {
+            font-family: 'Monaco', 'Menlo', monospace;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .status-healthy {
+            background: rgba(34, 197, 94, 0.2);
+            color: var(--success);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>MCP Server Factory</h1>
+            <div class="nav-links">
+                <a href="/docs" target="_blank">API Docs</a>
+                <a href="http://localhost:6006" target="_blank">Phoenix Traces</a>
+            </div>
+        </header>
+
+        <!-- Quick Actions -->
+        <div class="grid">
+            <div class="card">
+                <div class="card-title">Create from Template</div>
+                <div class="card-description">
+                    Start with a pre-built template for common use cases like market data,
+                    calculations, or web search.
+                </div>
+                <button class="btn btn-primary" onclick="showTemplates()">Browse Templates</button>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Import from OpenAPI</div>
+                <div class="card-description">
+                    Convert an existing REST API to an MCP server automatically
+                    by importing its OpenAPI specification.
+                </div>
+                <button class="btn btn-primary" onclick="showImportModal()">Import API</button>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Create Custom</div>
+                <div class="card-description">
+                    Build a custom MCP server from scratch with full control
+                    over tools and implementations.
+                </div>
+                <a href="create.html" class="btn btn-secondary">Create Server</a>
+            </div>
+        </div>
+
+        <!-- Servers List -->
+        <div class="servers-list">
+            <div class="servers-header">
+                <h2>Your Servers</h2>
+                <button class="btn btn-secondary" onclick="loadServers()">Refresh</button>
+            </div>
+            <div id="servers-container">
+                <div class="empty-state">Loading servers...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Templates Modal -->
+    <div class="modal" id="templates-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Server Templates</h2>
+                <button class="modal-close" onclick="closeModal('templates-modal')">&times;</button>
+            </div>
+            <div id="templates-container">
+                <div class="empty-state">Loading templates...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Modal -->
+    <div class="modal" id="import-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Import from OpenAPI</h2>
+                <button class="modal-close" onclick="closeModal('import-modal')">&times;</button>
+            </div>
+            <form id="import-form" onsubmit="handleImport(event)">
+                <div class="form-group">
+                    <label>OpenAPI Spec URL</label>
+                    <input type="url" name="spec_url" placeholder="https://api.example.com/openapi.json" required>
+                </div>
+                <div class="form-group">
+                    <label>Server ID</label>
+                    <input type="text" name="server_id" placeholder="my_api_server" pattern="^[a-z_][a-z0-9_]*$" required>
+                </div>
+                <div class="form-group">
+                    <label>Server Name</label>
+                    <input type="text" name="server_name" placeholder="My API Server" required>
+                </div>
+                <div class="form-group">
+                    <label>Include Paths (optional, comma-separated)</label>
+                    <input type="text" name="include_patterns" placeholder="/users, /orders">
+                </div>
+                <button type="submit" class="btn btn-primary">Import</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Code Preview Modal -->
+    <div class="modal" id="code-modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2>Generated Code</h2>
+                <button class="modal-close" onclick="closeModal('code-modal')">&times;</button>
+            </div>
+            <pre><code id="code-preview"></code></pre>
+            <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+                <button class="btn btn-primary" onclick="generateServer()">Generate File</button>
+                <button class="btn btn-secondary" onclick="copyCode()">Copy Code</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '';
+        let currentServerId = null;
+
+        // Load servers on page load
+        document.addEventListener('DOMContentLoaded', loadServers);
+
+        async function loadServers() {
+            try {
+                const response = await fetch(`${API_BASE}/servers`);
+                const servers = await response.json();
+                renderServers(servers);
+            } catch (error) {
+                console.error('Failed to load servers:', error);
+                document.getElementById('servers-container').innerHTML =
+                    '<div class="empty-state">Failed to load servers</div>';
+            }
+        }
+
+        function renderServers(servers) {
+            const container = document.getElementById('servers-container');
+
+            if (!servers.length) {
+                container.innerHTML = '<div class="empty-state">No servers yet. Create one to get started!</div>';
+                return;
+            }
+
+            container.innerHTML = servers.map(server => `
+                <div class="server-item">
+                    <div class="server-info">
+                        <h3>${server.name}</h3>
+                        <p>${server.description.substring(0, 100)}...</p>
+                        <div style="margin-top: 0.5rem;">
+                            <span class="tag">${server.tool_count} tools</span>
+                            <span class="tag">${server.source_type}</span>
+                            ${server.tags.map(t => `<span class="tag">${t}</span>`).join('')}
+                        </div>
+                    </div>
+                    <div class="server-actions">
+                        <button class="btn btn-secondary" onclick="previewCode('${server.id}')">Preview</button>
+                        <button class="btn btn-primary" onclick="evaluateServer('${server.id}')">Evaluate</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function showTemplates() {
+            document.getElementById('templates-modal').classList.add('active');
+
+            try {
+                const response = await fetch(`${API_BASE}/templates`);
+                const templates = await response.json();
+                renderTemplates(templates);
+            } catch (error) {
+                console.error('Failed to load templates:', error);
+            }
+        }
+
+        function renderTemplates(templates) {
+            const container = document.getElementById('templates-container');
+
+            container.innerHTML = templates.map(template => `
+                <div class="card" style="margin-bottom: 1rem;">
+                    <div class="card-title">${template.name}</div>
+                    <div class="card-description">${template.description}</div>
+                    <p style="font-size: 0.875rem; margin-bottom: 1rem;">
+                        <strong>Tools:</strong> ${template.example_tools.join(', ')}
+                    </p>
+                    <button class="btn btn-primary" onclick="createFromTemplate('${template.id}')">Use Template</button>
+                </div>
+            `).join('');
+        }
+
+        async function createFromTemplate(templateId) {
+            const serverId = prompt('Enter server ID (lowercase, underscores):', `my_${templateId}`);
+            if (!serverId) return;
+
+            const serverName = prompt('Enter server name:', `My ${templateId.replace('_', ' ')} Server`);
+            if (!serverName) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/templates/${templateId}/create`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        template_id: templateId,
+                        server_id: serverId,
+                        server_name: serverName
+                    })
+                });
+
+                if (response.ok) {
+                    closeModal('templates-modal');
+                    loadServers();
+                    alert('Server created successfully!');
+                } else {
+                    const error = await response.json();
+                    alert(`Error: ${error.detail}`);
+                }
+            } catch (error) {
+                console.error('Failed to create server:', error);
+                alert('Failed to create server');
+            }
+        }
+
+        function showImportModal() {
+            document.getElementById('import-modal').classList.add('active');
+        }
+
+        async function handleImport(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+
+            const data = {
+                spec_url: formData.get('spec_url'),
+                server_id: formData.get('server_id'),
+                server_name: formData.get('server_name'),
+                include_patterns: formData.get('include_patterns')
+                    ? formData.get('include_patterns').split(',').map(s => s.trim())
+                    : null
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/import/openapi`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    closeModal('import-modal');
+                    form.reset();
+                    loadServers();
+                    alert('API imported successfully!');
+                } else {
+                    const error = await response.json();
+                    alert(`Error: ${error.detail}`);
+                }
+            } catch (error) {
+                console.error('Import failed:', error);
+                alert('Failed to import API');
+            }
+        }
+
+        async function previewCode(serverId) {
+            currentServerId = serverId;
+
+            try {
+                const response = await fetch(`${API_BASE}/servers/${serverId}/preview`, {
+                    method: 'POST'
+                });
+                const data = await response.json();
+
+                document.getElementById('code-preview').textContent = data.code;
+                document.getElementById('code-modal').classList.add('active');
+            } catch (error) {
+                console.error('Failed to preview code:', error);
+                alert('Failed to preview code');
+            }
+        }
+
+        async function generateServer() {
+            if (!currentServerId) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/servers/${currentServerId}/generate`, {
+                    method: 'POST'
+                });
+                const data = await response.json();
+
+                alert(`Server generated at: ${data.output_path}`);
+                closeModal('code-modal');
+            } catch (error) {
+                console.error('Failed to generate server:', error);
+                alert('Failed to generate server');
+            }
+        }
+
+        async function evaluateServer(serverId) {
+            if (!confirm('Run evaluation on this server? This will generate test cases and use the LLM-as-judge.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/evaluate/${serverId}`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ num_synthetic_cases: 3 })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    alert(`Evaluation complete!\n\nScore: ${result.avg_quality_score.toFixed(2)}/5\nRecommendation: ${result.recommendation}\n\n${result.reasoning}`);
+                } else {
+                    const error = await response.json();
+                    alert(`Error: ${error.detail}`);
+                }
+            } catch (error) {
+                console.error('Evaluation failed:', error);
+                alert('Evaluation failed');
+            }
+        }
+
+        function copyCode() {
+            const code = document.getElementById('code-preview').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // Close modals on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal.active').forEach(modal => {
+                    modal.classList.remove('active');
+                });
+            }
+        });
+
+        // Close modals on backdrop click
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

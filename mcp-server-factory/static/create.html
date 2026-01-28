@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Server - MCP Server Factory</title>
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --error: #ef4444;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--bg-tertiary);
+        }
+
+        h1 { font-size: 1.5rem; font-weight: 600; }
+
+        .back-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        .back-link:hover { color: var(--text-primary); }
+
+        .card {
+            background: var(--bg-secondary);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            border: 1px solid var(--bg-tertiary);
+            margin-bottom: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--bg-tertiary);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 0.875rem;
+        }
+
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.625rem 1.25rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover { background: var(--accent-hover); }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover { background: #475569; }
+
+        .btn-danger {
+            background: var(--error);
+            color: white;
+        }
+
+        .btn-small {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.75rem;
+        }
+
+        .tools-list {
+            margin-top: 1rem;
+        }
+
+        .tool-item {
+            background: var(--bg-primary);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            border: 1px solid var(--bg-tertiary);
+        }
+
+        .tool-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .tool-name {
+            font-weight: 500;
+        }
+
+        .params-list {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .param-item {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+            align-items: center;
+        }
+
+        .param-item input,
+        .param-item select {
+            padding: 0.5rem;
+            font-size: 0.75rem;
+        }
+
+        .help-text {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        .actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .alert-success {
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid var(--success);
+            color: var(--success);
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid var(--error);
+            color: var(--error);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Create MCP Server</h1>
+            <a href="/" class="back-link">&larr; Back to Dashboard</a>
+        </header>
+
+        <div id="alert-container"></div>
+
+        <form id="create-form" onsubmit="handleSubmit(event)">
+            <!-- Server Info -->
+            <div class="card">
+                <div class="card-title">Server Information</div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Server ID</label>
+                        <input type="text" name="server_id" placeholder="my_server" pattern="^[a-z_][a-z0-9_]*$" required>
+                        <div class="help-text">Lowercase letters and underscores only</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Server Name</label>
+                        <input type="text" name="server_name" placeholder="My Custom Server" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="description" placeholder="Describe what this server does..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Tags (comma-separated)</label>
+                    <input type="text" name="tags" placeholder="api, custom, utility">
+                </div>
+            </div>
+
+            <!-- Tools -->
+            <div class="card">
+                <div class="card-title">Tools</div>
+                <div id="tools-container" class="tools-list">
+                    <!-- Tools will be added here -->
+                </div>
+                <button type="button" class="btn btn-secondary" onclick="addTool()">+ Add Tool</button>
+            </div>
+
+            <!-- Actions -->
+            <div class="actions">
+                <a href="/" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">Create Server</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const API_BASE = '';
+        let toolCount = 0;
+
+        function addTool() {
+            const container = document.getElementById('tools-container');
+            const toolId = toolCount++;
+
+            const toolHtml = `
+                <div class="tool-item" id="tool-${toolId}">
+                    <div class="tool-header">
+                        <span class="tool-name">Tool ${toolId + 1}</span>
+                        <button type="button" class="btn btn-danger btn-small" onclick="removeTool(${toolId})">Remove</button>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Tool ID</label>
+                            <input type="text" name="tool_${toolId}_id" placeholder="my_tool" pattern="^[a-z_][a-z0-9_]*$" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Tool Name</label>
+                            <input type="text" name="tool_${toolId}_name" placeholder="My Tool" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea name="tool_${toolId}_description" placeholder="Describe what this tool does. Be specific - this helps the LLM know when to use it." required></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Implementation Type</label>
+                            <select name="tool_${toolId}_impl_type" onchange="updateImplFields(${toolId})">
+                                <option value="python">Python Handler</option>
+                                <option value="http">HTTP Endpoint</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="tool_${toolId}_handler_group">
+                            <label>Handler</label>
+                            <input type="text" name="tool_${toolId}_handler" placeholder="module.path:function">
+                        </div>
+                        <div class="form-group" id="tool_${toolId}_endpoint_group" style="display:none;">
+                            <label>Endpoint URL</label>
+                            <input type="text" name="tool_${toolId}_endpoint" placeholder="https://api.example.com/action">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Parameters</label>
+                        <div id="params_${toolId}" class="params-list">
+                            <!-- Parameters will be added here -->
+                        </div>
+                        <button type="button" class="btn btn-secondary btn-small" onclick="addParam(${toolId})">+ Add Parameter</button>
+                    </div>
+                </div>
+            `;
+
+            container.insertAdjacentHTML('beforeend', toolHtml);
+        }
+
+        function removeTool(toolId) {
+            document.getElementById(`tool-${toolId}`).remove();
+        }
+
+        function updateImplFields(toolId) {
+            const implType = document.querySelector(`[name="tool_${toolId}_impl_type"]`).value;
+            const handlerGroup = document.getElementById(`tool_${toolId}_handler_group`);
+            const endpointGroup = document.getElementById(`tool_${toolId}_endpoint_group`);
+
+            if (implType === 'python') {
+                handlerGroup.style.display = 'block';
+                endpointGroup.style.display = 'none';
+            } else {
+                handlerGroup.style.display = 'none';
+                endpointGroup.style.display = 'block';
+            }
+        }
+
+        let paramCounts = {};
+
+        function addParam(toolId) {
+            if (!paramCounts[toolId]) paramCounts[toolId] = 0;
+            const paramId = paramCounts[toolId]++;
+
+            const container = document.getElementById(`params_${toolId}`);
+
+            const paramHtml = `
+                <div class="param-item" id="param_${toolId}_${paramId}">
+                    <input type="text" name="param_${toolId}_${paramId}_name" placeholder="param_name" style="flex:1" required>
+                    <select name="param_${toolId}_${paramId}_type" style="width:120px">
+                        <option value="string">string</option>
+                        <option value="number">number</option>
+                        <option value="integer">integer</option>
+                        <option value="boolean">boolean</option>
+                    </select>
+                    <input type="text" name="param_${toolId}_${paramId}_desc" placeholder="Description" style="flex:2" required>
+                    <label style="display:flex;align-items:center;gap:0.25rem;font-size:0.75rem;">
+                        <input type="checkbox" name="param_${toolId}_${paramId}_required" checked> Required
+                    </label>
+                    <button type="button" class="btn btn-danger btn-small" onclick="removeParam(${toolId}, ${paramId})">X</button>
+                </div>
+            `;
+
+            container.insertAdjacentHTML('beforeend', paramHtml);
+        }
+
+        function removeParam(toolId, paramId) {
+            document.getElementById(`param_${toolId}_${paramId}`).remove();
+        }
+
+        function showAlert(message, type) {
+            const container = document.getElementById('alert-container');
+            container.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            setTimeout(() => container.innerHTML = '', 5000);
+        }
+
+        async function handleSubmit(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+
+            // Build server object
+            const server = {
+                id: formData.get('server_id'),
+                name: formData.get('server_name'),
+                description: formData.get('description'),
+                tags: formData.get('tags')?.split(',').map(t => t.trim()).filter(t => t) || [],
+                tools: []
+            };
+
+            // Collect tools
+            document.querySelectorAll('.tool-item').forEach(toolEl => {
+                const toolIdMatch = toolEl.id.match(/tool-(\d+)/);
+                if (!toolIdMatch) return;
+                const toolIdx = toolIdMatch[1];
+
+                const implType = formData.get(`tool_${toolIdx}_impl_type`);
+
+                const tool = {
+                    id: formData.get(`tool_${toolIdx}_id`),
+                    name: formData.get(`tool_${toolIdx}_name`),
+                    description: formData.get(`tool_${toolIdx}_description`),
+                    parameters: [],
+                    implementation: {
+                        type: implType,
+                        handler: implType === 'python' ? formData.get(`tool_${toolIdx}_handler`) : null,
+                        endpoint: implType === 'http' ? formData.get(`tool_${toolIdx}_endpoint`) : null,
+                        method: 'POST'
+                    }
+                };
+
+                // Collect parameters for this tool
+                const paramContainer = document.getElementById(`params_${toolIdx}`);
+                if (paramContainer) {
+                    paramContainer.querySelectorAll('.param-item').forEach(paramEl => {
+                        const paramMatch = paramEl.id.match(/param_\d+_(\d+)/);
+                        if (!paramMatch) return;
+                        const paramIdx = paramMatch[1];
+
+                        tool.parameters.push({
+                            name: formData.get(`param_${toolIdx}_${paramIdx}_name`),
+                            type: formData.get(`param_${toolIdx}_${paramIdx}_type`),
+                            description: formData.get(`param_${toolIdx}_${paramIdx}_desc`),
+                            required: formData.get(`param_${toolIdx}_${paramIdx}_required`) === 'on'
+                        });
+                    });
+                }
+
+                server.tools.push(tool);
+            });
+
+            try {
+                const response = await fetch(`${API_BASE}/servers`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(server)
+                });
+
+                if (response.ok) {
+                    showAlert('Server created successfully!', 'success');
+                    setTimeout(() => window.location.href = '/', 1500);
+                } else {
+                    const error = await response.json();
+                    showAlert(`Error: ${error.detail}`, 'error');
+                }
+            } catch (error) {
+                console.error('Failed to create server:', error);
+                showAlert('Failed to create server', 'error');
+            }
+        }
+
+        // Add initial tool
+        addTool();
+    </script>
+</body>
+</html>

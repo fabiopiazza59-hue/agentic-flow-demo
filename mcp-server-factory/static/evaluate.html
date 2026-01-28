@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluations - MCP Server Factory</title>
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --error: #ef4444;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--bg-tertiary);
+        }
+
+        h1 { font-size: 1.5rem; font-weight: 600; }
+
+        .back-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        .back-link:hover { color: var(--text-primary); }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            border: 1px solid var(--bg-tertiary);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .stat-value.success { color: var(--success); }
+        .stat-value.warning { color: var(--warning); }
+        .stat-value.error { color: var(--error); }
+
+        .card {
+            background: var(--bg-secondary);
+            border-radius: 0.75rem;
+            border: 1px solid var(--bg-tertiary);
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--bg-tertiary);
+        }
+
+        .card-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--bg-tertiary);
+        }
+
+        th {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .recommendation {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .recommendation-keep {
+            background: rgba(34, 197, 94, 0.2);
+            color: var(--success);
+        }
+
+        .recommendation-improve {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+        }
+
+        .recommendation-deprecate {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--error);
+        }
+
+        .score-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .score-bar-bg {
+            flex: 1;
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .score-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+        }
+
+        .score-value {
+            font-size: 0.875rem;
+            font-weight: 500;
+            min-width: 2.5rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover { background: var(--accent-hover); }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+        }
+
+        .timestamp {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Evaluation Dashboard</h1>
+            <a href="/" class="back-link">&larr; Back to Dashboard</a>
+        </header>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total Evaluations</div>
+                <div class="stat-value" id="stat-total">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Avg Quality Score</div>
+                <div class="stat-value" id="stat-avg-score">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Keep Rate</div>
+                <div class="stat-value success" id="stat-keep-rate">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Need Improvement</div>
+                <div class="stat-value warning" id="stat-improve-rate">-</div>
+            </div>
+        </div>
+
+        <!-- Recent Evaluations -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Recent Evaluations</span>
+                <button class="btn btn-secondary" onclick="loadEvaluations()">Refresh</button>
+            </div>
+            <div id="evaluations-container">
+                <div class="empty-state">Loading evaluations...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '';
+
+        document.addEventListener('DOMContentLoaded', loadEvaluations);
+
+        async function loadEvaluations() {
+            try {
+                const response = await fetch(`${API_BASE}/evaluate`);
+                const data = await response.json();
+                renderEvaluations(data.evaluations);
+                updateStats(data.evaluations);
+            } catch (error) {
+                console.error('Failed to load evaluations:', error);
+                document.getElementById('evaluations-container').innerHTML =
+                    '<div class="empty-state">Failed to load evaluations</div>';
+            }
+        }
+
+        function renderEvaluations(evaluations) {
+            const container = document.getElementById('evaluations-container');
+
+            if (!evaluations.length) {
+                container.innerHTML = '<div class="empty-state">No evaluations yet. Run an evaluation from the dashboard.</div>';
+                return;
+            }
+
+            container.innerHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Server</th>
+                            <th>Quality Score</th>
+                            <th>Recommendation</th>
+                            <th>Timestamp</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${evaluations.map(e => `
+                            <tr>
+                                <td><strong>${e.server_id}</strong></td>
+                                <td>
+                                    <div class="score-bar">
+                                        <div class="score-bar-bg">
+                                            <div class="score-bar-fill" style="width: ${(e.avg_quality_score / 5) * 100}%; background: ${getScoreColor(e.avg_quality_score)}"></div>
+                                        </div>
+                                        <span class="score-value">${e.avg_quality_score.toFixed(1)}/5</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="recommendation recommendation-${e.recommendation.toLowerCase()}">${e.recommendation}</span>
+                                </td>
+                                <td class="timestamp">${formatTimestamp(e.timestamp)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function updateStats(evaluations) {
+            document.getElementById('stat-total').textContent = evaluations.length;
+
+            if (evaluations.length > 0) {
+                const avgScore = evaluations.reduce((sum, e) => sum + e.avg_quality_score, 0) / evaluations.length;
+                document.getElementById('stat-avg-score').textContent = avgScore.toFixed(1) + '/5';
+
+                const keepCount = evaluations.filter(e => e.recommendation === 'KEEP').length;
+                const improveCount = evaluations.filter(e => e.recommendation === 'IMPROVE').length;
+
+                document.getElementById('stat-keep-rate').textContent =
+                    Math.round((keepCount / evaluations.length) * 100) + '%';
+                document.getElementById('stat-improve-rate').textContent =
+                    Math.round((improveCount / evaluations.length) * 100) + '%';
+            }
+        }
+
+        function getScoreColor(score) {
+            if (score >= 4) return '#22c55e';
+            if (score >= 3) return '#f59e0b';
+            return '#ef4444';
+        }
+
+        function formatTimestamp(ts) {
+            const date = new Date(ts);
+            return date.toLocaleString();
+        }
+    </script>
+</body>
+</html>
