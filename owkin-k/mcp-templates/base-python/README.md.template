@@ -1,0 +1,73 @@
+# {{server_name}}
+
+{{description}}
+
+## Quick Start
+
+### Local Development
+
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the server
+python server.py
+```
+
+The server will start on `http://localhost:{{port}}`
+
+### Docker
+
+```bash
+# Build
+docker build -t {{server_id}} .
+
+# Run
+docker run -p {{port}}:{{port}} {{server_id}}
+```
+
+### Register with MCP Gateway
+
+```bash
+# Using CLI
+mcp-gateway register --url http://localhost:{{port}}
+
+# Using API
+curl -X POST http://localhost:8000/mcp/servers \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "id": "{{server_id}}",
+    "name": "{{server_name}}",
+    "url": "http://localhost:{{port}}",
+    "description": "{{description}}"
+  }'
+```
+
+## Tools
+
+| Tool | Description |
+|------|-------------|
+| `{{tool_1_name}}` | {{tool_1_description}} |
+| `{{tool_2_name}}` | {{tool_2_description}} |
+
+## Customization
+
+1. Edit `server.py` to add your business logic
+2. Add new tools by creating new async functions
+3. Update the `/tools` endpoint to expose new tools
+
+## Testing
+
+```bash
+# Health check
+curl http://localhost:{{port}}/health
+
+# List tools
+curl http://localhost:{{port}}/tools
+
+# Call a tool
+curl -X POST http://localhost:{{port}}/call \
+  -H "Content-Type: application/json" \
+  -d '{"tool": "{{tool_1_name}}", "arguments": {"input": "test"}}'
+```

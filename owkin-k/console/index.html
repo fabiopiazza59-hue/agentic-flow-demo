@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCP Gateway - Agentic AI Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+        .tab-active { border-bottom: 2px solid #6366f1; color: #6366f1; }
+        .card { background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+        .status-healthy { background: #22c55e; }
+        .status-unknown { background: #f59e0b; }
+        .status-unhealthy { background: #ef4444; }
+        .tool-chip { display: inline-block; padding: 2px 8px; background: #e0e7ff; color: #4338ca; border-radius: 4px; font-size: 12px; margin: 2px; }
+        .skill-card:hover { border-color: #6366f1; }
+        pre code { font-size: 13px; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
+        .modal.active { display: flex; align-items: center; justify-content: center; }
+        .modal-content { background: white; border-radius: 8px; max-width: 800px; max-height: 80vh; overflow: auto; width: 90%; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- Header -->
+    <header class="bg-indigo-600 text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                    <div>
+                        <h1 class="text-xl font-bold">MCP Gateway</h1>
+                        <p class="text-indigo-200 text-sm">Agentic AI Platform for Life Sciences</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm bg-indigo-500 px-3 py-1 rounded-full">Demo Tenant</span>
+                    <span id="api-status" class="text-sm">Connecting...</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="bg-white shadow">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex space-x-8">
+                <button class="tab-btn tab-active py-4 px-1 font-medium" data-tab="mcp-hub">
+                    MCP Hub
+                </button>
+                <button class="tab-btn py-4 px-1 font-medium text-gray-500 hover:text-gray-700" data-tab="skill-studio">
+                    Skill Studio
+                </button>
+                <button class="tab-btn py-4 px-1 font-medium text-gray-500 hover:text-gray-700" data-tab="agent-builder">
+                    Agent Builder
+                </button>
+                <button class="tab-btn py-4 px-1 font-medium text-gray-500 hover:text-gray-700" data-tab="workflows">
+                    Workflows
+                </button>
+                <button class="tab-btn py-4 px-1 font-medium text-gray-500 hover:text-gray-700" data-tab="playground">
+                    Playground
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-6">
+        <!-- MCP Hub Tab -->
+        <div id="tab-mcp-hub" class="tab-content">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">MCP Servers</h2>
+                <button onclick="showAddServerModal()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
+                    + Add Server
+                </button>
+            </div>
+
+            <div id="servers-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Servers will be loaded here -->
+            </div>
+
+            <h3 class="text-xl font-bold text-gray-800 mt-8 mb-4">All Available Tools</h3>
+            <div id="tools-list" class="card p-4">
+                <!-- Tools will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Skill Studio Tab -->
+        <div id="tab-skill-studio" class="tab-content hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Skill Studio</h2>
+                <button onclick="showCreateSkillModal()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
+                    + Create Skill
+                </button>
+            </div>
+
+            <div id="skills-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Skills will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Agent Builder Tab -->
+        <div id="tab-agent-builder" class="tab-content hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Agent Builder</h2>
+                <button onclick="showCreateAgentModal()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
+                    + Create Agent
+                </button>
+            </div>
+
+            <div id="agents-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Agents will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Workflows Tab -->
+        <div id="tab-workflows" class="tab-content hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Workflow Designer</h2>
+                <button onclick="showCreateWorkflowModal()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
+                    + Create Workflow
+                </button>
+            </div>
+
+            <div id="workflows-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Workflows will be loaded here -->
+            </div>
+
+            <div class="card p-6 mt-6">
+                <h3 class="text-lg font-semibold mb-4">Workflow Templates</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="border rounded-lg p-4 hover:border-indigo-500 cursor-pointer" onclick="createFromTemplate('model-evaluation')">
+                        <h4 class="font-medium">Model Evaluation Pipeline</h4>
+                        <p class="text-sm text-gray-500 mt-1">Evaluate model → Compare baselines → Generate report</p>
+                    </div>
+                    <div class="border rounded-lg p-4 hover:border-indigo-500 cursor-pointer" onclick="createFromTemplate('slide-analysis')">
+                        <h4 class="font-medium">Slide Analysis Flow</h4>
+                        <p class="text-sm text-gray-500 mt-1">Load slide → Run inference → Human review → Report</p>
+                    </div>
+                    <div class="border rounded-lg p-4 hover:border-indigo-500 cursor-pointer" onclick="createFromTemplate('cohort-study')">
+                        <h4 class="font-medium">Cohort Study</h4>
+                        <p class="text-sm text-gray-500 mt-1">Query cohort → Analyze slides → Aggregate results</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Playground Tab -->
+        <div id="tab-playground" class="tab-content hidden">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Agent Playground</h2>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Configuration Panel -->
+                <div class="card p-4">
+                    <h3 class="font-semibold mb-4">Configuration</h3>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Model</label>
+                            <select id="playground-model" class="w-full border rounded-lg px-3 py-2">
+                                <option value="claude-sonnet-4-20250514">Claude Sonnet 4</option>
+                                <option value="claude-3-5-haiku-latest">Claude 3.5 Haiku</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Skills</label>
+                            <div id="playground-skills" class="space-y-2">
+                                <!-- Skills checkboxes loaded here -->
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Max Iterations</label>
+                            <input type="number" id="playground-iterations" value="5" min="1" max="10" class="w-full border rounded-lg px-3 py-2">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Panel -->
+                <div class="lg:col-span-2 card p-4 flex flex-col" style="min-height: 500px;">
+                    <h3 class="font-semibold mb-4">Chat</h3>
+
+                    <div id="chat-messages" class="flex-1 overflow-y-auto space-y-4 mb-4" style="max-height: 400px;">
+                        <div class="text-gray-500 text-center py-8">
+                            Send a message to start the conversation
+                        </div>
+                    </div>
+
+                    <div class="flex space-x-2">
+                        <input type="text" id="chat-input" placeholder="Ask about pathology slides, model evaluation..." class="flex-1 border rounded-lg px-4 py-2" onkeypress="if(event.key==='Enter') sendMessage()">
+                        <button onclick="sendMessage()" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700">
+                            Send
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add Server Modal -->
+    <div id="add-server-modal" class="modal">
+        <div class="modal-content p-6">
+            <h3 class="text-xl font-bold mb-4">Add MCP Server</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Server ID</label>
+                    <input type="text" id="new-server-id" class="w-full border rounded-lg px-3 py-2" placeholder="my-lims-server">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                    <input type="text" id="new-server-name" class="w-full border rounded-lg px-3 py-2" placeholder="My LIMS Server">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">URL</label>
+                    <input type="text" id="new-server-url" class="w-full border rounded-lg px-3 py-2" placeholder="http://localhost:8004">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <textarea id="new-server-desc" class="w-full border rounded-lg px-3 py-2" rows="2" placeholder="What does this server do?"></textarea>
+                </div>
+            </div>
+            <div class="flex justify-end space-x-2 mt-6">
+                <button onclick="hideModal('add-server-modal')" class="px-4 py-2 border rounded-lg hover:bg-gray-50">Cancel</button>
+                <button onclick="addServer()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">Add Server</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Skill Modal -->
+    <div id="create-skill-modal" class="modal">
+        <div class="modal-content p-6" style="max-width: 900px;">
+            <h3 class="text-xl font-bold mb-4">Create Skill</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Skill ID</label>
+                        <input type="text" id="new-skill-id" class="w-full border rounded-lg px-3 py-2" placeholder="my-custom-skill">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                        <input type="text" id="new-skill-name" class="w-full border rounded-lg px-3 py-2" placeholder="My Custom Skill">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                        <input type="text" id="new-skill-desc" class="w-full border rounded-lg px-3 py-2" placeholder="What does this skill do?">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Authorized Tools (comma-separated)</label>
+                        <input type="text" id="new-skill-tools" class="w-full border rounded-lg px-3 py-2" placeholder="pathology.*, scoring.*">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Skill Content (Markdown)</label>
+                    <textarea id="new-skill-content" class="w-full border rounded-lg px-3 py-2 font-mono text-sm" rows="12" placeholder="# Skill Name
+
+## When to Use
+...
+
+## Steps
+1.
+2.
+
+## Tools Available
+- tool.name
+
+## Output Format
+..."></textarea>
+                </div>
+            </div>
+            <div class="flex justify-end space-x-2 mt-6">
+                <button onclick="hideModal('create-skill-modal')" class="px-4 py-2 border rounded-lg hover:bg-gray-50">Cancel</button>
+                <button onclick="createSkill()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">Create Skill</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Agent Modal -->
+    <div id="create-agent-modal" class="modal">
+        <div class="modal-content p-6">
+            <h3 class="text-xl font-bold mb-4">Create Agent</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Agent ID</label>
+                    <input type="text" id="new-agent-id" class="w-full border rounded-lg px-3 py-2" placeholder="my-agent">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                    <input type="text" id="new-agent-name" class="w-full border rounded-lg px-3 py-2" placeholder="My Custom Agent">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <textarea id="new-agent-desc" class="w-full border rounded-lg px-3 py-2" rows="2"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Model</label>
+                    <select id="new-agent-model" class="w-full border rounded-lg px-3 py-2">
+                        <option value="claude-sonnet-4-20250514">Claude Sonnet 4</option>
+                        <option value="claude-3-5-haiku-latest">Claude 3.5 Haiku</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Assigned Skills</label>
+                    <div id="agent-skills-checkboxes" class="space-y-2 max-h-32 overflow-y-auto border rounded-lg p-2">
+                        <!-- Loaded dynamically -->
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Authorized Tools (comma-separated patterns)</label>
+                    <input type="text" id="new-agent-tools" class="w-full border rounded-lg px-3 py-2" placeholder="pathology.*, scoring.*">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Max Iterations</label>
+                        <input type="number" id="new-agent-iterations" value="5" class="w-full border rounded-lg px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Token Budget</label>
+                        <input type="number" id="new-agent-tokens" value="4000" class="w-full border rounded-lg px-3 py-2">
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-end space-x-2 mt-6">
+                <button onclick="hideModal('create-agent-modal')" class="px-4 py-2 border rounded-lg hover:bg-gray-50">Cancel</button>
+                <button onclick="createAgent()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">Create Agent</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Skill Modal -->
+    <div id="view-skill-modal" class="modal">
+        <div class="modal-content p-6" style="max-width: 800px;">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="view-skill-title" class="text-xl font-bold">Skill Name</h3>
+                <button onclick="hideModal('view-skill-modal')" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div id="view-skill-content" class="prose max-w-none">
+                <!-- Content loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '';
+        const API_KEY = 'ok-demo-key';
+
+        // Tab switching
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('tab-active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+                btn.classList.add('tab-active');
+                document.getElementById('tab-' + btn.dataset.tab).classList.remove('hidden');
+            });
+        });
+
+        // API helpers
+        async function api(endpoint, options = {}) {
+            const response = await fetch(API_BASE + endpoint, {
+                ...options,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-API-Key': API_KEY,
+                    ...options.headers
+                }
+            });
+            return response.json();
+        }
+
+        // Load data
+        async function loadServers() {
+            const data = await api('/mcp/servers');
+            const grid = document.getElementById('servers-grid');
+            grid.innerHTML = data.servers.map(s => `
+                <div class="card p-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="font-semibold">${s.name}</h3>
+                        <span class="status-dot ${s.tenant_id === 'global' ? 'status-healthy' : 'status-unknown'}"></span>
+                    </div>
+                    <p class="text-sm text-gray-500 mb-3">${s.description}</p>
+                    <div class="text-xs text-gray-400 mb-2">URL: ${s.url}</div>
+                    <div class="flex flex-wrap">
+                        ${s.tools.map(t => `<span class="tool-chip">${t.name}</span>`).join('')}
+                    </div>
+                    ${s.tenant_id !== 'global' ? `
+                        <button onclick="deleteServer('${s.id}')" class="mt-3 text-red-500 text-sm hover:text-red-700">Delete</button>
+                    ` : '<div class="mt-3 text-xs text-indigo-500">MCP Global</div>'}
+                </div>
+            `).join('');
+        }
+
+        async function loadTools() {
+            const data = await api('/mcp/tools');
+            const list = document.getElementById('tools-list');
+            list.innerHTML = `
+                <table class="w-full text-sm">
+                    <thead class="text-left text-gray-500 border-b">
+                        <tr>
+                            <th class="py-2">Tool</th>
+                            <th class="py-2">Server</th>
+                            <th class="py-2">Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.tools.map(t => `
+                            <tr class="border-b hover:bg-gray-50">
+                                <td class="py-2 font-mono text-indigo-600">${t.full_name}</td>
+                                <td class="py-2">${t.server_name}</td>
+                                <td class="py-2 text-gray-600">${t.description}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        async function loadSkills() {
+            const data = await api('/skills');
+            const grid = document.getElementById('skills-grid');
+            grid.innerHTML = data.skills.map(s => `
+                <div class="card p-4 border-2 border-transparent skill-card cursor-pointer" onclick="viewSkill('${s.id}')">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="font-semibold">${s.name}</h3>
+                        <span class="text-xs text-gray-400">v${s.version}</span>
+                    </div>
+                    <p class="text-sm text-gray-500 mb-3">${s.description}</p>
+                    <div class="flex flex-wrap">
+                        ${s.tools_available.map(t => `<span class="tool-chip">${t}</span>`).join('')}
+                    </div>
+                    <div class="mt-3 text-xs ${s.tenant_id === 'global' ? 'text-indigo-500' : 'text-gray-400'}">
+                        ${s.tenant_id === 'global' ? 'MCP Template' : 'Custom'}
+                    </div>
+                </div>
+            `).join('');
+
+            // Also update playground skills
+            const playgroundSkills = document.getElementById('playground-skills');
+            playgroundSkills.innerHTML = data.skills.map(s => `
+                <label class="flex items-center space-x-2">
+                    <input type="checkbox" value="${s.id}" ${s.id === 'pathology-qa' ? 'checked' : ''}>
+                    <span class="text-sm">${s.name}</span>
+                </label>
+            `).join('');
+
+            // Update agent modal skills
+            const agentSkills = document.getElementById('agent-skills-checkboxes');
+            if (agentSkills) {
+                agentSkills.innerHTML = data.skills.map(s => `
+                    <label class="flex items-center space-x-2">
+                        <input type="checkbox" value="${s.id}" class="agent-skill-checkbox">
+                        <span class="text-sm">${s.name}</span>
+                    </label>
+                `).join('');
+            }
+        }
+
+        async function loadAgents() {
+            const data = await api('/agents');
+            const grid = document.getElementById('agents-grid');
+            if (data.agents.length === 0) {
+                grid.innerHTML = `
+                    <div class="card p-8 text-center col-span-2">
+                        <p class="text-gray-500">No agents created yet. Click "Create Agent" to get started.</p>
+                    </div>
+                `;
+                return;
+            }
+            grid.innerHTML = data.agents.map(a => `
+                <div class="card p-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="font-semibold">${a.name}</h3>
+                        <span class="text-xs bg-gray-100 px-2 py-1 rounded">${a.model.split('-').slice(-1)[0]}</span>
+                    </div>
+                    <p class="text-sm text-gray-500 mb-3">${a.description || 'No description'}</p>
+                    <div class="text-sm mb-2">
+                        <span class="font-medium">Skills:</span> ${a.assigned_skills.join(', ') || 'None'}
+                    </div>
+                    <div class="text-sm mb-2">
+                        <span class="font-medium">Tools:</span> ${a.authorized_tools.join(', ') || 'None'}
+                    </div>
+                    <div class="text-xs text-gray-400">
+                        Max iterations: ${a.max_iterations} | Token budget: ${a.token_budget}
+                    </div>
+                    <div class="flex space-x-2 mt-3">
+                        <button onclick="testAgent('${a.id}')" class="text-indigo-600 text-sm hover:text-indigo-800">Test</button>
+                        <button onclick="deleteAgent('${a.id}')" class="text-red-500 text-sm hover:text-red-700">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function loadWorkflows() {
+            const data = await api('/workflows');
+            const grid = document.getElementById('workflows-grid');
+            if (data.workflows.length === 0) {
+                grid.innerHTML = `
+                    <div class="card p-8 text-center col-span-2">
+                        <p class="text-gray-500">No workflows created yet. Use a template or click "Create Workflow" to get started.</p>
+                    </div>
+                `;
+                return;
+            }
+            grid.innerHTML = data.workflows.map(w => `
+                <div class="card p-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="font-semibold">${w.name}</h3>
+                        <span class="text-xs bg-gray-100 px-2 py-1 rounded">${w.trigger}</span>
+                    </div>
+                    <p class="text-sm text-gray-500 mb-3">${w.description || 'No description'}</p>
+                    <div class="text-sm mb-2">
+                        <span class="font-medium">Nodes:</span> ${w.nodes.length}
+                    </div>
+                    <div class="flex space-x-2 mt-3">
+                        <button onclick="runWorkflow('${w.id}')" class="text-indigo-600 text-sm hover:text-indigo-800">Run</button>
+                        <button onclick="deleteWorkflow('${w.id}')" class="text-red-500 text-sm hover:text-red-700">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Modal helpers
+        function showModal(id) {
+            document.getElementById(id).classList.add('active');
+        }
+        function hideModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+        function showAddServerModal() { showModal('add-server-modal'); }
+        function showCreateSkillModal() { showModal('create-skill-modal'); }
+        function showCreateAgentModal() {
+            loadSkills(); // Refresh skills for checkboxes
+            showModal('create-agent-modal');
+        }
+        function showCreateWorkflowModal() { alert('Workflow creation coming soon!'); }
+
+        // CRUD operations
+        async function addServer() {
+            const server = {
+                id: document.getElementById('new-server-id').value,
+                name: document.getElementById('new-server-name').value,
+                url: document.getElementById('new-server-url').value,
+                description: document.getElementById('new-server-desc').value,
+                tools: []
+            };
+            await api('/mcp/servers', { method: 'POST', body: JSON.stringify(server) });
+            hideModal('add-server-modal');
+            loadServers();
+            loadTools();
+        }
+
+        async function deleteServer(id) {
+            if (confirm('Delete this server?')) {
+                await api('/mcp/servers/' + id, { method: 'DELETE' });
+                loadServers();
+                loadTools();
+            }
+        }
+
+        async function createSkill() {
+            const skill = {
+                id: document.getElementById('new-skill-id').value,
+                name: document.getElementById('new-skill-name').value,
+                description: document.getElementById('new-skill-desc').value,
+                content: document.getElementById('new-skill-content').value,
+                tools_available: document.getElementById('new-skill-tools').value.split(',').map(s => s.trim()).filter(s => s)
+            };
+            await api('/skills', { method: 'POST', body: JSON.stringify(skill) });
+            hideModal('create-skill-modal');
+            loadSkills();
+        }
+
+        async function viewSkill(id) {
+            const skill = await api('/skills/' + id);
+            document.getElementById('view-skill-title').textContent = skill.name;
+            document.getElementById('view-skill-content').innerHTML = `
+                <pre class="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto"><code>${skill.content}</code></pre>
+            `;
+            showModal('view-skill-modal');
+        }
+
+        async function createAgent() {
+            const selectedSkills = Array.from(document.querySelectorAll('.agent-skill-checkbox:checked')).map(cb => cb.value);
+            const agent = {
+                id: document.getElementById('new-agent-id').value,
+                name: document.getElementById('new-agent-name').value,
+                description: document.getElementById('new-agent-desc').value,
+                model: document.getElementById('new-agent-model').value,
+                assigned_skills: selectedSkills,
+                authorized_tools: document.getElementById('new-agent-tools').value.split(',').map(s => s.trim()).filter(s => s),
+                max_iterations: parseInt(document.getElementById('new-agent-iterations').value),
+                token_budget: parseInt(document.getElementById('new-agent-tokens').value)
+            };
+            await api('/agents', { method: 'POST', body: JSON.stringify(agent) });
+            hideModal('create-agent-modal');
+            loadAgents();
+        }
+
+        async function deleteAgent(id) {
+            if (confirm('Delete this agent?')) {
+                await api('/agents/' + id, { method: 'DELETE' });
+                loadAgents();
+            }
+        }
+
+        async function deleteWorkflow(id) {
+            if (confirm('Delete this workflow?')) {
+                await api('/workflows/' + id, { method: 'DELETE' });
+                loadWorkflows();
+            }
+        }
+
+        function testAgent(id) {
+            // Switch to playground tab
+            document.querySelector('[data-tab="playground"]').click();
+            // Pre-fill with a test message
+            document.getElementById('chat-input').value = 'What is the tumor classification for slide S-2024-001?';
+            document.getElementById('chat-input').focus();
+        }
+
+        function createFromTemplate(template) {
+            alert(`Creating workflow from template: ${template}\nThis feature is coming soon!`);
+        }
+
+        function runWorkflow(id) {
+            alert(`Running workflow: ${id}\nThis feature is coming soon!`);
+        }
+
+        // Chat functionality
+        let chatHistory = [];
+
+        async function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            if (!message) return;
+
+            const messagesDiv = document.getElementById('chat-messages');
+
+            // Add user message
+            messagesDiv.innerHTML += `
+                <div class="flex justify-end">
+                    <div class="bg-indigo-600 text-white rounded-lg px-4 py-2 max-w-md">
+                        ${message}
+                    </div>
+                </div>
+            `;
+
+            input.value = '';
+
+            // Add thinking indicator
+            const thinkingId = 'thinking-' + Date.now();
+            messagesDiv.innerHTML += `
+                <div id="${thinkingId}" class="flex">
+                    <div class="bg-gray-200 rounded-lg px-4 py-2">
+                        <div class="flex space-x-1">
+                            <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                            <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                            <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+            try {
+                // Call the real agent API
+                const response = await api('/playground/run', {
+                    method: 'POST',
+                    body: JSON.stringify({ query: message })
+                });
+
+                document.getElementById(thinkingId).remove();
+
+                // Build response HTML with steps
+                let responseHtml = '';
+
+                if (response.steps && response.steps.length > 0) {
+                    responseHtml += '<div class="text-xs text-gray-500 mb-2 border-b pb-2">';
+                    responseHtml += '<strong>Agent Steps:</strong><br>';
+                    for (const step of response.steps) {
+                        if (step.thought) {
+                            responseHtml += `<span class="text-purple-600">💭 ${step.thought}</span><br>`;
+                        }
+                        if (step.action) {
+                            responseHtml += `<span class="text-blue-600">🔧 Tool: ${step.action}</span><br>`;
+                        }
+                        if (step.observation) {
+                            responseHtml += `<span class="text-green-600">📋 Result: ${step.observation.substring(0, 100)}...</span><br>`;
+                        }
+                    }
+                    responseHtml += '</div>';
+                }
+
+                // Add the final answer
+                const answer = response.answer || response.error || 'No response received';
+                responseHtml += `<pre class="whitespace-pre-wrap font-sans text-sm">${answer}</pre>`;
+
+                messagesDiv.innerHTML += `
+                    <div class="flex">
+                        <div class="bg-white border rounded-lg px-4 py-2 max-w-2xl shadow-sm">
+                            ${responseHtml}
+                        </div>
+                    </div>
+                `;
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+            } catch (error) {
+                document.getElementById(thinkingId).remove();
+
+                messagesDiv.innerHTML += `
+                    <div class="flex">
+                        <div class="bg-red-50 border border-red-200 rounded-lg px-4 py-2 max-w-2xl">
+                            <span class="text-red-600">Error: ${error.message || 'Failed to get response from agent'}</span>
+                        </div>
+                    </div>
+                `;
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            }
+        }
+
+        // Check API status
+        async function checkApiStatus() {
+            try {
+                const data = await api('/health');
+                document.getElementById('api-status').innerHTML = `
+                    <span class="status-dot status-healthy mr-2"></span>Connected
+                `;
+            } catch (e) {
+                document.getElementById('api-status').innerHTML = `
+                    <span class="status-dot status-unhealthy mr-2"></span>Disconnected
+                `;
+            }
+        }
+
+        // Initialize
+        async function init() {
+            await checkApiStatus();
+            await loadServers();
+            await loadTools();
+            await loadSkills();
+            await loadAgents();
+            await loadWorkflows();
+        }
+
+        init();
+
+        // Close modals on outside click
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) hideModal(modal.id);
+            });
+        });
+    </script>
+</body>
+</html>
