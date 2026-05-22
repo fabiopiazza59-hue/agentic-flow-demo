@@ -22,14 +22,12 @@ from src.models.schemas import (
     Direction,
     EnrichedScenario,
     OpenPosition,
-    Stage1Output,
     Stage2Output,
-    Stage3Output,
     Stage4Output,
-    Stage5Output,
-    Stage6Output,
     Verdict,
 )
+from src.stages.stage1_market_scan import run_stage1
+from src.stages.stage2_ticker_discovery import run_stage2
 from src.stages.stage3_triage import run_stage3, load_stage2_from_yaml
 from src.stages.stage4a_risk_math import compute_risk_math, parse_levels_from_scenario
 from src.stages.stage4b_bear_challenger import run_stage4b_batch
@@ -50,15 +48,6 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-    .verdict-live { color: #00c853; font-weight: bold; }
-    .verdict-watch { color: #ff9100; font-weight: bold; }
-    .verdict-kill { color: #ff1744; font-weight: bold; }
-    .metric-card {
-        background: #1e1e2e;
-        border-radius: 8px;
-        padding: 16px;
-        margin: 4px 0;
-    }
     .stage-header {
         border-left: 4px solid #6366f1;
         padding-left: 12px;
@@ -101,12 +90,12 @@ with st.sidebar:
         "claude-haiku-4-5-20251001",
     ], index=0)
 
-    start_stage = st.selectbox(
-        "Start from stage",
-        [("Stage 1 — Full pipeline", 1),
-         ("Stage 3 — From fixture/upload", 3)],
-        format_func=lambda x: x[0],
-    )[1]
+    start_mode = st.radio(
+        "Pipeline mode",
+        ["Stages 3-6 (from scenarios)", "Stages 1-6 (full pipeline)"],
+        index=0,
+        help="Stage 3-6 uses fixture or uploaded scenarios. Full pipeline runs Stage 1+2 first (web search, slower).",
+    )
 
     st.divider()
     st.caption("v0.2 | Spec-driven pipeline")
@@ -129,18 +118,19 @@ def get_settings() -> Settings:
 
 st.header("Seamaster — Trading Advisor Pipeline")
 
-# Initialize variables used across sections
-stage2_output = None
-prices = {}
-
 # Tab layout
 tab_run, tab_journal = st.tabs(["Run Pipeline", "Journal"])
 
 # ── Run Pipeline tab ──
 
 with tab_run:
-    # Stage 2 input — always load so it's available when button is clicked
-    if start_stage >= 3:
+    # ── Scenario input section ──
+    # Always visible so stage2_output is always defined before the button
+
+    stage2_output: Stage2Output | None = None
+    prices: dict[str, float] = {}
+
+    if start_mode == "Stages 3-6 (from scenarios)":
         st.subheader("Stage 2 Input")
         input_mode = st.radio(
             "Scenario source",
@@ -157,30 +147,34 @@ with tab_run:
         else:
             stage2_output = load_stage2_from_yaml("fixtures/sample_stage2_output.yaml")
             st.info(f"Using sample fixture: {len(stage2_output.scenarios)} scenarios")
+    else:
+        st.info(
+            "**Full pipeline mode** — Stage 1 will scan the web for themes, "
+            "Stage 2 will generate scenarios. This takes 2-5 minutes and uses web search."
+        )
 
-        # Show scenarios
-        if stage2_output:
-            with st.expander("Preview scenarios", expanded=False):
-                for s in stage2_output.scenarios:
-                    direction_icon = {"long": "📈", "short": "📉", "pair": "🔄", "avoid": "⛔"}.get(s.direction.value, "")
-                    st.markdown(f"**{s.scenario_id}** — {direction_icon} {s.direction.value.upper()} {s.instrument} ({s.instrument_class.value})")
-                    st.caption(s.thesis_summary)
-                    st.caption(f"Catalyst: {s.proposed_catalyst} | Kill: {s.proposed_kill}")
-                    st.divider()
+    # ── Show scenario preview + price inputs when we have scenarios ──
 
-    # Current prices
-    if start_stage >= 3 and stage2_output:
+    if stage2_output is not None:
+        with st.expander(f"Preview scenarios ({len(stage2_output.scenarios)})", expanded=False):
+            for s in stage2_output.scenarios:
+                direction_icon = {"long": "📈", "short": "📉", "pair": "🔄", "avoid": "⛔"}.get(s.direction.value, "")
+                st.markdown(f"**{s.scenario_id}** — {direction_icon} {s.direction.value.upper()} {s.instrument} ({s.instrument_class.value})")
+                st.caption(s.thesis_summary)
+                st.caption(f"Catalyst: {s.proposed_catalyst} | Kill: {s.proposed_kill}")
+                st.divider()
+
         st.subheader("Current Prices")
         st.caption("Required for Stage 4a risk math. Enter current market prices.")
 
-        tickers = list({s.instrument for s in stage2_output.scenarios})
+        tickers = sorted({s.instrument for s in stage2_output.scenarios})
         default_prices = {
             "MU": 268.50, "AMAT": 195.00, "KRE": 48.20, "CCJ": 55.00,
             "OKLO": 28.00, "NVDA": 135.00, "GLD": 230.00,
         }
 
         cols = st.columns(min(len(tickers), 4))
-        for i, ticker in enumerate(sorted(tickers)):
+        for i, ticker in enumerate(tickers):
             with cols[i % len(cols)]:
                 prices[ticker] = st.number_input(
                     f"{ticker}",
@@ -190,16 +184,15 @@ with tab_run:
                     key=f"price_{ticker}",
                 )
 
-    # Run button
+    # ── Run button ──
+
     st.divider()
 
     if st.button("Run Pipeline", type="primary", use_container_width=True):
+
+        # ── Validation ──
         if not api_key:
             st.error("Set your Anthropic API key in the sidebar.")
-            st.stop()
-
-        if start_stage >= 3 and not stage2_output:
-            st.error("Upload a Stage 2 YAML or use the sample fixture.")
             st.stop()
 
         settings = get_settings()
@@ -211,16 +204,67 @@ with tab_run:
             current_portfolio_heat_pct=0.0,
         )
 
-        # Store results in session state
         if "results" not in st.session_state:
             st.session_state.results = {}
 
-        # ── Stage 3 ──
+        # ── Stages 1+2 (full pipeline mode only) ──
+
+        if start_mode == "Stages 1-6 (full pipeline)":
+            st.markdown('<div class="stage-header"><h3>Stage 1 — Market Scan</h3></div>', unsafe_allow_html=True)
+            with st.spinner("Journalist + macro lenses scanning the market..."):
+                try:
+                    stage1_result = run_stage1(settings, run_id=run_id)
+                    write_journal(1, run_id, stage1_result)
+                    st.session_state.results["stage1"] = stage1_result
+                except Exception as e:
+                    st.error(f"Stage 1 failed: {e}")
+                    st.stop()
+
+            st.success(f"Stage 1 complete: {len(stage1_result.themes)} themes")
+            st.info(f"**Desk note:** {stage1_result.desk_note}")
+
+            with st.expander("Themes", expanded=False):
+                for t in stage1_result.themes:
+                    st.markdown(f"**{t.theme_id}** [{t.lens}] — {t.title}")
+                    st.caption(t.summary)
+                    st.divider()
+
+            st.markdown('<div class="stage-header"><h3>Stage 2 — Ticker Discovery</h3></div>', unsafe_allow_html=True)
+            with st.spinner("Generating tradeable scenarios from themes..."):
+                try:
+                    stage2_output = run_stage2(stage1_result, settings, run_id=run_id)
+                    write_journal(2, run_id, stage2_output)
+                    st.session_state.results["stage2"] = stage2_output
+                except Exception as e:
+                    st.error(f"Stage 2 failed: {e}")
+                    st.stop()
+
+            st.success(f"Stage 2 complete: {len(stage2_output.scenarios)} scenarios")
+
+            # Collect prices — for full pipeline, use placeholder prices
+            # (in production, these would be fetched live)
+            for s in stage2_output.scenarios:
+                if s.instrument not in prices:
+                    prices[s.instrument] = 100.0  # placeholder
+            st.warning(
+                "Full pipeline generated new tickers. Price inputs above may not "
+                "include them — using $100 placeholder for unknown tickers. "
+                "Re-run in Stage 3-6 mode with correct prices for accurate risk math."
+            )
+
+        # ── Validate stage2_output exists before proceeding ──
+
+        if stage2_output is None:
+            st.error("No scenarios loaded. Select a fixture or upload a YAML file.")
+            st.stop()
+
+        # ── Stage 3 — Triage Gate ──
+
         st.markdown('<div class="stage-header"><h3>Stage 3 — Triage Gate</h3></div>', unsafe_allow_html=True)
         with st.spinner("Skeptical PM reviewing scenarios..."):
             try:
                 stage3_result = run_stage3(stage2_output, settings, run_id=run_id)
-                journal_path = write_journal(3, run_id, stage3_result)
+                write_journal(3, run_id, stage3_result)
                 st.session_state.results["stage3"] = stage3_result
             except Exception as e:
                 st.error(f"Stage 3 failed: {e}")
@@ -235,7 +279,6 @@ with tab_run:
         col4.metric("KILL", summary.verdicts.get("KILL", 0))
 
         for v in stage3_result.verdicts:
-            verdict_class = f"verdict-{v.verdict.value.lower()}"
             with st.expander(
                 f"{'✅' if v.verdict == Verdict.LIVE else '⏸️' if v.verdict == Verdict.WATCH else '❌'} "
                 f"{v.scenario_id} → {v.verdict.value} — {v.one_line_reason}",
@@ -257,7 +300,8 @@ with tab_run:
 
         st.info(f"**Desk note:** {summary.desk_note}")
 
-        # Filter survivors
+        # ── Filter survivors ──
+
         surviving_ids = {
             v.scenario_id for v in stage3_result.verdicts
             if v.verdict in (Verdict.LIVE, Verdict.WATCH)
@@ -271,6 +315,7 @@ with tab_run:
             st.stop()
 
         # ── Stage 4a — Risk Math ──
+
         st.markdown('<div class="stage-header"><h3>Stage 4a — Risk Math</h3></div>', unsafe_allow_html=True)
 
         enriched = []
@@ -328,6 +373,7 @@ with tab_run:
         st.dataframe(risk_data, use_container_width=True, hide_index=True)
 
         # ── Stage 4b — Bear Challenger ──
+
         st.markdown('<div class="stage-header"><h3>Stage 4b — Bear Challenger</h3></div>', unsafe_allow_html=True)
         with st.spinner("Adversarial analyst building bear cases..."):
             try:
@@ -364,7 +410,8 @@ with tab_run:
                     st.markdown(f"**Historical precedent:** {bc.historical_precedent}")
                     st.markdown(f"**What market knows:** {bc.what_market_knows_that_we_dont}")
 
-        # ── Stage 5 — Synthesis ──
+        # ── Stage 5 — Synthesis Decision ──
+
         st.markdown('<div class="stage-header"><h3>Stage 5 — Synthesis Decision</h3></div>', unsafe_allow_html=True)
         with st.spinner("Senior PM making final decisions..."):
             try:
@@ -410,6 +457,7 @@ with tab_run:
         st.info(f"**IC Note:** {stage5_result.ic_note}")
 
         # ── Stage 6 — Action Table ──
+
         st.markdown('<div class="stage-header"><h3>Stage 6 — Action Table</h3></div>', unsafe_allow_html=True)
 
         stage6_result = run_stage6(stage5_result)
@@ -431,7 +479,7 @@ with tab_run:
         md = render_markdown(stage6_result)
         st.markdown(md)
 
-        # Also write latest.md
+        # Write latest.md
         journal_dir = Path("journal/stage6")
         journal_dir.mkdir(parents=True, exist_ok=True)
         (journal_dir / "latest.md").write_text(md)
