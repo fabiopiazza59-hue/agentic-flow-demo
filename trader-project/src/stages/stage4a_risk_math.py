@@ -153,17 +153,27 @@ def parse_levels_from_scenario(proposed_kill: str, proposed_catalyst: str, curre
     Returns (entry, stop, target).
     """
     entry = current_price
+    is_long = direction in (Direction.long, Direction.pair)
 
     # Try to extract a price from proposed_kill (e.g., "MU breaks below $245")
     stop = _extract_price(proposed_kill)
+
+    # Validate extracted stop makes sense for the direction and is in the
+    # same order of magnitude as entry (catches commodity-price references
+    # like "$70/lb uranium" when the stock is $55).
+    if stop is not None:
+        ratio = stop / entry if entry else 0
+        if is_long and (stop >= entry or ratio < 0.5 or ratio > 1.0):
+            stop = None  # nonsensical for a long — fall back
+        elif not is_long and (stop <= entry or ratio > 1.5 or ratio < 1.0):
+            stop = None  # nonsensical for a short — fall back
+
     if stop is None:
         # Fallback: 5% stop
-        if direction in (Direction.long, Direction.pair):
+        if is_long:
             stop = entry * 0.95
         else:
             stop = entry * 1.05
-
-    is_long = direction in (Direction.long, Direction.pair)
 
     stop_distance = abs(entry - stop)
     if is_long:

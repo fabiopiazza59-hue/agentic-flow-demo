@@ -275,12 +275,12 @@ class AccountState(BaseModel):
 class TradeDecision(BaseModel):
     scenario_id: str
     decision: Decision
-    final_direction: Direction
-    final_size_usd: float
+    final_direction: Optional[Direction] = None
+    final_size_usd: float = 0.0
     rationale: str
-    risks_acknowledged: str
+    risks_acknowledged: str = ""
     defer_until: Optional[date] = None
-    interaction_with_book: str
+    interaction_with_book: str = ""
 
 
 class PositionCheck(BaseModel):

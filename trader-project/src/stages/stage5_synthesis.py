@@ -16,6 +16,7 @@ import anthropic
 import yaml
 
 from src.config.settings import Settings
+from src.utils import extract_json
 from src.models.schemas import (
     AccountState,
     Decision,
@@ -223,7 +224,7 @@ def run_stage5(
     )
 
     raw_text = response.content[0].text
-    parsed = json.loads(raw_text)
+    parsed = extract_json(raw_text)
 
     decisions = [TradeDecision(**d) for d in parsed["decisions"]]
     position_checks = [

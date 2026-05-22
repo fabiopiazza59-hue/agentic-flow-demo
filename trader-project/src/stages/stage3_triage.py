@@ -13,6 +13,7 @@ import anthropic
 import yaml
 
 from src.config.settings import Settings
+from src.utils import extract_json
 from src.models.schemas import (
     Scenario,
     ScenarioVerdict,
@@ -173,7 +174,7 @@ def run_stage3(
     )
 
     raw_text = response.content[0].text
-    parsed = json.loads(raw_text)
+    parsed = extract_json(raw_text)
 
     verdicts = [ScenarioVerdict(**v) for v in parsed["verdicts"]]
     batch_summary = Stage3BatchSummary(

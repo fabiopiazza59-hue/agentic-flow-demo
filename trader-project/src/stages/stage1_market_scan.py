@@ -14,6 +14,7 @@ import anthropic
 import yaml
 
 from src.config.settings import Settings
+from src.utils import extract_json
 from src.models.schemas import (
     LensMetadata,
     Stage1Output,
@@ -201,7 +202,7 @@ def _run_lens(
             if block.type == "text":
                 text_content = block.text
 
-    parsed = json.loads(text_content)
+    parsed = extract_json(text_content)
     return parsed["themes"], parsed.get("metadata", {})
 
 
