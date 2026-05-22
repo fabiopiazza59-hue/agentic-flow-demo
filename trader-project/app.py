@@ -129,13 +129,17 @@ def get_settings() -> Settings:
 
 st.header("Seamaster — Trading Advisor Pipeline")
 
+# Initialize variables used across sections
+stage2_output = None
+prices = {}
+
 # Tab layout
 tab_run, tab_journal = st.tabs(["Run Pipeline", "Journal"])
 
 # ── Run Pipeline tab ──
 
 with tab_run:
-    # Stage 2 input
+    # Stage 2 input — always load so it's available when button is clicked
     if start_stage >= 3:
         st.subheader("Stage 2 Input")
         input_mode = st.radio(
@@ -150,8 +154,6 @@ with tab_run:
                 stage2_data = yaml.safe_load(uploaded.read())
                 stage2_output = Stage2Output(**stage2_data)
                 st.success(f"Loaded {len(stage2_output.scenarios)} scenarios")
-            else:
-                stage2_output = None
         else:
             stage2_output = load_stage2_from_yaml("fixtures/sample_stage2_output.yaml")
             st.info(f"Using sample fixture: {len(stage2_output.scenarios)} scenarios")
@@ -167,28 +169,26 @@ with tab_run:
                     st.divider()
 
     # Current prices
-    if start_stage >= 3:
+    if start_stage >= 3 and stage2_output:
         st.subheader("Current Prices")
         st.caption("Required for Stage 4a risk math. Enter current market prices.")
 
-        if stage2_output:
-            tickers = list({s.instrument for s in stage2_output.scenarios})
-            default_prices = {
-                "MU": 268.50, "AMAT": 195.00, "KRE": 48.20, "CCJ": 55.00,
-                "OKLO": 28.00, "NVDA": 135.00, "GLD": 230.00,
-            }
+        tickers = list({s.instrument for s in stage2_output.scenarios})
+        default_prices = {
+            "MU": 268.50, "AMAT": 195.00, "KRE": 48.20, "CCJ": 55.00,
+            "OKLO": 28.00, "NVDA": 135.00, "GLD": 230.00,
+        }
 
-            cols = st.columns(min(len(tickers), 4))
-            prices = {}
-            for i, ticker in enumerate(sorted(tickers)):
-                with cols[i % len(cols)]:
-                    prices[ticker] = st.number_input(
-                        f"{ticker}",
-                        value=default_prices.get(ticker, 100.0),
-                        step=0.50,
-                        format="%.2f",
-                        key=f"price_{ticker}",
-                    )
+        cols = st.columns(min(len(tickers), 4))
+        for i, ticker in enumerate(sorted(tickers)):
+            with cols[i % len(cols)]:
+                prices[ticker] = st.number_input(
+                    f"{ticker}",
+                    value=default_prices.get(ticker, 100.0),
+                    step=0.50,
+                    format="%.2f",
+                    key=f"price_{ticker}",
+                )
 
     # Run button
     st.divider()
