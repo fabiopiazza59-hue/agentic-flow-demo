@@ -22,7 +22,9 @@ from __future__ import annotations
 import hashlib
 import io
 import re
+import time
 from datetime import date
+from functools import lru_cache
 
 import pandas as pd
 import requests
@@ -42,7 +44,21 @@ _HEADERS = {
 
 # ============================================================= Alpha Vantage (keyed, authoritative)
 
+_AV_MIN_INTERVAL = 1.5  # seconds; free tier wants <= ~1 request/second
+_av_last_call = 0.0
+
+
+def _av_throttle() -> None:
+    """Sleep so consecutive Alpha Vantage requests respect the free-tier rate limit."""
+    global _av_last_call
+    wait = _AV_MIN_INTERVAL - (time.monotonic() - _av_last_call)
+    if wait > 0:
+        time.sleep(wait)
+    _av_last_call = time.monotonic()
+
+
 def alphavantage_history(symbol: str, api_key: str) -> pd.DataFrame:
+    _av_throttle()
     resp = requests.get(
         "https://www.alphavantage.co/query",
         params={"function": "TIME_SERIES_DAILY", "symbol": symbol,
@@ -67,6 +83,7 @@ def alphavantage_history(symbol: str, api_key: str) -> pd.DataFrame:
 
 
 def alphavantage_quote(symbol: str, api_key: str) -> dict:
+    _av_throttle()
     resp = requests.get(
         "https://www.alphavantage.co/query",
         params={"function": "GLOBAL_QUOTE", "symbol": symbol, "apikey": api_key},
@@ -155,8 +172,13 @@ def stooq_history(symbol: str) -> pd.DataFrame:
 
 # ============================================================================ fallback chains
 
+@lru_cache(maxsize=8)
 def _fetch_history(symbol: str) -> pd.DataFrame:
-    """Daily OHLCV with provider fallback. Raises only if every source fails."""
+    """Daily OHLCV with provider fallback. Raises only if every source fails.
+
+    Cached per process so a single daily run hits the (rate-limited) data provider once per symbol
+    instead of re-fetching for score/quote/predict separately.
+    """
     errors = []
     if settings.alphavantage_api_key:
         try:
