@@ -1,0 +1,307 @@
+{
+  "symbol": "AMZN",
+  "pass_threshold": 0.01,
+  "rolling_window": 20,
+  "rolling": {
+    "n": 0,
+    "n_all_time": 0,
+    "pass_rate": null,
+    "directional_accuracy": null,
+    "mape": null,
+    "baseline_mape": null,
+    "edge": null,
+    "beats_baseline_overall": false,
+    "brier": null
+  },
+  "all_time": {
+    "n": 0,
+    "n_all_time": 0,
+    "pass_rate": null,
+    "directional_accuracy": null,
+    "mape": null,
+    "baseline_mape": null,
+    "edge": null,
+    "beats_baseline_overall": false,
+    "brier": null
+  },
+  "scorecards": {},
+  "series": [
+    {
+      "date": "2026-05-01",
+      "predicted_close": 265.05999755859375,
+      "actual_close": 268.260009765625,
+      "prior_close": 265.05999755859375,
+      "ape": 0.011928770933196699,
+      "baseline_ape": 0.011928770933196699,
+      "pass": false
+    },
+    {
+      "date": "2026-05-04",
+      "predicted_close": 268.260009765625,
+      "actual_close": 272.04998779296875,
+      "prior_close": 268.260009765625,
+      "ape": 0.013931182493667083,
+      "baseline_ape": 0.013931182493667083,
+      "pass": false
+    },
+    {
+      "date": "2026-05-05",
+      "predicted_close": 272.04998779296875,
+      "actual_close": 273.54998779296875,
+      "prior_close": 272.04998779296875,
+      "ape": 0.005483458479023027,
+      "baseline_ape": 0.005483458479023027,
+      "pass": true
+    },
+    {
+      "date": "2026-05-06",
+      "predicted_close": 273.54998779296875,
+      "actual_close": 274.989990234375,
+      "prior_close": 273.54998779296875,
+      "ape": 0.005236563120639157,
+      "baseline_ape": 0.005236563120639157,
+      "pass": true
+    },
+    {
+      "date": "2026-05-07",
+      "predicted_close": 274.989990234375,
+      "actual_close": 271.1700134277344,
+      "prior_close": 274.989990234375,
+      "ape": 0.014087017802426122,
+      "baseline_ape": 0.014087017802426122,
+      "pass": false
+    },
+    {
+      "date": "2026-05-08",
+      "predicted_close": 271.1700134277344,
+      "actual_close": 272.67999267578125,
+      "prior_close": 271.1700134277344,
+      "ape": 0.005537550566983668,
+      "baseline_ape": 0.005537550566983668,
+      "pass": true
+    },
+    {
+      "date": "2026-05-11",
+      "predicted_close": 272.67999267578125,
+      "actual_close": 268.989990234375,
+      "prior_close": 272.67999267578125,
+      "ape": 0.013717991655344111,
+      "baseline_ape": 0.013717991655344111,
+      "pass": false
+    },
+    {
+      "date": "2026-05-12",
+      "predicted_close": 268.989990234375,
+      "actual_close": 265.82000732421875,
+      "prior_close": 268.989990234375,
+      "ape": 0.011925298407993213,
+      "baseline_ape": 0.011925298407993213,
+      "pass": false
+    },
+    {
+      "date": "2026-05-13",
+      "predicted_close": 265.82000732421875,
+      "actual_close": 270.1300048828125,
+      "prior_close": 265.82000732421875,
+      "ape": 0.0159552714644325,
+      "baseline_ape": 0.0159552714644325,
+      "pass": false
+    },
+    {
+      "date": "2026-05-14",
+      "predicted_close": 270.1300048828125,
+      "actual_close": 267.2200012207031,
+      "prior_close": 270.1300048828125,
+      "ape": 0.010889917105067058,
+      "baseline_ape": 0.010889917105067058,
+      "pass": false
+    },
+    {
+      "date": "2026-05-15",
+      "predicted_close": 267.2200012207031,
+      "actual_close": 264.1400146484375,
+      "prior_close": 267.2200012207031,
+      "ape": 0.011660431594830475,
+      "baseline_ape": 0.011660431594830475,
+      "pass": false
+    },
+    {
+      "date": "2026-05-18",
+      "predicted_close": 264.1400146484375,
+      "actual_close": 264.8599853515625,
+      "prior_close": 264.1400146484375,
+      "ape": 0.00271830681470946,
+      "baseline_ape": 0.00271830681470946,
+      "pass": true
+    },
+    {
+      "date": "2026-05-19",
+      "predicted_close": 264.8599853515625,
+      "actual_close": 259.3399963378906,
+      "prior_close": 264.8599853515625,
+      "ape": 0.02128475781452528,
+      "baseline_ape": 0.02128475781452528,
+      "pass": false
+    },
+    {
+      "date": "2026-05-20",
+      "predicted_close": 259.3399963378906,
+      "actual_close": 265.010009765625,
+      "prior_close": 259.3399963378906,
+      "ape": 0.021395468921151083,
+      "baseline_ape": 0.021395468921151083,
+      "pass": false
+    },
+    {
+      "date": "2026-05-21",
+      "predicted_close": 265.010009765625,
+      "actual_close": 268.4599914550781,
+      "prior_close": 265.010009765625,
+      "ape": 0.01285100871364073,
+      "baseline_ape": 0.01285100871364073,
+      "pass": false
+    },
+    {
+      "date": "2026-05-22",
+      "predicted_close": 268.4599914550781,
+      "actual_close": 266.32000732421875,
+      "prior_close": 268.4599914550781,
+      "ape": 0.008035386272178013,
+      "baseline_ape": 0.008035386272178013,
+      "pass": true
+    },
+    {
+      "date": "2026-05-26",
+      "predicted_close": 266.32000732421875,
+      "actual_close": 265.2900085449219,
+      "prior_close": 266.32000732421875,
+      "ape": 0.0038825389050506365,
+      "baseline_ape": 0.0038825389050506365,
+      "pass": true
+    },
+    {
+      "date": "2026-05-27",
+      "predicted_close": 265.2900085449219,
+      "actual_close": 271.8500061035156,
+      "prior_close": 265.2900085449219,
+      "ape": 0.024130945048041752,
+      "baseline_ape": 0.024130945048041752,
+      "pass": false
+    },
+    {
+      "date": "2026-05-28",
+      "predicted_close": 271.8500061035156,
+      "actual_close": 274.0,
+      "prior_close": 271.8500061035156,
+      "ape": 0.007846693052862683,
+      "baseline_ape": 0.007846693052862683,
+      "pass": true
+    },
+    {
+      "date": "2026-05-29",
+      "predicted_close": 274.0,
+      "actual_close": 270.6400146484375,
+      "prior_close": 274.0,
+      "ape": 0.012414961460621907,
+      "baseline_ape": 0.012414961460621907,
+      "pass": false
+    },
+    {
+      "date": "2026-06-01",
+      "predicted_close": 270.6400146484375,
+      "actual_close": 261.260009765625,
+      "prior_close": 270.6400146484375,
+      "ape": 0.03590294929265008,
+      "baseline_ape": 0.03590294929265008,
+      "pass": false
+    },
+    {
+      "date": "2026-06-02",
+      "predicted_close": 261.260009765625,
+      "actual_close": 256.5199890136719,
+      "prior_close": 261.260009765625,
+      "ape": 0.018478173066273185,
+      "baseline_ape": 0.018478173066273185,
+      "pass": false
+    },
+    {
+      "date": "2026-06-03",
+      "predicted_close": 256.5199890136719,
+      "actual_close": 250.02000427246094,
+      "prior_close": 256.5199890136719,
+      "ape": 0.02599785869184906,
+      "baseline_ape": 0.02599785869184906,
+      "pass": false
+    },
+    {
+      "date": "2026-06-04",
+      "predicted_close": 250.02000427246094,
+      "actual_close": 253.7899932861328,
+      "prior_close": 250.02000427246094,
+      "ape": 0.014854758317525314,
+      "baseline_ape": 0.014854758317525314,
+      "pass": false
+    },
+    {
+      "date": "2026-06-05",
+      "predicted_close": 253.7899932861328,
+      "actual_close": 246.02999877929688,
+      "prior_close": 253.7899932861328,
+      "ape": 0.03154084682899625,
+      "baseline_ape": 0.03154084682899625,
+      "pass": false
+    }
+  ],
+  "pending": {
+    "date": "2026-06-08",
+    "created_at": "2026-06-07T19:23:41.709714+00:00",
+    "prior_close": 246.03,
+    "predicted_close": 245.05,
+    "predicted_direction": "down",
+    "confidence": 0.5,
+    "weights": {
+      "technical": 0.2,
+      "momentum": 0.2,
+      "contrarian": 0.2,
+      "news": 0.2,
+      "macro": 0.2
+    },
+    "analyst_predictions": {
+      "technical": {
+        "predicted_close": 246.03,
+        "direction": "down",
+        "confidence": 0.5,
+        "rationale": "[stub:technical] prev_close adjusted by feature heuristic (offline mode)."
+      },
+      "momentum": {
+        "predicted_close": 241.56,
+        "direction": "down",
+        "confidence": 0.5,
+        "rationale": "[stub:momentum] prev_close adjusted by feature heuristic (offline mode)."
+      },
+      "contrarian": {
+        "predicted_close": 246.74,
+        "direction": "up",
+        "confidence": 0.5,
+        "rationale": "[stub:contrarian] prev_close adjusted by feature heuristic (offline mode)."
+      },
+      "news": {
+        "predicted_close": 246.03,
+        "direction": "down",
+        "confidence": 0.5,
+        "rationale": "[stub:news] prev_close adjusted by feature heuristic (offline mode)."
+      },
+      "macro": {
+        "predicted_close": 244.91,
+        "direction": "down",
+        "confidence": 0.5,
+        "rationale": "[stub:macro] prev_close adjusted by feature heuristic (offline mode)."
+      }
+    },
+    "rationale": "[offline] scorecard-weighted blend of analyst predictions.",
+    "quote_source": "history",
+    "status": "pending",
+    "actual_close": null
+  },
+  "updated_count": 25
+}
