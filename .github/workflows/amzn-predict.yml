@@ -1,0 +1,76 @@
+name: AMZN Daily Close Predictor
+
+on:
+  schedule:
+    # 13:00 UTC on weekdays = before the 09:30 ET open year-round (08:00 EST / 09:00 EDT).
+    # The trading-day guard skips US market holidays.
+    - cron: "0 13 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Run mode"
+        required: false
+        default: "daily"
+        type: choice
+        options: [daily, score, predict, report, backfill]
+
+concurrency:
+  group: amzn-predict
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+defaults:
+  run:
+    working-directory: self-improvement_loop
+
+jobs:
+  predict:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: self-improvement_loop/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Configure git
+        run: |
+          git config user.name  "amzn-predictor-bot"
+          git config user.email "actions@github.com"
+
+      - name: Run daily pipeline
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          FINNHUB_API_KEY: ${{ secrets.FINNHUB_API_KEY }}
+          ALPHAVANTAGE_API_KEY: ${{ secrets.ALPHAVANTAGE_API_KEY }}
+        run: |
+          python -m src.loop.run_daily --mode "${{ github.event.inputs.mode || 'daily' }}"
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: self-improvement_loop/results/site
+
+  deploy-pages:
+    needs: predict
+    runs-on: ubuntu-latest
+    # Only deploy from the default branch (scheduled runs already use it).
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
