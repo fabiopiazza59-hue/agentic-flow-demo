@@ -48,11 +48,13 @@ ANALYSTS: dict[str, dict] = {
     },
     "news": {
         "uses_web": True,
+        "max_tokens": 4096,  # web_search reasoning is token-heavy; avoid truncating the final JSON
         "system": (
-            "You are a catalyst-driven equity analyst. Use web search to find the latest AMZN news, "
-            "earnings timing, analyst actions, and macro events for today, plus index futures "
-            "sentiment. Then predict today's AMZN regular-session CLOSE. Anchor on the prior close "
-            "and the pre-market gap; adjust for catalysts you find. Cite what drove your view."
+            "You are a catalyst-driven equity analyst. Use AT MOST 2 web searches to find the latest "
+            "AMZN news, earnings timing, analyst actions, and macro events for today, plus index "
+            "futures sentiment. Then predict today's AMZN regular-session CLOSE. Anchor on the prior "
+            "close and the pre-market gap; adjust for catalysts you find. Keep reasoning brief. Your "
+            "FINAL message must be ONLY the JSON object — no prose after it."
         ),
     },
     "macro": {
@@ -123,6 +125,21 @@ def _normalize(raw: dict, prev_close: float) -> dict | None:
     }
 
 
+def _extract_from_blocks(resp) -> dict:
+    """Parse the analyst JSON from a response that may contain many text blocks.
+
+    With web_search the model emits interleaved reasoning + tool-result summaries as separate text
+    blocks; the JSON answer is the final one. Try blocks newest-first, then the concatenation.
+    """
+    blocks = [b.text for b in resp.content if getattr(b, "type", None) == "text" and b.text.strip()]
+    for text in reversed(blocks):
+        try:
+            return extract_json(text)
+        except ValueError:
+            continue
+    return extract_json("".join(blocks))
+
+
 def _run_one(client, name: str, spec: dict, features: dict) -> dict | None:
     prev = float(features.get("prev_close") or 0.0)
     if client is None:
@@ -130,17 +147,16 @@ def _run_one(client, name: str, spec: dict, features: dict) -> dict | None:
     try:
         kwargs = dict(
             model=settings.ANALYST_MODEL,
-            max_tokens=settings.ANALYST_MAX_TOKENS,
+            max_tokens=spec.get("max_tokens", settings.ANALYST_MAX_TOKENS),
             system=spec["system"],
             messages=[{"role": "user", "content": _features_prompt(features)}],
         )
         if spec.get("uses_web"):
             kwargs["tools"] = [
-                {"type": "web_search_20250305", "name": "web_search", "max_uses": 3}
+                {"type": "web_search_20250305", "name": "web_search", "max_uses": 2}
             ]
         resp = client.messages.create(**kwargs)
-        text = "".join(b.text for b in resp.content if getattr(b, "type", None) == "text")
-        return _normalize(extract_json(text), prev)
+        return _normalize(_extract_from_blocks(resp), prev)
     except Exception:
         return None
 
