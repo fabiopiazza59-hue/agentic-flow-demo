@@ -16,6 +16,7 @@ Flags:
 from __future__ import annotations
 
 import argparse
+import os
 import subprocess
 import sys
 from datetime import date
@@ -23,7 +24,7 @@ from datetime import date
 from ..agents.analysts import get_client, run_analysts
 from ..agents.meta_judge import synthesize
 from ..agents.reflector import reflect
-from ..config import settings
+from ..config import PROJECT_ROOT, settings
 from ..data.market_calendar import is_trading_day, last_n_trading_days, previous_trading_day
 from ..data.providers import get_actual_close, get_history, get_quote
 from ..evals.metrics import score_row
@@ -32,12 +33,13 @@ from ..features import build_features
 from ..utils import iso_today, now_iso, read_jsonl, to_date, upsert_ledger_row, write_jsonl
 from .. import report
 
+# Relative to the project root (self-improvement_loop/).
 COMMIT_PATHS = [
-    "self-improvement_loop/data",
-    "self-improvement_loop/results",
-    "self-improvement_loop/learnings",
-    "self-improvement_loop/RESULTS.md",
-    "self-improvement_loop/README.md",
+    "data",
+    "results",
+    "learnings",
+    "RESULTS.md",
+    "README.md",
 ]
 
 
@@ -188,23 +190,30 @@ def do_backfill(rows: list[dict], n: int = 25) -> list[dict]:
 
 # ------------------------------------------------------------------------------------- commit
 
-def git_commit(target_date: str) -> None:
-    root = "/Users/fabio/Documents/VS-code"
+def git_commit(target_date: str) -> bool:
     try:
-        subprocess.run(["git", "-C", root, "add", *COMMIT_PATHS], check=True)
-        status = subprocess.run(["git", "-C", root, "status", "--porcelain", *COMMIT_PATHS],
+        root = subprocess.run(
+            ["git", "-C", str(PROJECT_ROOT), "rev-parse", "--show-toplevel"],
+            capture_output=True, text=True, check=True,
+        ).stdout.strip()
+        paths = [str(PROJECT_ROOT / p) for p in COMMIT_PATHS if (PROJECT_ROOT / p).exists()]
+        subprocess.run(["git", "-C", root, "add", *paths], check=True)
+        status = subprocess.run(["git", "-C", root, "status", "--porcelain", *paths],
                                 capture_output=True, text=True)
         if not status.stdout.strip():
             log("nothing to commit.")
-            return
+            return True
         subprocess.run(
             ["git", "-C", root, "commit", "-m", f"chore: daily AMZN run {target_date}"],
             check=True,
         )
-        subprocess.run(["git", "-C", root, "push"], check=False)
+        subprocess.run(["git", "-C", root, "pull", "--rebase"], check=False)
+        subprocess.run(["git", "-C", root, "push", "origin", "HEAD"], check=True)
         log("committed and pushed results.")
+        return True
     except subprocess.CalledProcessError as e:
-        log(f"git commit failed (non-fatal): {e}")
+        log(f"git commit/push failed: {e}")
+        return False
 
 
 # ---------------------------------------------------------------------------------------- main
@@ -251,14 +260,16 @@ def main(argv: list[str] | None = None) -> int:
         _emit_ci_summary(metrics)
 
         if not args.dry_run and not args.no_commit:
-            git_commit(target_date.isoformat())
+            committed = git_commit(target_date.isoformat())
+            # In CI a failed commit means the day's prediction is lost — fail loudly.
+            if not committed and os.getenv("GITHUB_ACTIONS"):
+                return 1
         return 0
 
     return 1
 
 
 def _emit_ci_summary(metrics: dict) -> None:
-    import os
     summary_path = os.getenv("GITHUB_STEP_SUMMARY")
     r = metrics.get("rolling", {})
     text = (
