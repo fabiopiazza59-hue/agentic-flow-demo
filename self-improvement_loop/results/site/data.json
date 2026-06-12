@@ -300,6 +300,33 @@
       "ape": 0.0006932550362938892,
       "baseline_ape": 0.003303156349400548,
       "pass": true
+    },
+    {
+      "date": "2026-06-09",
+      "predicted_close": 245.22000122070312,
+      "actual_close": 244.19000244140625,
+      "prior_close": 245.22000122070312,
+      "ape": 0.0042180219050696995,
+      "baseline_ape": 0.0042180219050696995,
+      "pass": true
+    },
+    {
+      "date": "2026-06-10",
+      "predicted_close": 244.19000244140625,
+      "actual_close": 238.0,
+      "prior_close": 244.19000244140625,
+      "ape": 0.026008413619353993,
+      "baseline_ape": 0.026008413619353993,
+      "pass": false
+    },
+    {
+      "date": "2026-06-11",
+      "predicted_close": 238.0,
+      "actual_close": 241.50999450683594,
+      "prior_close": 238.0,
+      "ape": 0.014533537272456801,
+      "baseline_ape": 0.014533537272456801,
+      "pass": false
     }
   ],
   "pending": {
@@ -353,5 +380,5 @@
     "status": "pending",
     "actual_close": null
   },
-  "updated_count": 26
+  "updated_count": 29
 }
