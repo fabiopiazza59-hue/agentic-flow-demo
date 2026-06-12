@@ -2,9 +2,10 @@ name: AMZN Daily Close Predictor
 
 on:
   schedule:
-    # 13:00 UTC on weekdays = before the 09:30 ET open year-round (08:00 EST / 09:00 EDT).
-    # The trading-day guard skips US market holidays.
-    - cron: "0 13 * * 1-5"
+    # 11:30 UTC on weekdays. GitHub cron is best-effort and has drifted 3-4h past
+    # the requested time, so this leaves headroom to still run before the 09:30 ET
+    # open (13:30 UTC in EDT). The trading-day guard skips US market holidays.
+    - cron: "30 11 * * 1-5"
   workflow_dispatch:
     inputs:
       mode:
@@ -29,11 +30,11 @@ jobs:
   predict:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
           cache: pip
