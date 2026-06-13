@@ -27,6 +27,10 @@ honestly says "no edge yet."
   up-weights what works.
 - **STRATEGY.md** is an append-only living strategy the reflector adds one tested insight to per day.
 - **learnings/YYYY-MM-DD.md** post-mortems feed back into the next prediction.
+- **learnings/FAILURES.md** — concentrated, append-only log of every missed prediction (>1% error)
+  with a root-cause analysis (which analyst dragged the blend, direction vs magnitude, what to change).
+- **learnings/WHATS_NOT_WORKING.md** — a rolling self-diagnosis regenerated each scoring that looks
+  *across all failures* for recurring patterns; it's fed to the meta-judge before the next shot.
 
 ## Layout
 ```

@@ -23,7 +23,7 @@ from datetime import date
 
 from ..agents.analysts import get_client, run_analysts
 from ..agents.meta_judge import synthesize
-from ..agents.reflector import reflect
+from ..agents.reflector import diagnose_failures, reflect
 from ..config import PROJECT_ROOT, settings
 from ..data.market_calendar import is_trading_day, last_n_trading_days, previous_trading_day
 from ..data.providers import get_actual_close, get_history, get_quote
@@ -82,11 +82,17 @@ def do_score(rows: list[dict], client) -> tuple[list[dict], dict | None]:
     scorecards = update_scorecards(scorecards, target.get("analyst_predictions", {}), actual)
     save_scorecards(scorecards)
 
-    # reflect -> post-mortem + bounded STRATEGY.md note
+    # reflect -> post-mortem + bounded STRATEGY.md note + (on FAIL) failure analysis
     reflection = reflect(target, scorecards, client=client)
     _write_learning(target["date"], reflection)
 
     rows = upsert_ledger_row(rows, target)
+
+    # Concentrated failure log + rolling "what's not working" self-diagnosis.
+    if target.get("pass") is False:
+        _append_failure_log(target, reflection)
+    _refresh_whats_not_working(rows, scorecards, client)
+
     log(f"scored {target['date']}: predicted {target['predicted_close']} vs actual {actual} "
         f"(APE {target['ape']*100:.2f}%, {'PASS' if target['pass'] else 'FAIL'}).")
     return rows, target
@@ -108,6 +114,47 @@ def _write_learning(d: str, reflection: dict) -> None:
             f.write(f"\n- ({d}) {note}")
 
 
+# Failure-focused learnings. Paths derive from LEARNINGS_DIR at call time so tests can isolate them.
+
+def _failures_path():
+    return settings.LEARNINGS_DIR / "FAILURES.md"
+
+
+def _whats_not_working_path():
+    return settings.LEARNINGS_DIR / "WHATS_NOT_WORKING.md"
+
+
+def _append_failure_log(row: dict, reflection: dict) -> None:
+    """Append a concentrated entry for every missed prediction (>1% error)."""
+    settings.ensure_dirs()
+    p = _failures_path()
+    if not p.exists():
+        p.write_text(
+            "# Failure Log — AMZN Close Predictor\n\n"
+            "Every missed prediction (>1% error), newest at the bottom. "
+            "Reread before each shot.\n", encoding="utf-8"
+        )
+    ape_pct = (row.get("ape") or 0) * 100
+    entry = (
+        f"\n## {row.get('date')} — FAIL (APE {ape_pct:.2f}%)\n"
+        f"- Predicted {row.get('predicted_close')} vs actual {row.get('actual_close')} "
+        f"(prior {row.get('prior_close')}); dir hit: {row.get('directional_hit')}; "
+        f"beat baseline: {row.get('beats_baseline')}; closest analyst: {row.get('winning_strategy')}.\n"
+        f"{(reflection.get('failure_reflection') or '').strip()}\n"
+    )
+    with p.open("a", encoding="utf-8") as f:
+        f.write(entry)
+
+
+def _refresh_whats_not_working(rows: list[dict], scorecards: dict, client) -> None:
+    """Regenerate the rolling failure self-diagnosis once at least one real prediction has failed."""
+    scored = [r for r in rows if r.get("status") == "scored" and not r.get("seed")]
+    if not any(r.get("pass") is False for r in scored):
+        return
+    md = diagnose_failures(scored, scorecards, client=client)
+    _whats_not_working_path().write_text(md, encoding="utf-8")
+
+
 # --------------------------------------------------------------------------------- predicting
 
 def do_predict(rows: list[dict], target_date: date, client) -> tuple[list[dict], dict]:
@@ -120,9 +167,11 @@ def do_predict(rows: list[dict], target_date: date, client) -> tuple[list[dict],
     scorecards = load_scorecards()
     strategy_md = settings.STRATEGY_PATH.read_text(encoding="utf-8") if settings.STRATEGY_PATH.exists() else ""
     recent_learnings = _recent_learnings(settings.LEARNINGS_CONTEXT_N)
+    wnw_path = _whats_not_working_path()
+    whats_not_working = wnw_path.read_text(encoding="utf-8") if wnw_path.exists() else ""
 
     final = synthesize(analyst_predictions, scorecards, strategy_md, recent_learnings,
-                       features, client=client)
+                       features, client=client, whats_not_working=whats_not_working)
 
     row = {
         "date": target_date.isoformat(),

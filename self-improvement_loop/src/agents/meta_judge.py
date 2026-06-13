@@ -57,11 +57,14 @@ def _offline_blend(analyst_predictions: dict, scorecards: dict, prev_close: floa
 
 
 def _user_prompt(analyst_predictions: dict, scorecards: dict, strategy_md: str,
-                 recent_learnings: list[str], features: dict) -> str:
+                 recent_learnings: list[str], features: dict, whats_not_working: str = "") -> str:
+    wnw = (f"KNOWN FAILURE PATTERNS — actively avoid repeating these:\n{whats_not_working[:3000]}\n\n"
+           if whats_not_working.strip() else "")
     return (
         f"Symbol: {settings.SYMBOL}\n"
         f"Prior close: {features.get('prev_close')}\n"
         f"Pre-market gap %: {features.get('premarket_gap_pct')}\n\n"
+        f"{wnw}"
         f"Analyst predictions (JSON):\n{json.dumps(analyst_predictions, indent=2)}\n\n"
         f"Per-strategy scorecards (JSON):\n{json.dumps(scorecards, indent=2)}\n\n"
         f"Living strategy notes (STRATEGY.md):\n{strategy_md[:4000]}\n\n"
@@ -89,7 +92,8 @@ def _normalize(raw: dict, analyst_predictions: dict, scorecards: dict, prev_clos
 
 
 def synthesize(analyst_predictions: dict, scorecards: dict, strategy_md: str,
-               recent_learnings: list[str], features: dict, client=None) -> dict:
+               recent_learnings: list[str], features: dict, client=None,
+               whats_not_working: str = "") -> dict:
     prev_close = float(features.get("prev_close") or 0.0)
     if client is None or not analyst_predictions:
         return _offline_blend(analyst_predictions, scorecards, prev_close)
@@ -101,7 +105,7 @@ def synthesize(analyst_predictions: dict, scorecards: dict, strategy_md: str,
             messages=[{
                 "role": "user",
                 "content": _user_prompt(analyst_predictions, scorecards, strategy_md,
-                                        recent_learnings, features),
+                                        recent_learnings, features, whats_not_working),
             }],
         )
         text = "".join(b.text for b in resp.content if getattr(b, "type", None) == "text")

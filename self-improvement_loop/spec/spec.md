@@ -94,7 +94,11 @@ source and Alpha Vantage the recommended keyed source for CI.
   eval fields; set `status="scored"`; update scorecards; write a post-mortem learning file.
   Idempotent: re-running a scored day does not double-count.
 - **FR3 Reflect.** Reflector (Opus) writes `learnings/YYYY-MM-DD.md` (what happened, why, one
-  concrete adjustment) and appends a bounded note to `learnings/STRATEGY.md` (never deletes).
+  concrete adjustment) and appends a bounded note to `learnings/STRATEGY.md` (never deletes). On a
+  **FAIL** it also (a) appends a root-cause entry to `learnings/FAILURES.md` (concentrated, append-only
+  log of every miss) and (b) regenerates `learnings/WHATS_NOT_WORKING.md` — a rolling self-diagnosis
+  across ALL scored predictions surfacing recurring failure patterns. FR4's predict step feeds
+  `WHATS_NOT_WORKING.md` to the meta-judge so the next prediction actively avoids known mistakes.
 - **FR4 Predict (T).** Build features; run analysts in parallel; meta-judge synthesizes final
   prediction using scorecards + STRATEGY.md + last-N learnings; append a `pending` ledger row.
   Exactly one pending row per target date (re-running replaces same-day pending row).
