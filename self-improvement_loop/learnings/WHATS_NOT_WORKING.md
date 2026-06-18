@@ -3,20 +3,20 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- **Direction is the core problem, not magnitude.** All 3 directional misses (incl. the "passing" 06-16) come with zero magnitude misses. The model nails the level but bets the wrong sign — useless for trading.
-- **The two outright fails (06-12, 06-15) also lost to baseline.** Mean fail APE 2.71% and both worse than just-guessing-prior. When it's wrong, it's actively worse than doing nothing.
-- **06-16 "pass" is misleading**: APE 0.17% but directional_hit=false and beats_baseline=false. Counting it as a win flatters the scorecard.
-- Sample is tiny (n=4); treat all of this as directional signal, not proven law.
+- **The failures are 100% directional, not magnitude.** All 3 misses (and even the lucky pass on 06-16) blew the direction call; dir_misses=3, mag_misses=0. The model gets the size roughly right but the sign wrong — it's a turning-point/regime problem, not a calibration-of-magnitude problem.
+- **Losing to baseline on every fail.** All 3 failures had ape > baseline_ape (06-12, 06-15, 06-17). On miss days a naive baseline beats us — we add negative value precisely when it matters.
+- **The one clean win (06-08) came from a flat equal-weight 0.2 ensemble.** As soon as weights tilted toward momentum/news/macro, results degraded. Concentration hurt.
+- Confidence is low across the board (0.38–0.58), so no overconfidence flags fire — but it's also uselessly flat. Confidence isn't discriminating wins from losses.
 
 ## Unreliable under these conditions
-- **momentum as winning strategy is a coin flip on direction** (hit_rate 0.5) and was the "winner" on both 06-12 and 06-16 misses — high MAPE on macro-skewed weight days.
-- **macro-heavy weighting precedes failure**: 06-12 (macro 0.34) and 06-15 (momentum+macro 0.60) are both fails. macro strategy is the worst performer (MAPE 1.64%, hit 0.25).
-- **technical and contrarian are dead weight**: 0 wins across all 4, yet contrarian carries the 2nd-highest weight hint (0.20). It's getting weight it hasn't earned.
-- Confidence is **not the issue** — overconfident_misses=0, and confidence was actually *lower* (0.40, 0.42) on the bad-direction days. If anything the model knows when it's shaky but still ships wrong-sign calls.
+- **Contrarian is dead weight: 0/5 hit rate, highest-ish MAPE (0.020).** It never wins yet still carries ~0.14–0.22 weight on fail days.
+- **Technical and macro are weak (0.2 hit rate, MAPE ~0.020–0.022).** Technical "won" 06-17 and still missed direction badly (ape 0.037).
+- **Consecutive-day clustering:** 06-15→06-16→06-17 all directional misses — looks like a sustained trend/regime the ensemble kept fading. Errors compound in trending or news-driven stretches.
+- "Winning strategy" label is misleading: on 06-12, 06-15, 06-17 the named winner still got direction wrong — the selector is picking the least-bad loser.
 
 ## Fixes to try next
-- Add a **directional gate**: when strategies disagree on sign, suppress/flatten the trade rather than committing — magnitude accuracy is wasted if sign is wrong.
-- **Cut technical and contrarian weight toward zero** until they show any directional hits; reallocate to news (best MAPE + only consistent contributor).
-- **Cap macro weight** and stop letting macro+momentum jointly dominate (>0.5) — that combo owns both failures.
-- Re-score 06-16 as a directional miss; stop crediting passes that fail direction AND baseline.
-- Get more samples before trusting any weight hint; n=4 can't distinguish skill from noise.
+- **Add a directional gate / regime filter.** Since magnitude is fine but sign isn't, predict direction separately and only commit when strategies agree; otherwise default to baseline.
+- **Cut contrarian weight to ~0 until it shows a positive hit rate;** trim technical/macro.
+- **Penalize disagreement:** when no strategy clears a confidence threshold for direction, fall back to baseline (would have avoided sub-baseline losses).
+- **Rebuild confidence to track directional hit-rate**, not magnitude — current scores don't separate wins from misses.
+- Sample size is tiny (n=5); treat all of this as provisional and re-evaluate after ~20 scored days.
