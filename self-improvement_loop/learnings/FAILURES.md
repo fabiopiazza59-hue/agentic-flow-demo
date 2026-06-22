@@ -17,3 +17,9 @@ Every missed prediction (>1% error), newest at the bottom. Reread before each sh
 - **What went wrong:** wrong direction; final blend 246.35 missed by 3.73%.
 - **Likely culprit:** analyst `contrarian` was furthest from actual and pulled the blend.
 - **Try next:** reduce weight on `contrarian` under today's conditions and lean on `technical`.
+
+## 2026-06-18 — FAIL (APE 2.66%)
+- Predicted 237.9 vs actual 244.39 (prior 237.5); dir hit: True; beat baseline: True; closest analyst: contrarian.
+- **What went wrong:** right direction, magnitude off; final blend 237.9 missed by 2.66%.
+- **Likely culprit:** analyst `macro` was furthest from actual and pulled the blend.
+- **Try next:** reduce weight on `macro` under today's conditions and lean on `contrarian`.
