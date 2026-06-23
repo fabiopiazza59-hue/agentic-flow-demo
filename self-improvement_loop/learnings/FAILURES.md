@@ -23,3 +23,7 @@ Every missed prediction (>1% error), newest at the bottom. Reread before each sh
 - **What went wrong:** right direction, magnitude off; final blend 237.9 missed by 2.66%.
 - **Likely culprit:** analyst `macro` was furthest from actual and pulled the blend.
 - **Try next:** reduce weight on `macro` under today's conditions and lean on `contrarian`.
+
+## 2026-06-22 — FAIL (APE 5.08%)
+- Predicted 244.62 vs actual 232.79 (prior 244.39); dir hit: False; beat baseline: False; closest analyst: news.
+**What went wrong:** The blend predicted flat (+0.09%) against a -4.75% drop — wrong direction and far too small in magnitude. Contrarian, macro, and momentum all bet on an RSI-31 oversold bounce and collectively held the blend near prior close. **Root cause:** mistaking a deep-downtrend extension for a mean-reversion setup; 'oversold' was treated as a buy signal when the stock was in sustained decline below both SMA20 and SMA50 amid an active Nasdaq selloff. The only analyst reading the tape correctly (news, down) was under-weighted relative to its strong 0.0198 MAPE track record. **One change to try:** Add a regime gate — when price is >3% below SMA20 and a sector-selloff catalyst is live, cap the combined weight of contrarian+macro and shift it to the news analyst, whose lower MAPE and directional reads have been the desk's best signal.

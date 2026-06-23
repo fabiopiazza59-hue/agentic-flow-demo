@@ -33,4 +33,5 @@ date,prior_close,predicted_close,actual_close,predicted_direction,directional_hi
 2026-06-16,246.02,246.42,246.0,up,False,0.001707317073170681,True,8.130081300817167e-05,False,0.42,momentum,scored
 2026-06-17,246.0,246.35,237.5,up,False,0.03726315789473682,False,0.035789473684210524,False,0.38,technical,scored
 2026-06-18,237.5,237.9,244.39,up,True,0.026555914726461724,False,0.028192642906829195,True,0.4,contrarian,scored
-2026-06-22,244.39,244.62,,up,,,,,,0.4,,pending
+2026-06-22,244.39,244.62,232.79,up,False,0.050818334120881534,False,0.04983031917178571,False,0.4,news,scored
+2026-06-23,232.79,232.95,,up,,,,,,0.4,,pending
