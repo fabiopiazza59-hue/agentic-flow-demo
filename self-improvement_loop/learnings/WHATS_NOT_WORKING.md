@@ -3,20 +3,18 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- **Directional failure dominates**: 4 of 5 misses are wrong-direction, not magnitude. The model can't call which way AMZN moves — only 1 pure magnitude miss. This is a signal problem, not a calibration-of-size problem.
-- **Errors are escalating**: APE walks up over time (2.0% → 3.4% → 3.7% → 5.1% on 6/22). The model is drifting further from price, not converging.
-- **We lose to baseline on the misses**: every failed day except 6/18 also failed `beats_baseline`. A naive baseline would have beaten us on 4 of 7 days. That's the headline indictment.
-- **No genuine overconfidence** (0 overconfident misses), but only because confidence is uniformly low (0.38–0.58). The system isn't calibrated so much as it's perpetually unsure — it never earns a high-confidence bet, so it can't be "wrong with conviction."
+- **Directional misses dominate.** 4 of 5 failures got the *sign* wrong, not just the magnitude. This is a directional model failure, not a fine-tuning problem — we're betting the wrong way on multi-day moves.
+- **The system loses to a naive baseline when it loses.** On 4 of 5 fails it failed to beat baseline_ape too. When wrong, we're worse than doing nothing.
+- **Error magnitude is growing.** Fail APEs trend up across June (2.0% → 3.4% → 3.7% → 5.1%). Mean fail APE 3.38% vs sub-0.5% on passes — bimodal: we're either nearly perfect or badly off, no middle.
+- **No single strategy is carrying.** Best is `news` at 37.5% hit rate; the other four sit at 12.5–25%. The whole ensemble is barely better than a coin flip on direction.
 
 ## Unreliable under these conditions
-- **News-led days are a trap**: `news` wins the ensemble on both 6/15 and 6/22 — the two worst APE days (3.4%, 5.1%), both directional misses. Yet news carries the **highest weight_hint (0.243)**. We're over-trusting the worst regime driver.
-- **macro-led** is the only winning day (6/08), but macro has the **worst MAPE (0.0278)** and lowest hit rate over the window — its one good call is masking systemic weakness.
-- **technical** is the weakest pillar: 14% hit rate, won only on 6/17 (a 3.7% miss). It should not be earning a 0.20 weight.
-- All five strategies cluster at **14–29% hit rate** — the whole ensemble is below coin-flip directionally. This is a regime the model fundamentally misreads (likely a trending/gapping period it keeps fading).
+- **Late-June stretch (06/15–06/22) is a kill zone** — 4 straight directional misses with rising APE, suggesting a regime/trend shift the model never adapted to (likely a sustained move it kept fading).
+- **`technical`, `contrarian`, `macro` are effectively dead weight** — 12.5% hit rate each, highest MAPEs (2.1–2.5%). When `momentum`/`macro` carry top weight (06/12, 06/15), results are poor.
+- **Confidence is uninformative, not overconfident.** 0 overconfident misses, but confidence sits flat at 0.38–0.42 on nearly everything (pass AND fail). It's not miscalibrated high — it's miscalibrated *flat*. No signal value at all.
 
 ## Fixes to try next
-- **Cut news weight** from 0.24 toward ~0.15 until it stops winning the worst days; it's a contrarian indicator of failure right now.
-- **Add a baseline-fallback gate**: when ensemble disagreement is high or no strategy clears a hit-rate threshold, default to last-close/random-walk — it would have saved 4 days.
-- **Diagnose the directional signal directly** — build a sign-only classifier and audit it separately from magnitude; the size logic is roughly fine, the direction logic is broken.
-- **Suppress technical and macro** weights; promote whichever strategy actually called direction on trending days (none have yet — flag this regime as out-of-distribution).
-- Sample size is tiny (n=7); treat all of this as directional, re-run after 20+ scored days.
+- Add a **trend/regime filter**: when price is in a sustained directional run, stop letting contrarian/technical fade it. The 06/15–06/22 cluster screams unhandled regime.
+- **Cut or shrink technical, contrarian, macro**; lean weight toward `news` (only strategy beating coin-flip). Re-test as a news+momentum core.
+- **Rebuild confidence to actually vary** and gate trades — flat 0.4 confidence is useless. Suppress predictions when strategies disagree on sign.
+- Investigate why we **lose to baseline when wrong** — possibly overfitting to short-term reversals; add a "defer to baseline" fallback under high disagreement.
