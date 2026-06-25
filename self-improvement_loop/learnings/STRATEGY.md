@@ -10,3 +10,4 @@ Append-only insights. Newest at the bottom.
 - (2026-06-18) 2026-06-18: FAIL, beat baseline; closest contrarian, worst macro.
 - (2026-06-22) When 3+ analysts cite 'oversold RSI' as a bounce thesis while price is already >3% below SMA20 AND news flags an active sector selloff, suppress the mean-reversion analysts and lean toward the news/momentum-down read — oversold can stay oversold in a downtrend.
 - (2026-06-23) When a real-time intraday reference print (e.g. Morningstar) sits above prior close AND RSI is oversold, weight the news anchor more heavily than momentum — the bounce tends to exceed the blended estimate.
+- (2026-06-24) When analyst directions are split (no >60% agreement) and RSI is 30-40, the realized move is typically within ±0.3% of prior close — test whether a flat-baseline anchor outperforms the blended forecast in these regimes.

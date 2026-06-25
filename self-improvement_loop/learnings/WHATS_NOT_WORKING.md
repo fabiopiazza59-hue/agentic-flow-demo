@@ -3,18 +3,19 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- **Directional misses dominate.** 4 of 5 failures got the *sign* wrong, not just the magnitude. This is a directional model failure, not a fine-tuning problem — we're betting the wrong way on multi-day moves.
-- **The system loses to a naive baseline when it loses.** On 4 of 5 fails it failed to beat baseline_ape too. When wrong, we're worse than doing nothing.
-- **Error magnitude is growing.** Fail APEs trend up across June (2.0% → 3.4% → 3.7% → 5.1%). Mean fail APE 3.38% vs sub-0.5% on passes — bimodal: we're either nearly perfect or badly off, no middle.
-- **No single strategy is carrying.** Best is `news` at 37.5% hit rate; the other four sit at 12.5–25%. The whole ensemble is barely better than a coin flip on direction.
+- **Direction, not magnitude, is the killer**: 4 of 5 fails are directional misses; only 1 is pure magnitude. The model gets the size roughly right but bets the wrong way.
+- **Baseline is beating us on fails**: on 4 of 5 fails we also failed `beats_baseline`. We're adding negative value precisely when we miss — worse than a naive carry-forward.
+- **Error is escalating in late June**: APE climbs 2.0% → 3.4% → 3.7% → 5.1% (06-12 through 06-22). This is a trending regime the model fights.
+- **Confidence is flat and uninformative** (mostly 0.40). 0 overconfident misses only because confidence never rises — calibration is dead, not good. No signal value.
 
 ## Unreliable under these conditions
-- **Late-June stretch (06/15–06/22) is a kill zone** — 4 straight directional misses with rising APE, suggesting a regime/trend shift the model never adapted to (likely a sustained move it kept fading).
-- **`technical`, `contrarian`, `macro` are effectively dead weight** — 12.5% hit rate each, highest MAPEs (2.1–2.5%). When `momentum`/`macro` carry top weight (06/12, 06/15), results are poor.
-- **Confidence is uninformative, not overconfident.** 0 overconfident misses, but confidence sits flat at 0.38–0.42 on nearly everything (pass AND fail). It's not miscalibrated high — it's miscalibrated *flat*. No signal value at all.
+- **Trending/momentum regimes**: directional misses cluster when price moves persistently; the ensemble keeps reverting against the trend (contrarian hit_rate 0.11, momentum only 0.22).
+- **News-led days are coin-flips on direction**: `news` "wins" most often (3) yet still drove the 06-15 and 06-22 misses — it wins the ensemble but not the call.
+- **Low-confidence days (≤0.40) dominate the fail set** — every big-APE miss sits at 0.38–0.42. The model knows it's unsure but still commits.
+- **Contrarian and macro are dead weight**: contrarian 0.11 hit / 0.0212 MAPE, macro 0.11 hit / 0.0227 MAPE — worst two on both axes.
 
 ## Fixes to try next
-- Add a **trend/regime filter**: when price is in a sustained directional run, stop letting contrarian/technical fade it. The 06/15–06/22 cluster screams unhandled regime.
-- **Cut or shrink technical, contrarian, macro**; lean weight toward `news` (only strategy beating coin-flip). Re-test as a news+momentum core.
-- **Rebuild confidence to actually vary** and gate trades — flat 0.4 confidence is useless. Suppress predictions when strategies disagree on sign.
-- Investigate why we **lose to baseline when wrong** — possibly overfitting to short-term reversals; add a "defer to baseline" fallback under high disagreement.
+- **Add a trend/regime filter**: when a multi-day directional move is in force, suppress contrarian and lean directional; stop fading trends.
+- **Cut contrarian and macro weight hard** (both 0.11 hit rate); reallocate toward news/technical, the only sub-0.018 MAPE strategies.
+- **Gate on baseline**: when ensemble direction disagrees with carry-forward AND confidence ≤0.45, default toward baseline rather than overriding it.
+- **Rebuild confidence calibration**: current 0.40-flat output is useless; force spread and penalize directional disagreement across strategies.
