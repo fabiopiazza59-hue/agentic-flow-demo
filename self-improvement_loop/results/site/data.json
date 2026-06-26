@@ -3,67 +3,67 @@
   "pass_threshold": 0.01,
   "rolling_window": 20,
   "rolling": {
-    "n": 9,
-    "n_all_time": 9,
-    "pass_rate": 0.4444444444444444,
-    "directional_accuracy": 0.4444444444444444,
-    "mape": 0.019793593194948073,
-    "baseline_mape": 0.018476658435979013,
-    "edge": -0.00131693475896906,
+    "n": 10,
+    "n_all_time": 10,
+    "pass_rate": 0.4,
+    "directional_accuracy": 0.4,
+    "mape": 0.021377953535380145,
+    "baseline_mape": 0.019827089592513274,
+    "edge": -0.001550863942866871,
     "beats_baseline_overall": false,
-    "brier": 0.25191111111111114
+    "brier": 0.24697000000000005
   },
   "all_time": {
-    "n": 9,
-    "n_all_time": 9,
-    "pass_rate": 0.4444444444444444,
-    "directional_accuracy": 0.4444444444444444,
-    "mape": 0.019793593194948073,
-    "baseline_mape": 0.018476658435979013,
-    "edge": -0.00131693475896906,
+    "n": 10,
+    "n_all_time": 10,
+    "pass_rate": 0.4,
+    "directional_accuracy": 0.4,
+    "mape": 0.021377953535380145,
+    "baseline_mape": 0.019827089592513274,
+    "edge": -0.001550863942866871,
     "beats_baseline_overall": false,
-    "brier": 0.25191111111111114
+    "brier": 0.24697000000000005
   },
   "scorecards": {
     "technical": {
-      "n": 9,
+      "n": 10,
       "wins": 2,
-      "sum_ape": 0.1694738396196505,
-      "hit_rate": 0.2222222222222222,
-      "mape": 0.01883042662440561,
-      "weight_hint": 0.2112
+      "sum_ape": 0.19766643025442435,
+      "hit_rate": 0.2,
+      "mape": 0.019766643025442433,
+      "weight_hint": 0.2192
     },
     "momentum": {
-      "n": 9,
-      "wins": 2,
-      "sum_ape": 0.19634544377801835,
-      "hit_rate": 0.2222222222222222,
-      "mape": 0.021816160419779816,
-      "weight_hint": 0.1823
+      "n": 10,
+      "wins": 3,
+      "sum_ape": 0.2205294004319103,
+      "hit_rate": 0.3,
+      "mape": 0.02205294004319103,
+      "weight_hint": 0.1965
     },
     "contrarian": {
-      "n": 9,
+      "n": 10,
       "wins": 1,
-      "sum_ape": 0.19097507811226425,
-      "hit_rate": 0.1111111111111111,
-      "mape": 0.021219453123584916,
-      "weight_hint": 0.1874
+      "sum_ape": 0.23277940391288982,
+      "hit_rate": 0.1,
+      "mape": 0.02327794039128898,
+      "weight_hint": 0.1862
     },
     "news": {
-      "n": 9,
+      "n": 10,
       "wins": 3,
-      "sum_ape": 0.14691634248971364,
-      "hit_rate": 0.3333333333333333,
-      "mape": 0.016324038054412626,
-      "weight_hint": 0.2436
+      "sum_ape": 0.19753085286370603,
+      "hit_rate": 0.3,
+      "mape": 0.019753085286370604,
+      "weight_hint": 0.2194
     },
     "macro": {
-      "n": 9,
+      "n": 10,
       "wins": 1,
-      "sum_ape": 0.20385945577322173,
-      "hit_rate": 0.1111111111111111,
-      "mape": 0.02265105064146908,
-      "weight_hint": 0.1756
+      "sum_ape": 0.24258021697316895,
+      "hit_rate": 0.1,
+      "mape": 0.024258021697316896,
+      "weight_hint": 0.1787
     }
   },
   "series": [
@@ -399,58 +399,67 @@
       "ape": 0.002006232125325474,
       "baseline_ape": 0.0006829726384086592,
       "pass": true
+    },
+    {
+      "date": "2026-06-25",
+      "predicted_close": 235.1,
+      "actual_close": 227.01,
+      "prior_close": 234.27,
+      "ape": 0.03563719659926877,
+      "baseline_ape": 0.031980970001321614,
+      "pass": false
     }
   ],
   "pending": {
-    "date": "2026-06-25",
-    "created_at": "2026-06-25T13:38:47.480002+00:00",
-    "prior_close": 234.27,
-    "predicted_close": 235.1,
-    "predicted_direction": "up",
-    "confidence": 0.45,
+    "date": "2026-06-26",
+    "created_at": "2026-06-26T13:33:15.714814+00:00",
+    "prior_close": 227.01,
+    "predicted_close": 225.3,
+    "predicted_direction": "down",
+    "confidence": 0.48,
     "weights": {
-      "news": 0.34,
-      "technical": 0.22,
-      "momentum": 0.16,
-      "contrarian": 0.16,
-      "macro": 0.12
+      "news": 0.32,
+      "momentum": 0.24,
+      "technical": 0.18,
+      "macro": 0.16,
+      "contrarian": 0.1
     },
     "analyst_predictions": {
-      "momentum": {
-        "predicted_close": 232.5,
-        "direction": "down",
-        "confidence": 0.58,
-        "rationale": "The dominant 5d and 20d trends are strongly negative (-4.8% and -11.7%), RSI at 37.3 signals oversold but not yet reversing, and price is well below all key SMAs (5/20/50). With no pre-market gap to suggest a catalyst, the prevailing downtrend is likely to persist intraday, pulling the close modestly lower from 234.27."
-      },
-      "technical": {
-        "predicted_close": 233.41,
-        "direction": "down",
-        "confidence": 0.52,
-        "rationale": "AMZN is in a sustained downtrend (ret_20d: -11.7%), trading well below all key SMAs (5/20/50), with RSI at 37.3 indicating oversold but not yet bouncing. No pre-market gap, recent candlestick action shows rejection at 242 on 6/24 and a return to prior day's close, suggesting continued near-term pressure with mild downside bias."
-      },
-      "macro": {
-        "predicted_close": 235.8,
-        "direction": "up",
-        "confidence": 0.52,
-        "rationale": "No pre-market gap signals a neutral open, but RSI at 37.3 is oversold and the stock showed a slight recovery attempt on 6/24 after recent heavy selling; modest mean-reversion bounce likely if broad market (Nasdaq) holds steady. The 20-day realized vol of ~2.3% daily suggests a moderate intraday range, with limited upside given the stock remains well below all major SMAs and in a downtrend."
-      },
       "contrarian": {
-        "predicted_close": 236.5,
-        "direction": "up",
-        "confidence": 0.52,
-        "rationale": "RSI at 37.3 is approaching oversold territory and AMZN is significantly stretched below both SMA20 (-5.7%) and SMA50 (-8.8%), suggesting mean-reversion upside potential. With no premarket gap and recent stabilization around 234, a modest bounce toward 236-237 is likely, though the broader downtrend tempers conviction."
-      },
-      "news": {
-        "predicted_close": 238.5,
+        "predicted_close": 231.5,
         "direction": "up",
         "confidence": 0.62,
-        "rationale": "Nasdaq futures surged ~1.8\u20132.3% on Micron's blowout AI earnings, providing a strong beta-driven tailwind for AMZN (beta ~1.85); Prime Day 2026 concludes today adding incremental buzz. Hot PCE at 4.1% (highest since April 2023) partially caps upside by dampening rate-cut expectations, limiting the net move to an estimated ~+1.8% from the flat pre-market open."
+        "rationale": "RSI at 29.55 is deeply oversold territory, and price is 7.75% below SMA20 and 11.5% below SMA50, suggesting a stretched downside condition ripe for mean reversion. Despite the prevailing downtrend, the extreme oversold readings and no gap at open support a modest bounce from prior close of 227.01."
+      },
+      "macro": {
+        "predicted_close": 224.5,
+        "direction": "down",
+        "confidence": 0.58,
+        "rationale": "AMZN is deeply oversold (RSI ~29.5) and well below all key moving averages, down ~16.5% over 20 days with no pre-market gap suggesting no catalyst reversal; the continued downtrend momentum and weak tech/risk sentiment bias the stock marginally lower intraday, though extreme oversold conditions may limit further downside."
+      },
+      "momentum": {
+        "predicted_close": 224.5,
+        "direction": "down",
+        "confidence": 0.62,
+        "rationale": "Strong short-term downtrend persists (ret_1d: -3.1%, ret_5d: -4.4%, ret_20d: -16.5%) with price well below all key moving averages and near 20-day realized vol suggesting continued selling pressure; despite RSI at oversold 29.55 offering potential support, no premarket gap provides no reversal catalyst, so the prevailing downtrend is likely to continue modestly intraday."
+      },
+      "technical": {
+        "predicted_close": 229.47,
+        "direction": "up",
+        "confidence": 0.52,
+        "rationale": "RSI at 29.55 is deeply oversold suggesting a minor technical bounce from the 252-week low support area near 227, with zero premarket gap indicating neutral sentiment; however, the persistent downtrend (ret_20d: -16.5%, price well below all major SMAs) limits upside conviction to a modest mean-reversion attempt."
+      },
+      "news": {
+        "predicted_close": 224.5,
+        "direction": "down",
+        "confidence": 0.62,
+        "rationale": "AMZN was already trading ~2.8% below its prior close mid-session amid a broad Nasdaq tech sell-off (NDX futures -1.08%), an EU DMA cloud-gatekeeper designation headwind, and persistent megacap selling pressure; while a deeply oversold RSI of 29.55 and Prime Day conclusion offer marginal support, the macro and sector tape overwhelmingly favor a lower close near ~$224.50."
       }
     },
-    "rationale": "News carries the lowest MAPE (0.0163) and highest hit_rate and flags a genuine risk-on catalyst (Micron AI beat lifting Nasdaq, beta ~1.85), so I lean modestly up despite the downtrend. However hot PCE caps upside and prior post-mortems punish over-trusting any single bullish outlier, so I shrink news's $238.50 hard toward the prior-close anchor. Contrarian/macro are demoted per their 0.11 hit rates, and the bearish technical/momentum reads keep the result close to flat rather than a strong bounce.",
+    "rationale": "Confirmed multi-week downtrend (ret_20d -16.5%, below all SMAs) with news flagging an active sector selloff matches the regime where oversold-RSI bounce theses repeatedly failed (06-22, 06-25 notes); per the playbook, mean-reversion analysts (contrarian/macro) are suppressed and the down-calling news/momentum read leads. Three of five analysts (news, momentum, macro) cluster at 224.50 down, so I anchor near there but pull slightly toward prior close to respect the oversold cushion and avoid trend-chasing overshoot. Confidence kept moderate since the desk's confidence has historically been uninformative and oversold can snap back.",
     "quote_source": "alphavantage",
     "status": "pending",
     "actual_close": null
   },
-  "updated_count": 37
+  "updated_count": 38
 }
