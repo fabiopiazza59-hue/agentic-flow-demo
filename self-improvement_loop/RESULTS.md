@@ -3,37 +3,38 @@
 _Auto-generated each trading day. PASS = predicted close within ±1% of actual._
 
 ## Verdict
-❌ **No edge yet** — rolling MAPE 2.14% does not beat the random-walk baseline 1.98%. Keep learning.
+❌ **No edge yet** — rolling MAPE 2.23% does not beat the random-walk baseline 2.02%. Keep learning.
 
-**Today's open prediction (2026-06-26):** close ≈ **225.30** (down, confidence 48.00%) vs prior close 227.01.
+**Today's open prediction (2026-06-29):** close ≈ **232.30** (down, confidence 42.00%) vs prior close 232.69.
 
-## Rolling metrics (last 10 scored days)
+## Rolling metrics (last 11 scored days)
 
 | Metric | Rolling | All-time |
 |---|---|---|
-| Scored days | 10 | 10 |
-| PASS rate (±1%) | 40.00% | 40.00% |
-| Directional accuracy | 40.00% | 40.00% |
-| MAPE | 2.14% | 2.14% |
-| Baseline MAPE (random walk) | 1.98% | 1.98% |
-| Edge (baseline − model) | -0.16% | -0.16% |
+| Scored days | 11 | 11 |
+| PASS rate (±1%) | 36.36% | 36.36% |
+| Directional accuracy | 36.36% | 36.36% |
+| MAPE | 2.23% | 2.23% |
+| Baseline MAPE (random walk) | 2.02% | 2.02% |
+| Edge (baseline − model) | -0.21% | -0.21% |
 | Brier (confidence calib.) | 0.25 | 0.25 |
 
 ## Per-strategy scorecards
 
 | Strategy | Obs | Win rate (closest) | MAPE | Weight hint |
 |---|---|---|---|---|
-| news | 10 | 30.00% | 1.98% | 0.22 |
-| technical | 10 | 20.00% | 1.98% | 0.22 |
-| momentum | 10 | 30.00% | 2.21% | 0.20 |
-| contrarian | 10 | 10.00% | 2.33% | 0.19 |
-| macro | 10 | 10.00% | 2.43% | 0.18 |
+| technical | 11 | 18.18% | 1.92% | 0.23 |
+| news | 11 | 27.27% | 2.12% | 0.21 |
+| contrarian | 11 | 18.18% | 2.16% | 0.20 |
+| momentum | 11 | 27.27% | 2.32% | 0.19 |
+| macro | 11 | 9.09% | 2.53% | 0.17 |
 
 ## Last 20 scored model predictions
 _(backfill seed rows are excluded from metrics and this table; they appear only as price-history context on the dashboard chart)_
 
 | Date | Predicted | Actual | APE | PASS | Dir hit | Beat baseline | Closest |
 |---|---|---|---|---|---|---|---|
+| 2026-06-26 | 225.30 | 232.69 | 3.18% | ❌ | ❌ | ❌ | contrarian |
 | 2026-06-25 | 235.10 | 227.01 | 3.56% | ❌ | ❌ | ❌ | momentum |
 | 2026-06-24 | 234.74 | 234.27 | 0.20% | ✅ | ✅ | ❌ | technical |
 | 2026-06-23 | 232.95 | 234.11 | 0.50% | ✅ | ✅ | ✅ | news |

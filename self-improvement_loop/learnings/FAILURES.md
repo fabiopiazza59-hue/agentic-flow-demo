@@ -31,3 +31,13 @@ Every missed prediction (>1% error), newest at the bottom. Reread before each sh
 ## 2026-06-25 — FAIL (APE 3.56%)
 - Predicted 235.1 vs actual 227.01 (prior 234.27); dir hit: False; beat baseline: False; closest analyst: momentum.
 **What went wrong:** We predicted +0.35% into a -3.1% drop — wrong direction and magnitude, 8 points off. **Root cause:** News (0.34 weight) sold an unrealized Nasdaq-futures beta bounce while dismissing its own hot-PCE warning, and contrarian+macro piled on a mean-reversion bounce that never came against a strongly confirmed downtrend; the two correct down-callers (momentum, technical) were collectively underweighted at 0.38. The blend bought a one-day catalyst narrative over weeks of price evidence. **The one change:** In confirmed downtrends (ret_20d < -8%, below all SMAs), require news-driven bullish reversals to clear a higher confidence bar and structurally cap their combined weight below trend-following analysts — don't let a futures-pop story override a falling knife.
+
+## 2026-06-26 — FAIL (APE 3.18%)
+- Predicted 225.3 vs actual 232.69 (prior 227.01); dir hit: False; beat baseline: False; closest analyst: contrarian.
+## What Went Wrong
+
+We predicted 225.3 vs actual 232.69 (3.18% APE, missed baseline too). The miss was both directional and magnitude: four of five analysts called 'down' into a deeply oversold tape, and the meta-judge rewarded that consensus by piling weight onto news (0.32) and momentum (0.24). The contrarian analyst nailed it at 231.5 but carried only 0.10 weight.
+
+**Root cause**: regime misclassification. With RSI at 29.55 and price ~7.75% below SMA20, the setup was a classic exhaustion/mean-reversion zone, but our weighting treated it as trend-continuation. The bearish analysts kept citing the SAME inputs (RSI oversold, no gap, -16.5% over 20d) and reached opposite conclusions — a sign of narrative anchoring rather than independent signal.
+
+**One change to try**: implement a hard regime gate — when RSI < 30, force minimum 0.30 weight on the contrarian analyst and cap combined momentum+news weight at 0.40. Backtest whether this flips the directional hit rate on oversold days.
