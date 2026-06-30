@@ -41,3 +41,11 @@ We predicted 225.3 vs actual 232.69 (3.18% APE, missed baseline too). The miss w
 **Root cause**: regime misclassification. With RSI at 29.55 and price ~7.75% below SMA20, the setup was a classic exhaustion/mean-reversion zone, but our weighting treated it as trend-continuation. The bearish analysts kept citing the SAME inputs (RSI oversold, no gap, -16.5% over 20d) and reached opposite conclusions — a sign of narrative anchoring rather than independent signal.
 
 **One change to try**: implement a hard regime gate — when RSI < 30, force minimum 0.30 weight on the contrarian analyst and cap combined momentum+news weight at 0.40. Backtest whether this flips the directional hit rate on oversold days.
+
+## 2026-06-29 — FAIL (APE 3.26%)
+- Predicted 232.3 vs actual 240.14 (prior 232.69); dir hit: False; beat baseline: False; closest analyst: news.
+**What went wrong:** Four of five analysts anchored on a downtrend (RSI 39, price below SMA20/50) and clustered at 230–234, but those signals were backward-looking and already reflected in price; AMZN gapped up and closed +3.2%. The blend missed both direction and magnitude by ~7.8 points.
+
+**Root cause:** The news analyst was *reporting realized intraday tape* (+3.8% live) — effectively ground truth — yet was capped at 0.20 weight while technical/momentum/macro opinion dominated at 0.59. We systematically discount the only analyst observing actual same-day price action, despite it leading every scorecard metric.
+
+**One change to try:** When news cites a confirmed gap + intraday percentage move, anchor the prediction to its estimate (weight floor 0.40) and demote pure-technical bearishness; back-test whether this would have flipped this and similar gap-day misses.

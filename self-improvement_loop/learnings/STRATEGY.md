@@ -13,3 +13,4 @@ Append-only insights. Newest at the bottom.
 - (2026-06-24) When analyst directions are split (no >60% agreement) and RSI is 30-40, the realized move is typically within ±0.3% of prior close — test whether a flat-baseline anchor outperforms the blended forecast in these regimes.
 - (2026-06-25) When ret_20d < -8% and price is below all SMAs, down-calling momentum+technical should outweigh news/mean-reversion analysts; test capping bullish-blend weight below trend-following weight in confirmed downtrends.
 - (2026-06-26) When RSI < 30 AND price > 7% below SMA20 with no confirming premarket gap down, up-weight the contrarian/mean-reversion analyst above all trend-followers — this is a testable regime switch.
+- (2026-06-29) When the news analyst reports a confirmed same-day gap and intraday direction (e.g. '+3.8% intraday'), treat that as a realized-price anchor and floor its weight at 0.40, overriding RSI/SMA-distance bearishness which is already priced in.
