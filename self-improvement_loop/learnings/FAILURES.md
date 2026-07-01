@@ -49,3 +49,9 @@ We predicted 225.3 vs actual 232.69 (3.18% APE, missed baseline too). The miss w
 **Root cause:** The news analyst was *reporting realized intraday tape* (+3.8% live) — effectively ground truth — yet was capped at 0.20 weight while technical/momentum/macro opinion dominated at 0.59. We systematically discount the only analyst observing actual same-day price action, despite it leading every scorecard metric.
 
 **One change to try:** When news cites a confirmed gap + intraday percentage move, anchor the prediction to its estimate (weight floor 0.40) and demote pure-technical bearishness; back-test whether this would have flipped this and similar gap-day misses.
+
+## 2026-06-30 — FAIL (APE 1.05%)
+- Predicted 240.85 vs actual 238.34 (prior 240.14); dir hit: False; beat baseline: False; closest analyst: technical.
+- **What went wrong:** wrong direction; final blend 240.85 missed by 1.05%.
+- **Likely culprit:** analyst `news` was furthest from actual and pulled the blend.
+- **Try next:** reduce weight on `news` under today's conditions and lean on `technical`.
