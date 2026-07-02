@@ -15,3 +15,4 @@ Append-only insights. Newest at the bottom.
 - (2026-06-26) When RSI < 30 AND price > 7% below SMA20 with no confirming premarket gap down, up-weight the contrarian/mean-reversion analyst above all trend-followers — this is a testable regime switch.
 - (2026-06-29) When the news analyst reports a confirmed same-day gap and intraday direction (e.g. '+3.8% intraday'), treat that as a realized-price anchor and floor its weight at 0.40, overriding RSI/SMA-distance bearishness which is already priced in.
 - (2026-06-30) 2026-06-30: FAIL, did not beat baseline; closest technical, worst news.
+- (2026-07-01) 2026-07-01: FAIL, did not beat baseline; closest news, worst macro.

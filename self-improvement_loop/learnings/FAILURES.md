@@ -55,3 +55,9 @@ We predicted 225.3 vs actual 232.69 (3.18% APE, missed baseline too). The miss w
 - **What went wrong:** wrong direction; final blend 240.85 missed by 1.05%.
 - **Likely culprit:** analyst `news` was furthest from actual and pulled the blend.
 - **Try next:** reduce weight on `news` under today's conditions and lean on `technical`.
+
+## 2026-07-01 — FAIL (APE 1.47%)
+- Predicted 238.15 vs actual 241.7 (prior 238.34); dir hit: False; beat baseline: False; closest analyst: news.
+- **What went wrong:** wrong direction; final blend 238.15 missed by 1.47%.
+- **Likely culprit:** analyst `macro` was furthest from actual and pulled the blend.
+- **Try next:** reduce weight on `macro` under today's conditions and lean on `news`.

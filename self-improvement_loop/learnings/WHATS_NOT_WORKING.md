@@ -3,21 +3,19 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- **Direction, not magnitude, is the killer.** 8 of 9 fails are directional misses (only 1 pure magnitude). We are systematically calling the wrong sign, then the error size follows. Fixing APE won't help until we fix the up/down call.
-- **We lose to the naive baseline on nearly every fail.** 8 of 9 failing days had ape ≥ baseline_ape. On misses the model isn't just wrong, it's *worse than doing nothing*.
-- **No overconfidence flagged, but confidence is uniformly flat (~0.4–0.58).** Confidence carries almost no signal — it doesn't separate the 4 passes from the 9 fails. That's miscalibration by uselessness, not by arrogance.
-- **Every strategy has a losing hit rate.** Best is news at 0.31; macro is a disaster at 0.08. No strategy clears 50% — the ensemble is averaging garbage.
+- **Direction, not magnitude, is the killer**: 9 of 10 fails are directional misses (only 1 pure magnitude miss). The model gets the size roughly right but bets the wrong way. This is a sign flip problem, not a calibration-of-error problem.
+- **We rarely beat the baseline**: of 14 scored, we beat baseline only ~4 times, and several "passes" (06-16, 06-24) still lost to baseline. Naive persistence is outperforming the ensemble.
+- **Losing streak is structural**: the last 5 predictions (06-25 → 07-01) are all fails, all directional misses, all worse than baseline. Something regime-specific broke around late June.
+- **Overconfidence is NOT the current issue**: 0 overconfident misses, confidences are clustered 0.38–0.58. The model is honestly unsure — the problem is it's unsure *and* wrong, not falsely bold.
 
 ## Unreliable under these conditions
-- **Late-June clustering (6/22–6/30): 6 straight fails**, mostly 3–5% APE. Something regime-shifted (volatility/trend break) and the model never adapted — it kept fading the real move.
-- **Momentum as winning_strategy → fails hard** (6/12, 6/25 both big directional misses, ~2–3.5% APE). Momentum is being trusted right when trend is reversing.
-- **Macro-heavy weighting fails** (6/12 macro 0.34 → miss; macro hit rate 0.08). Macro tilt is actively harmful.
-- **News wins nominally but still misses direction on big days** (6/15, 6/22, 6/29) — news captures small moves, breaks on large ones.
-- **Contrarian is the worst reliability (0.15 hit rate)** yet keeps getting meaningful weight.
+- **News-driven days**: `news` is the most-picked winning strategy on fails (06-15, 06-22, 06-29, 07-01) yet only a 0.357 hit rate. It wins the internal contest then mispredicts direction — it's reactive/lagging on news.
+- **Momentum and macro are broken**: `momentum` hit 0.214, `macro` hit 0.071 (1/14). Macro should be near-zero-weighted; it's actively harmful. Momentum whipsaws in choppy tape.
+- **Contrarian is the worst by win rate** (0.143) yet gets ~0.21 weight hint — mispriced.
+- **Larger absolute moves crush us**: fail APEs (2.7–5.1%) cluster on high-move days; passes are all sub-0.5% quiet days. We only "work" when nothing happens.
 
 ## Fixes to try next
-- **Retrain/gate the direction classifier separately from magnitude**; current blend can't call sign.
-- **Cut macro and contrarian weight toward zero** until hit rate clears 0.4; they're dead weight.
-- **Add a regime/volatility filter** — the 6/22+ streak shows the ensemble doesn't detect trend breaks; widen intervals or abstain when volatility spikes.
-- **Recalibrate confidence** so it actually predicts pass/fail; flat 0.4 confidence is a non-signal. Suppress trades below a calibrated threshold.
-- **Add a beat-baseline guardrail:** if the blend can't beat naive persistence in backtest for the current regime, default to baseline.
+- **Add a direction gate**: since magnitude is fine, build a separate up/down classifier and veto trades when strategies disagree on sign.
+- **Reweight by hit rate, not APE**: cut `macro` to ~0, cut `contrarian`, cap `news` — its weight hints overstate its reliability.
+- **Beat-baseline hard filter**: if ensemble can't beat persistence in backtest for the regime, default to baseline.
+- **Detect the late-June regime break** (5-fail streak) and add a volatility/regime feature; the model is calibrated for quiet days only.
