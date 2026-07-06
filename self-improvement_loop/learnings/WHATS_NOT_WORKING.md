@@ -3,19 +3,20 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- **Direction, not magnitude, is the killer**: 9 of 10 fails are directional misses (only 1 pure magnitude miss). The model gets the size roughly right but bets the wrong way. This is a sign flip problem, not a calibration-of-error problem.
-- **We rarely beat the baseline**: of 14 scored, we beat baseline only ~4 times, and several "passes" (06-16, 06-24) still lost to baseline. Naive persistence is outperforming the ensemble.
-- **Losing streak is structural**: the last 5 predictions (06-25 → 07-01) are all fails, all directional misses, all worse than baseline. Something regime-specific broke around late June.
-- **Overconfidence is NOT the current issue**: 0 overconfident misses, confidences are clustered 0.38–0.58. The model is honestly unsure — the problem is it's unsure *and* wrong, not falsely bold.
+- **Direction, not magnitude, is the problem.** 9 of 10 fails are directional misses (only 1 pure magnitude miss). The model sizes moves roughly right but calls the sign wrong. Fixing APE tuning won't help; we're betting the wrong way.
+- **We lose to the naive baseline on most fails.** 8 of 10 failures also had `beats_baseline=false` — on miss days the model adds negative value versus just persisting the prior close.
+- **Directional hit rate is broadly awful across strategies:** best is news at 33%, worst is macro at 7% and contrarian at 13%. A coin flip (50%) would beat every strategy here. That's a signal-inversion or feature-lag problem, not a noise problem.
+- **Clustered failure streak** from 2026-06-25 through 07-01 (6 straight misses) suggests a regime the model never adapted to, not random scatter.
 
 ## Unreliable under these conditions
-- **News-driven days**: `news` is the most-picked winning strategy on fails (06-15, 06-22, 06-29, 07-01) yet only a 0.357 hit rate. It wins the internal contest then mispredicts direction — it's reactive/lagging on news.
-- **Momentum and macro are broken**: `momentum` hit 0.214, `macro` hit 0.071 (1/14). Macro should be near-zero-weighted; it's actively harmful. Momentum whipsaws in choppy tape.
-- **Contrarian is the worst by win rate** (0.143) yet gets ~0.21 weight hint — mispriced.
-- **Larger absolute moves crush us**: fail APEs (2.7–5.1%) cluster on high-move days; passes are all sub-0.5% quiet days. We only "work" when nothing happens.
+- **Larger-move days.** Fail-day mean APE is 2.94%; the worst misses (06-22 5.1%, 06-17 3.7%, 06-25 3.6%) are all directional whiffs — the model won't commit to big moves and gets the sign wrong on them.
+- **News- and momentum-led days are the biggest culprits by volume:** news won on 5 of the 10 fails, momentum on 3. News has the best hit rate overall yet still leads most losses — it's being trusted on the wrong days.
+- **Macro and contrarian are dead weight** — 1 and 2 wins in 15, and macro-heavy weighting (06-12) produced a clean miss.
+- **Confidence carries no information.** Fails span 0.38–0.58, passes span 0.4–0.5. `overconfident_misses=0` only because confidence is flat and low everywhere — it's uncalibrated/uninformative, not well-behaved.
 
 ## Fixes to try next
-- **Add a direction gate**: since magnitude is fine, build a separate up/down classifier and veto trades when strategies disagree on sign.
-- **Reweight by hit rate, not APE**: cut `macro` to ~0, cut `contrarian`, cap `news` — its weight hints overstate its reliability.
-- **Beat-baseline hard filter**: if ensemble can't beat persistence in backtest for the regime, default to baseline.
-- **Detect the late-June regime break** (5-fail streak) and add a volatility/regime feature; the model is calibrated for quiet days only.
+- **Investigate sign inversion:** with hit rates this far below 50%, test flipping the directional call on momentum/macro/contrarian and re-score offline.
+- **Cut macro and contrarian weight to near zero;** they underperform baseline consistently.
+- **Add a regime/volatility filter:** on high-expected-move days defer to baseline (persistence) rather than committing direction, since that's where we bleed.
+- **Rebuild confidence** to actually track realized hit rate; current values are noise and can't gate anything.
+- **Root-cause the 06-25→07-01 streak** — check for a stale feature or data lag introduced then.
