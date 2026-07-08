@@ -3,21 +3,20 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- **Direction, not magnitude.** 9 of 10 failures are directional misses (only 1 pure magnitude). The model is calling the sign wrong, not just the size — that's the core problem.
-- Overall directional hit rate is dismal: **7/16 (~44%), worse than a coin flip.** APE on misses averages ~2.9%, so when we're wrong, we're wrong big.
-- We **rarely beat baseline on failures** — the naive baseline APE is near or below ours on almost every miss. We're adding noise, not signal.
-- Best runs (6/08, 7/02, 7/06) coincide with **momentum/macro leading and low confidence**; blowups (6/22 at 5.1%, 6/25, 6/29) come when **news is the winning strategy**.
+- **Direction, not magnitude, is the core problem.** 9 of 10 fails are directional misses; only 1 is magnitude-only. The model is systematically calling the wrong sign, not just over/undershooting size.
+- **We lose to the naive baseline on the misses.** On failing days APE (2.94%) runs above baseline; the ensemble adds noise rather than edge when it's wrong.
+- **A sustained losing streak mid-to-late June (06-12 → 06-01).** ~9 consecutive fails, several with 3–5% APE. This is a regime the model never adapted to, not scattered bad luck.
+- **No pattern of overconfidence** (0 overconfident misses) — but that's only because confidence is uniformly flat (~0.4–0.58). Confidence carries essentially no information; it's not calibrated, it's just muted.
 
 ## Unreliable under these conditions
-- **`macro` is broken as a standalone winner** — 1 win / 16, 6.25% hit rate, highest MAPE (2.11%). It only "worked" once (6/08 tie) and shouldn't lead.
-- **`contrarian` is nearly as bad** — 12.5% hit rate, and consistently down-weighted (0.05–0.16), yet still steers losses (6/18, 6/26).
-- **`news`-led days are volatile:** despite a 31% hit rate, the largest-APE failures (6/22, 6/25, 6/29, 7/01) all had news heavily weighted (0.22–0.34). News captures level but not direction.
-- **Mid-June cluster (6/12–6/29) is a persistent failure zone** — 8 of 10 misses. Suggests a regime shift (post-6/08) the model never adapted to; APE trending up through 6/22.
-- Confidence is **flat and low (0.38–0.58)** — no overconfident misses, but no discriminating power either. Confidence isn't tracking accuracy at all.
+- **Trending/volatile stretches (the big-APE days: 06-22 at 5.1%, 06-17 at 3.7%, 06-25/26/29 at ~3.2%)** — the ensemble keeps fading the move and gets the direction wrong repeatedly.
+- **`contrarian` is the worst offender**: 11.8% hit rate, high APE. It's actively harmful in trending regimes yet still carries ~0.19 weight.
+- **`macro` is dead weight**: 5.9% hit rate, highest MAPE. One lucky win (06-08) inflates its reputation.
+- **`news`-led days are inconsistent**: wins some (06-23, 06-24) but drives several of the worst fails (06-15, 06-22, 06-29). High variance, no reliability filter.
+- **Momentum/technical** are the only marginally-useful strategies and they carry the recovery (07-02 → 07-07 all passes were momentum/technical-led).
 
 ## Fixes to try next
-- **Cut `macro` and `contrarian`** from the winner pool or hard-cap their weight; both are worse than random on direction.
-- **Add a directional gate:** require momentum + news to agree on sign before committing; if they diverge, fall back to baseline (we lose to baseline anyway).
-- **Detect regime shifts** — the mid-June cluster shows stale weights; add a rolling recalibration or volatility filter that widens uncertainty after 2 consecutive dir-misses.
-- **Rebuild confidence to be predictive** — current 0.4-ish flatline is useless; calibrate against realized directional hit rate.
-- Investigate the **6/22 5.1% APE outlier** and the news-led blowups as a group for a common catalyst (earnings/macro print mis-read).
+- **Cut or heavily down-weight `contrarian` and `macro`** — combined ~0.37 weight for ~6–12% hit rates. Reallocate to momentum/technical.
+- **Add a trend/volatility regime detector**: in strong trends, suppress contrarian entirely and lean momentum; the streak of directional misses is a fade-the-trend failure.
+- **Rebuild confidence to be calibrated** — it's currently flat and useless. Tie it to strategy agreement and recent hit rate so we can size/skip low-conviction days.
+- **Add a directional guardrail**: gate final sign on momentum+technical agreement before trusting news/contrarian sign flips.
