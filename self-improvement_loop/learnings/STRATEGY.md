@@ -20,3 +20,4 @@ Append-only insights. Newest at the bottom.
 - (2026-07-06) When 4 of 5 analysts agree on direction and prior-day momentum exceeds +5% over 5 days, tilt the blended estimate toward the higher-confidence news/macro cluster rather than the ensemble mean — testable by comparing APE of mean-blend vs. momentum-weighted-blend on days with >80% directional consensus.
 - (2026-07-07) On clean-uptrend days (price above SMA5/SMA20, RSI 45-60, zero gap), overweight the technical analyst and discount macro/news bear calls that rest only on index futures with no AMZN-specific catalyst.
 - (2026-07-08) When the news analyst flags a same-day macro catalyst (index futures gap >1%, commodity shock) with confidence >0.6, its weight should be floored at 0.35 regardless of scorecard MAPE, because trend-continuation analysts are structurally blind to overnight regime shifts.
+- (2026-07-09) 2026-07-09: FAIL, beat baseline; closest news, worst contrarian.

@@ -65,3 +65,9 @@ We predicted 225.3 vs actual 232.69 (3.18% APE, missed baseline too). The miss w
 ## 2026-07-08 — FAIL (APE 1.04%)
 - Predicted 246.15 vs actual 243.62 (prior 245.98); dir hit: False; beat baseline: False; closest analyst: news.
 **What went wrong:** Directional miss — we predicted a modest up-drift into a broad risk-off day. Momentum and macro both parroted the same 'positive 5d trend, RSI ~50, continuation' rationale and together held 0.42 weight, anchoring the blend near flat. **Root cause:** The meta-judge weighted on backward-looking scorecard MAPE and momentum's raw hit count, ignoring that news had the highest hit_rate (0.33) AND a specific, dated catalyst the others literally could not see (they were re-reading yesterday's SMAs). Four of five analysts recycled identical technical priors, creating false consensus. **One change:** Add a catalyst-override rule — if the news analyst cites a quantified same-session macro shock (futures/oil move) with conf ≥0.6, dynamically boost its weight to ≥0.35 and haircut pure trend-continuation analysts by half; that single reallocation moves the blend from 246.15 toward ~244.3, flipping direction and beating baseline.
+
+## 2026-07-09 — FAIL (APE 1.28%)
+- Predicted 243.87 vs actual 247.04 (prior 243.62); dir hit: True; beat baseline: True; closest analyst: news.
+- **What went wrong:** right direction, magnitude off; final blend 243.87 missed by 1.28%.
+- **Likely culprit:** analyst `contrarian` was furthest from actual and pulled the blend.
+- **Try next:** reduce weight on `contrarian` under today's conditions and lean on `news`.
