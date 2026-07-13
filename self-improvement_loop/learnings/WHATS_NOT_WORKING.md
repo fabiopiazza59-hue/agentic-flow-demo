@@ -3,19 +3,20 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- **Direction, not size, is the killer.** 10 of 12 fails are directional misses (only 2 pure magnitude). The model gets the sign wrong far more than it overshoots — this is a *turn/reversal* problem, not a scaling one.
-- **Systematically worse than baseline on fails.** Mean fail APE 2.64% vs baseline that's often lower; on most losing days we'd have been better off just predicting the naive baseline. We are adding negative value on hard days.
-- **A clustered bad streak.** 2026-06-12 through 07-01 is almost all fails (only 06-23/06-24 pass). Something regime-specific broke and the ensemble never adapted.
-- **Big misses are large.** 06-22 APE 5.1%, 06-15/06-17/06-25/06-26/06-29 all >3%. These aren't near-misses; the model is confidently on the wrong side.
+- **Direction, not magnitude, is the core problem.** 10 of 12 fails are directional misses (only 2 pure magnitude). The model gets the sign wrong repeatedly — it isn't a calibration-of-size issue, it's a can't-call-up/down issue.
+- **Beating baseline is a coin flip at best.** Most fails also lose to baseline (e.g. 06-12, 06-15, 06-22, 06-25, 06-26, 06-29). On misses the ensemble adds nothing over naive persistence.
+- **Sustained losing streak mid-to-late June.** From 06-12 through 06-29 there were 8 fails in 9 days with APEs of 2–5%. The model broke during a directional regime and stayed broken — no adaptation.
+- **Confidence is flat and uninformative, not overconfident.** 0 overconfident misses only because confidence sits in a dead 0.4–0.58 band regardless of outcome. It carries no signal; it's not calibrated so much as constant.
 
 ## Unreliable under these conditions
-- **"news" as winning strategy = red flag.** It "wins" most often (7) yet presided over the worst run (06-15, 06-22, 06-25→06-01, 07-08, 07-09 all fails). It wins the internal contest but loses live — likely overfit to headlines during choppy tape.
-- **Contrarian and macro are dead weight:** hit rates 10.5% and 5.3%. Contrarian fires exactly when momentum continues; macro adds nothing.
-- **Momentum-heavy weightings whipsaw in reversals** (06-12, 06-25, 07-08 fails carried high momentum/technical weight).
-- **Confidence is flat and useless, not overconfident.** 0 overconfident-misses only because confidence is pinned ~0.40–0.55 regardless of outcome. No calibration signal at all — passes and fails look identical.
+- **Trending / regime-shift days.** The high-APE cluster (3–5%) is where price moved decisively and the ensemble faded or lagged the move — classic directional whiplash.
+- **`macro` is nearly useless: 5% hit rate, worst MAPE.** It should not be carrying ~0.18 weight. `contrarian` is also weak (15% hit) and tends to lose exactly on the trending days.
+- **`news`-led days are hit-or-miss.** News is the best strategy (35% hit) yet led many of the worst fails (06-15, 06-22, 06-29, 07-01) — it wins when it wins big but drags on high-vol news days.
+- **07-08 fail ran on empty/blank weights** — pipeline integrity issue on 06-30 (empty weights dict) too.
 
 ## Fixes to try next
-- **Cut macro and contrarian weight to near-zero;** they're negative-value. Reallocate cautiously — but note news' live reliability is worse than its win count suggests.
-- **Add a reversal/regime detector:** when recent realized direction flips, damp momentum/technical and shrink toward baseline instead of committing to a side.
-- **Fall back to baseline when ensemble disagreement is high** — we're losing to naive on exactly the days we're most confident in a call.
-- **Rebuild confidence so it actually varies with expected error;** current output is a constant and cannot flag risky days.
+- Add an explicit **regime/trend filter**; in trending regimes cut `contrarian` and `macro` toward zero.
+- **Down-weight or drop `macro`** (5% hit rate); redistribute to `news`/`technical`.
+- Rebuild **confidence as a real calibrated probability** tied to directional hit rate — current values are noise.
+- Fix the **empty-weights bug** and enforce a schema check before scoring.
+- Since best hit rate is only 35%, treat **directional prediction itself as the priority metric**, not APE.

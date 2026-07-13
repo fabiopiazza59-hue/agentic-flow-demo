@@ -21,3 +21,4 @@ Append-only insights. Newest at the bottom.
 - (2026-07-07) On clean-uptrend days (price above SMA5/SMA20, RSI 45-60, zero gap), overweight the technical analyst and discount macro/news bear calls that rest only on index futures with no AMZN-specific catalyst.
 - (2026-07-08) When the news analyst flags a same-day macro catalyst (index futures gap >1%, commodity shock) with confidence >0.6, its weight should be floored at 0.35 regardless of scorecard MAPE, because trend-continuation analysts are structurally blind to overnight regime shifts.
 - (2026-07-09) 2026-07-09: FAIL, beat baseline; closest news, worst contrarian.
+- (2026-07-10) When 3+ analysts agree on a down/mean-reversion call after a >2% multi-day run with RSI in 55-60 and flat premarket, widen the fade magnitude — historically the pullback exceeds the timid consensus estimate.
