@@ -3,20 +3,21 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- **Direction, not magnitude, is the core problem.** 10 of 12 fails are directional misses (only 2 pure magnitude). The model gets the sign wrong repeatedly — it isn't a calibration-of-size issue, it's a can't-call-up/down issue.
-- **Beating baseline is a coin flip at best.** Most fails also lose to baseline (e.g. 06-12, 06-15, 06-22, 06-25, 06-26, 06-29). On misses the ensemble adds nothing over naive persistence.
-- **Sustained losing streak mid-to-late June.** From 06-12 through 06-29 there were 8 fails in 9 days with APEs of 2–5%. The model broke during a directional regime and stayed broken — no adaptation.
-- **Confidence is flat and uninformative, not overconfident.** 0 overconfident misses only because confidence sits in a dead 0.4–0.58 band regardless of outcome. It carries no signal; it's not calibrated so much as constant.
+- **Direction is the core failure**: 11 of 13 misses are directional (85%), only 2 magnitude. The model predicts the wrong sign, not the wrong size. Getting APE down won't help; we're calling up/down wrong.
+- Overall directional hit rate is barely coin-flip-ish and skews worse in the mid-June cluster (6/12–6/29): a long streak of consecutive directional misses with rising APE (peaking 5.1% on 6/22).
+- No overconfident misses flagged, but confidence is **flat and useless** — nearly every prediction sits at 0.40–0.55 regardless of outcome. Confidence carries zero discriminating signal (misses at 0.55/0.58, hits at 0.40). It's miscalibrated by being inert, not by being cocky.
+- Beating baseline and passing are correlated with hits, but on misses we usually **also lose to baseline** — the ensemble adds negative value on hard days.
 
 ## Unreliable under these conditions
-- **Trending / regime-shift days.** The high-APE cluster (3–5%) is where price moved decisively and the ensemble faded or lagged the move — classic directional whiplash.
-- **`macro` is nearly useless: 5% hit rate, worst MAPE.** It should not be carrying ~0.18 weight. `contrarian` is also weak (15% hit) and tends to lose exactly on the trending days.
-- **`news`-led days are hit-or-miss.** News is the best strategy (35% hit) yet led many of the worst fails (06-15, 06-22, 06-29, 07-01) — it wins when it wins big but drags on high-vol news days.
-- **07-08 fail ran on empty/blank weights** — pipeline integrity issue on 06-30 (empty weights dict) too.
+- **The mid/late-June regime** (roughly 6/12–6/29): sustained directional misses, APE 2–5%, suggests a trend/volatility regime the model fought (likely a directional move it kept fading).
+- **Macro strategy is the worst**: 9.5% hit rate, highest MAPE (0.0182). It "wins" the ensemble on losing days (6/12, 6/13) — a red flag that macro dominates exactly when it's wrong.
+- **Contrarian (14%) and momentum (24%) hit rates are also sub-random**; contrarian gets weight ~0.20 despite being unreliable. Momentum "won" several outright misses (6/12, 6/25).
+- **News is the least-bad** (33% hit, lowest sum_ape) but still not good, and it too anchors several misses (6/15, 6/22, 6/29).
+- Days with empty/degenerate weights (6/30) still shipped predictions — pipeline gap.
 
 ## Fixes to try next
-- Add an explicit **regime/trend filter**; in trending regimes cut `contrarian` and `macro` toward zero.
-- **Down-weight or drop `macro`** (5% hit rate); redistribute to `news`/`technical`.
-- Rebuild **confidence as a real calibrated probability** tied to directional hit rate — current values are noise.
-- Fix the **empty-weights bug** and enforce a schema check before scoring.
-- Since best hit rate is only 35%, treat **directional prediction itself as the priority metric**, not APE.
+- Reframe scoring/optimization around **directional accuracy**, not APE — that's where we're bleeding.
+- **Cut macro weight sharply** (it's near-zero skill) and down-weight contrarian; stop letting the worst strategies "win" the ensemble on high-error days.
+- Add a **regime filter** (trend vs mean-revert): momentum/contrarian are being applied in the wrong regimes.
+- **Rebuild confidence** so it actually separates hits from misses; current 0.4–0.55 band is meaningless. Suppress trades when signal disagreement is high.
+- Add a **baseline guardrail**: if ensemble can't beat naive baseline in backtest for a regime, default to baseline.

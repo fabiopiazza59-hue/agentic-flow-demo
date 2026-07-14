@@ -71,3 +71,7 @@ We predicted 225.3 vs actual 232.69 (3.18% APE, missed baseline too). The miss w
 - **What went wrong:** right direction, magnitude off; final blend 243.87 missed by 1.28%.
 - **Likely culprit:** analyst `contrarian` was furthest from actual and pulled the blend.
 - **Try next:** reduce weight on `contrarian` under today's conditions and lean on `news`.
+
+## 2026-07-13 — FAIL (APE 1.40%)
+- Predicted 243.85 vs actual 247.31 (prior 245.34); dir hit: False; beat baseline: False; closest analyst: macro.
+**What went wrong:** Consensus-down blend (4/5 analysts) missed a +0.8% rally by 1.4%; baseline (prior close) beat us. **Root cause:** News, at 40% weight, anchored on an Iran-Hormuz 'futures down 1.2%' narrative that was either unconfirmed or already discounted — no analyst verified the premarket gap actually persisted, yet everyone repeated 'no gap cushion' while still predicting decline. The one contrarian-to-the-group voice (macro, up) was buried at 7% despite being the only correct direction. **The one change:** Require news-driven directional calls to be corroborated by an actual confirmed premarket gap in AMZN itself; if the cited move is index-level and unconfirmed, halve news weight and let momentum's positive 5d/20d trend set the directional lean.
