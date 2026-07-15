@@ -23,3 +23,4 @@ Append-only insights. Newest at the bottom.
 - (2026-07-09) 2026-07-09: FAIL, beat baseline; closest news, worst contrarian.
 - (2026-07-10) When 3+ analysts agree on a down/mean-reversion call after a >2% multi-day run with RSI in 55-60 and flat premarket, widen the fade magnitude — historically the pullback exceeds the timid consensus estimate.
 - (2026-07-13) When a news analyst cites a specific premarket futures move (e.g. 'Nasdaq -1.2%') as its core thesis, cap its weight unless the gap is confirmed at the AMZN open — stale/unconfirmed macro headlines with high confidence are the desk's biggest directional trap.
+- (2026-07-14) 2026-07-14: PASS, did not beat baseline; closest momentum, worst contrarian.
