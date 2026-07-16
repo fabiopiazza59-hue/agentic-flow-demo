@@ -3,18 +3,20 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- **Direction, not magnitude.** 11 of 13 fails are directional misses (85%); only 2 are pure magnitude. The model is guessing up/down wrong, not sizing wrong. APE on fails averages 2.55% — big enough to matter.
-- **Losing to the naive baseline.** On failing days the ensemble beats baseline only occasionally; most misses (e.g. 06-12, 06-17, 06-22, 06-25, 06-26, 06-29, 07-13) have ape ≥ baseline_ape. The stack is adding negative value on the hard days.
-- **The big blowups cluster.** 06-15 through 06-29 is a sustained losing streak (~3–5% APE repeatedly) — a regime the model never adapted to. That two-week stretch drives most of the total error.
-- **Every strategy has a losing directional hit rate.** Best is news at 32%, worst is macro at 9%. A coin flip beats most of them. Whatever signal is being extracted, it's near-random or inverted.
+- **Direction, not magnitude.** 12 of 14 fails are directional misses (86%); only 2 are pure magnitude. The model gets the size roughly right but calls the sign wrong. This is the core problem.
+- **Losing to baseline.** Nearly every fail also has `beats_baseline: false` — we're not just wrong, we're worse than naive persistence on the same days.
+- **Big-error clustering.** Fails carry a mean APE of 2.58% and several 3–5% blowups (06-22 at 5.1%, 06-17 at 3.7%, 06-15 at 3.4%). These are large single-day moves the model never anticipates.
+- **Confidence isn't the issue.** 0 overconfident misses; confidence is uniformly low (0.38–0.58). It's well-calibrated-by-being-timid — it never commits, so it never "over"-confidently misses, but it also adds no signal.
 
 ## Unreliable under these conditions
-- **Trending/volatile regimes (mid-to-late June):** consecutive same-direction misses suggest the model kept fading a move that continued. Contrarian (14% hit) and macro (9% hit) are actively harmful here.
-- **When "news" is the winning strategy:** it wins most raw picks (7) but still fails on 06-15, 06-22, 06-25, 06-29, 07-01, 07-08 — it's overweighted (news carries ~0.28–0.42 weight on nearly every failing day) yet unreliable directionally.
-- **Confidence gives no signal.** Fails span conf 0.38–0.58, passes span 0.40–0.55 — nearly identical. 0 overconfident-miss flags is misleading: confidence is flat/uninformative, not well-calibrated. Highest-conf days (0.55–0.58: 06-12, 07-13) all failed.
+- **High-volatility / large-move days.** Every big directional whiff coincides with a large actual move; the model reverts toward small changes and gets run over.
+- **`news`-led and `macro`-led calls on turbulent days.** News wins the ensemble on most fails (06-15, 06-22, 06-25→06-29, 07-01, 07-08/09) yet keeps missing direction; macro-led days (07-13, 07-15) also fail hard.
+- **`contrarian` and `macro` are the weakest engines** (13% hit rate each), yet they still carry ~0.19 weight_hint. `technical` is barely better (17%). Only `news` (30%) and `momentum` (26%) clear even a coin-flip-adjacent bar — and none are above 50%.
+- **Late-June cluster (06-22 to 06-30):** 5 straight/near-straight fails — a sustained regime the model never adapted to.
 
 ## Fixes to try next
-- **Add a directional regime filter.** Detect trend persistence and suppress contrarian/macro (both <15% hit) when a move is running; stop fading continuations.
-- **Demote macro and contrarian hard**; cap news weight — its dominance (0.3–0.4) isn't earning its keep on miss days.
-- **Rebuild confidence calibration.** Current confidence is a flat band with no predictive power; recalibrate against realized hit rate or gate low-conviction days out entirely.
-- **Sanity-gate against baseline:** if ensemble direction disagrees with persistence and confidence is low, default toward baseline rather than the stack.
+- **Attack directional accuracy directly:** train/select on sign-hit, not just APE. A magnitude-fair model that flips sign is useless.
+- **Add a volatility gate:** when expected move exceeds a threshold, widen predicted magnitude and down-weight mean-reverting engines instead of defaulting to small changes.
+- **Cut dead weight:** demote `contrarian` and `macro` (13% hit) toward zero; concentrate on `news` + `momentum`, but only where they've historically hit.
+- **Beat-baseline guardrail:** if ensemble disagrees with persistence on low-conviction days, fall back to baseline — we're currently losing to it.
+- **Make confidence mean something:** current 0.4-ish flatline is noise; recalibrate so higher confidence actually predicts higher hit rate, then size accordingly.
