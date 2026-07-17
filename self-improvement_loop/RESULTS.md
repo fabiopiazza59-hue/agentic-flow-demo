@@ -3,37 +3,38 @@
 _Auto-generated each trading day. PASS = predicted close within ±1% of actual._
 
 ## Verdict
-❌ **No edge yet** — rolling MAPE 1.67% does not beat the random-walk baseline 1.58%. Keep learning.
+❌ **No edge yet** — rolling MAPE 1.74% does not beat the random-walk baseline 1.68%. Keep learning.
 
-**Today's open prediction (2026-07-16):** close ≈ **253.90** (down, confidence 42.00%) vs prior close 254.96.
+**Today's open prediction (2026-07-17):** close ≈ **248.60** (down, confidence 42.00%) vs prior close 249.89.
 
 ## Rolling metrics (last 20 scored days)
 
 | Metric | Rolling | All-time |
 |---|---|---|
-| Scored days | 20 | 23 |
-| PASS rate (±1%) | 40.00% | 39.13% |
-| Directional accuracy | 45.00% | 43.48% |
-| MAPE | 1.67% | 1.69% |
-| Baseline MAPE (random walk) | 1.58% | 1.57% |
-| Edge (baseline − model) | -0.09% | -0.12% |
+| Scored days | 20 | 24 |
+| PASS rate (±1%) | 35.00% | 37.50% |
+| Directional accuracy | 50.00% | 45.83% |
+| MAPE | 1.74% | 1.69% |
+| Baseline MAPE (random walk) | 1.68% | 1.59% |
+| Edge (baseline − model) | -0.07% | -0.10% |
 | Brier (confidence calib.) | 0.25 | 0.25 |
 
 ## Per-strategy scorecards
 
 | Strategy | Obs | Win rate (closest) | MAPE | Weight hint |
 |---|---|---|---|---|
-| technical | 23 | 17.39% | 1.49% | 0.22 |
-| news | 23 | 30.43% | 1.55% | 0.21 |
-| contrarian | 23 | 13.04% | 1.72% | 0.19 |
-| momentum | 23 | 26.09% | 1.78% | 0.19 |
-| macro | 23 | 13.04% | 1.78% | 0.19 |
+| technical | 24 | 16.67% | 1.50% | 0.22 |
+| news | 24 | 29.17% | 1.53% | 0.22 |
+| contrarian | 24 | 16.67% | 1.68% | 0.20 |
+| momentum | 24 | 25.00% | 1.81% | 0.18 |
+| macro | 24 | 12.50% | 1.81% | 0.18 |
 
 ## Last 20 scored model predictions
 _(backfill seed rows are excluded from metrics and this table; they appear only as price-history context on the dashboard chart)_
 
 | Date | Predicted | Actual | APE | PASS | Dir hit | Beat baseline | Closest |
 |---|---|---|---|---|---|---|---|
+| 2026-07-16 | 253.90 | 249.89 | 1.60% | ❌ | ✅ | ✅ | contrarian |
 | 2026-07-15 | 247.35 | 254.96 | 2.98% | ❌ | ❌ | ❌ | macro |
 | 2026-07-14 | 247.72 | 247.49 | 0.09% | ✅ | ✅ | ❌ | momentum |
 | 2026-07-13 | 243.85 | 247.31 | 1.40% | ❌ | ❌ | ❌ | macro |
@@ -53,6 +54,5 @@ _(backfill seed rows are excluded from metrics and this table; they appear only 
 | 2026-06-22 | 244.62 | 232.79 | 5.08% | ❌ | ❌ | ❌ | news |
 | 2026-06-18 | 237.90 | 244.39 | 2.66% | ❌ | ✅ | ✅ | contrarian |
 | 2026-06-17 | 246.35 | 237.50 | 3.73% | ❌ | ❌ | ❌ | technical |
-| 2026-06-16 | 246.42 | 246.00 | 0.17% | ✅ | ❌ | ❌ | momentum |
 
 _This is a research experiment, not financial advice._
