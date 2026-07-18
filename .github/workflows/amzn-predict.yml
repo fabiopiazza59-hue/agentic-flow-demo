@@ -54,7 +54,7 @@ jobs:
           FINNHUB_API_KEY: ${{ secrets.FINNHUB_API_KEY }}
           ALPHAVANTAGE_API_KEY: ${{ secrets.ALPHAVANTAGE_API_KEY }}
         run: |
-          python -m src.loop.run_daily --mode "${{ github.event.inputs.mode || 'daily' }}"
+          python -m src.loop.run_ab --mode "${{ github.event.inputs.mode || 'daily' }}"
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

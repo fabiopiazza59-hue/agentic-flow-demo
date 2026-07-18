@@ -31,7 +31,9 @@
     <div class="sub">Self-improving agentic loop · PASS = predicted close within ±1% of actual · <span id="updated"></span></div>
   </header>
   <div class="verdict" id="verdict">Loading…</div>
+  <div class="verdict" id="abVerdict" style="display:none"></div>
   <div class="grid" id="kpis"></div>
+  <div class="grid" id="abKpis" style="margin-top:14px"></div>
   <div class="charts">
     <div class="card full"><h3>Predicted vs Actual close</h3><canvas id="priceChart" height="120"></canvas></div>
     <div class="card"><h3>Absolute % error vs random-walk baseline</h3><canvas id="apeChart" height="160"></canvas></div>
@@ -63,12 +65,36 @@
       document.getElementById("kpis").innerHTML = kpis.map(([l,val]) =>
         `<div class="kpi"><div class="label">${l}</div><div class="value">${val}</div></div>`).join("");
 
+      if (m.ab) {
+        const av = document.getElementById("abVerdict");
+        av.style.display = "block";
+        av.innerHTML = `🅰️/🅱️ <span style="color:var(--accent)">A/B test</span> — ${m.ab.verdict}`;
+        const rb = m.variant_b?.rolling || {};
+        const abk = [
+          ["B PASS rate", pct(rb.pass_rate)],
+          ["B Directional acc.", pct(rb.directional_accuracy)],
+          ["B MAPE", pct(rb.mape)],
+          ["B Edge", pct(rb.edge)],
+          ["Paired days", m.ab.n_paired ?? "—"],
+          ["B wins", `${m.ab.b_wins ?? "—"}/${m.ab.n_decisive ?? "—"}`],
+        ];
+        document.getElementById("abKpis").innerHTML = abk.map(([l,val]) =>
+          `<div class="kpi"><div class="label">${l}</div><div class="value">${val}</div></div>`).join("");
+      }
+
       const s = m.series || [];
       const labels = s.map(d=>d.date);
-      new Chart(priceChart, { type:"line", data:{ labels, datasets:[
-        { label:"Predicted", data:s.map(d=>d.predicted_close), borderColor:"#5b8cff", tension:.2 },
+      const bByDate = Object.fromEntries((m.variant_b?.series || []).map(d=>[d.date, d.predicted_close]));
+      const datasets = [
+        { label:"Predicted (A)", data:s.map(d=>d.predicted_close), borderColor:"#5b8cff", tension:.2 },
         { label:"Actual", data:s.map(d=>d.actual_close), borderColor:"#37d399", tension:.2 },
-      ]}, options:{ plugins:{legend:{labels:{color:"#e8ecf6"}}}, scales:{x:{ticks:{color:"#93a0bd"}},y:{ticks:{color:"#93a0bd"}}} } });
+      ];
+      if (m.variant_b?.series?.length) {
+        datasets.push({ label:"Predicted (B)", data:labels.map(d=>bByDate[d] ?? null),
+                        borderColor:"#f6c453", borderDash:[6,3], tension:.2 });
+      }
+      new Chart(priceChart, { type:"line", data:{ labels, datasets },
+        options:{ plugins:{legend:{labels:{color:"#e8ecf6"}}}, scales:{x:{ticks:{color:"#93a0bd"}},y:{ticks:{color:"#93a0bd"}}} } });
 
       new Chart(apeChart, { type:"line", data:{ labels, datasets:[
         { label:"Model APE", data:s.map(d=>d.ape!=null?d.ape*100:null), borderColor:"#ff6b6b", tension:.2 },

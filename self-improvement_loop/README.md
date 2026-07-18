@@ -38,13 +38,34 @@ honestly says "no edge yet."
   rolling edge vs baseline is negative, and confidence is replaced by a calibrated value (rolling
   pass rate ± an analyst-agreement nudge). Fired gates are recorded per row (`gates_applied`).
 
+## A/B test — two agent architectures, one daily run
+Since 2026-07-18 every daily run executes **two arms on the same pre-open snapshot** (same
+history, same quote — a fair paired test) and scores both the next day:
+
+- **Arm A — ensemble + gates** (the original loop): 5 analyst lenses → meta-judge → deterministic
+  guardrail gates. State: `data/predictions.jsonl`, `learnings/`.
+- **Arm B — raven-style prior + pulse** (inspired by
+  [predict-raven](https://github.com/Alchemist-X/predict-raven)): a statistical prior
+  (drift/vol Monte-Carlo, re-centered on the pre-market quote) → one evidence-gathering "pulse"
+  agent (web search, audited to `learnings_b/pulse/`) → a decision agent whose adjustment is
+  **hard-capped in code** at ±0.8σ (and the total move at 1.5σ). No ensemble, no meta-judge;
+  failures feed straight back into the decider via `learnings_b/FAILURES.md`.
+  State: `data/predictions_b.jsonl`, `learnings_b/`.
+
+`results/ab_compare.json` + an A/B section in `RESULTS.md` and the dashboard track the paired
+comparison (per-day APE deltas, B-wins rate, exact sign test). No verdict is rendered before
+10 paired scored days. Entry point: `python -m src.loop.run_ab` (CI uses this; `run_daily`
+still runs arm A standalone).
+
 ## Layout
 ```
 spec/        constitution, spec, plan, tasks (built spec-first)
-src/         config, utils, data/, evals/, agents/, features, loop/, report
-data/        predictions.jsonl (the ledger / state)
-results/     results.csv, metrics.json, site/ (Pages dashboard)
-learnings/   STRATEGY.md, scorecards.json, daily post-mortems
+src/         config, utils, data/, evals/, agents/, features, loop/, report, report_ab
+src/variant_b/  arm B: prior, pulse, decider, runner
+data/        predictions.jsonl (arm A ledger), predictions_b.jsonl (arm B ledger)
+results/     results.csv, metrics.json, ab_compare.json, site/ (Pages dashboard)
+learnings/   STRATEGY.md, scorecards.json, daily post-mortems (arm A)
+learnings_b/ FAILURES.md, pulse/ audit artifacts (arm B)
 tests/       pytest suite
 ```
 

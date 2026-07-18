@@ -39,6 +39,7 @@ COMMIT_PATHS = [
     "data",
     "results",
     "learnings",
+    "learnings_b",
     "RESULTS.md",
     "README.md",
 ]
@@ -158,10 +159,13 @@ def _refresh_whats_not_working(rows: list[dict], scorecards: dict, client) -> No
 
 # --------------------------------------------------------------------------------- predicting
 
-def do_predict(rows: list[dict], target_date: date, client) -> tuple[list[dict], dict]:
-    history = get_history(settings.SYMBOL, settings.LOOKBACK_DAYS)
-    quote = get_quote(settings.SYMBOL)
-    features = build_features(history, quote)
+def do_predict(rows: list[dict], target_date: date, client,
+               features: dict | None = None) -> tuple[list[dict], dict]:
+    """Predict today's close. Pass a pre-built `features` snapshot for a fair A/B run."""
+    if features is None:
+        history = get_history(settings.SYMBOL, settings.LOOKBACK_DAYS)
+        quote = get_quote(settings.SYMBOL)
+        features = build_features(history, quote)
     prior_close = features["prev_close"]
 
     scorecards = load_scorecards()

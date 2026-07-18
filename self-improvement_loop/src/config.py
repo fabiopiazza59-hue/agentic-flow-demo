@@ -36,6 +36,19 @@ class Settings(BaseModel):
     GATE_CONSENSUS_MIN: float = 0.6       # below this analyst agreement, shrink the move
     GATE_SHRINK: float = 0.5              # move multiplier per fired gate
 
+    # --- variant B: raven-style prior + pulse + bounded decider (src/variant_b/) ---
+    B_PULSE_MODEL: str = "claude-sonnet-5"     # evidence gathering (web search)
+    B_DECIDER_MODEL: str = "claude-opus-4-8"   # flagship bounded decision
+    B_PULSE_MAX_TOKENS: int = 4096
+    B_DECIDER_MAX_TOKENS: int = 1200
+    B_DRIFT_WINDOW: int = 60              # sessions for the drift estimate
+    B_SIGMA_WINDOW: int = 20              # sessions for the daily-vol estimate
+    B_MC_PATHS: int = 10000               # Monte-Carlo draws for prior percentiles
+    B_MAX_ADJ_SIGMA: float = 0.8          # evidence may move the prior at most ±0.8σ
+    B_MAX_MOVE_SIGMA: float = 1.5         # hard cap on total move from prev close, in σ
+    B_FAILURES_TAIL_CHARS: int = 3000     # tail of B's failure log fed to the decider
+    AB_MIN_PAIRED_DAYS: int = 10          # below this, the A/B report renders no verdict
+
     # --- paths ---
     DATA_DIR: Path = PROJECT_ROOT / "data"
     RESULTS_DIR: Path = PROJECT_ROOT / "results"
@@ -48,6 +61,9 @@ class Settings(BaseModel):
     METRICS_JSON: Path = PROJECT_ROOT / "results" / "metrics.json"
     RESULTS_MD: Path = PROJECT_ROOT / "RESULTS.md"
     SITE_DATA: Path = PROJECT_ROOT / "results" / "site" / "data.json"
+    LEDGER_B_PATH: Path = PROJECT_ROOT / "data" / "predictions_b.jsonl"
+    LEARNINGS_B_DIR: Path = PROJECT_ROOT / "learnings_b"
+    AB_COMPARE_JSON: Path = PROJECT_ROOT / "results" / "ab_compare.json"
 
     # --- env-derived helpers (not model fields) ---
     @property
@@ -72,7 +88,8 @@ class Settings(BaseModel):
         return None
 
     def ensure_dirs(self) -> None:
-        for d in (self.DATA_DIR, self.RESULTS_DIR, self.SITE_DIR, self.LEARNINGS_DIR):
+        for d in (self.DATA_DIR, self.RESULTS_DIR, self.SITE_DIR, self.LEARNINGS_DIR,
+                  self.LEARNINGS_B_DIR):
             d.mkdir(parents=True, exist_ok=True)
 
 
