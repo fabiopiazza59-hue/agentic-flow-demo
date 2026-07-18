@@ -67,7 +67,7 @@ def _user_prompt(analyst_predictions: dict, scorecards: dict, strategy_md: str,
         f"{wnw}"
         f"Analyst predictions (JSON):\n{json.dumps(analyst_predictions, indent=2)}\n\n"
         f"Per-strategy scorecards (JSON):\n{json.dumps(scorecards, indent=2)}\n\n"
-        f"Living strategy notes (STRATEGY.md):\n{strategy_md[:4000]}\n\n"
+        f"Living strategy notes (STRATEGY.md, newest last):\n{strategy_md[-4000:]}\n\n"
         f"Recent post-mortems:\n" + "\n---\n".join(recent_learnings[-settings.LEARNINGS_CONTEXT_N:])
     )
 

@@ -27,6 +27,7 @@ from ..agents.reflector import diagnose_failures, reflect
 from ..config import PROJECT_ROOT, settings
 from ..data.market_calendar import is_trading_day, last_n_trading_days, previous_trading_day
 from ..data.providers import get_actual_close, get_history, get_quote
+from ..evals.gates import apply_gates
 from ..evals.metrics import score_row
 from ..evals.scorecard import load_scorecards, save_scorecards, update_scorecards
 from ..features import build_features
@@ -163,15 +164,20 @@ def do_predict(rows: list[dict], target_date: date, client) -> tuple[list[dict],
     features = build_features(history, quote)
     prior_close = features["prev_close"]
 
-    analyst_predictions = run_analysts(features, client=client)
     scorecards = load_scorecards()
     strategy_md = settings.STRATEGY_PATH.read_text(encoding="utf-8") if settings.STRATEGY_PATH.exists() else ""
     recent_learnings = _recent_learnings(settings.LEARNINGS_CONTEXT_N)
     wnw_path = _whats_not_working_path()
     whats_not_working = wnw_path.read_text(encoding="utf-8") if wnw_path.exists() else ""
 
+    analyst_predictions = run_analysts(
+        features, client=client,
+        context={"scorecards": scorecards, "whats_not_working": whats_not_working},
+    )
+
     final = synthesize(analyst_predictions, scorecards, strategy_md, recent_learnings,
                        features, client=client, whats_not_working=whats_not_working)
+    final, gates = apply_gates(final, analyst_predictions, rows, features)
 
     row = {
         "date": target_date.isoformat(),
@@ -183,13 +189,15 @@ def do_predict(rows: list[dict], target_date: date, client) -> tuple[list[dict],
         "weights": final.get("weights", {}),
         "analyst_predictions": analyst_predictions,
         "rationale": final.get("rationale", ""),
+        "gates_applied": gates,
         "quote_source": features.get("quote_source"),
         "status": "pending",
         "actual_close": None,
     }
     rows = upsert_ledger_row(rows, row)
     log(f"predicted {target_date.isoformat()}: close ≈ {row['predicted_close']} "
-        f"({row['predicted_direction']}, conf {row['confidence']}) from {len(analyst_predictions)} analysts.")
+        f"({row['predicted_direction']}, conf {row['confidence']}) from {len(analyst_predictions)} analysts"
+        f"{'; gates: ' + ', '.join(gates) if gates else ''}.")
     return rows, row
 
 

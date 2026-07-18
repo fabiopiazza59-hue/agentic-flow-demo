@@ -31,6 +31,12 @@ honestly says "no edge yet."
   with a root-cause analysis (which analyst dragged the blend, direction vs magnitude, what to change).
 - **learnings/WHATS_NOT_WORKING.md** — a rolling self-diagnosis regenerated each scoring that looks
   *across all failures* for recurring patterns; it's fed to the meta-judge before the next shot.
+- **Analyst-level feedback** — each analyst also sees its own scorecard and the failure review, with
+  an explicit anti-groupthink instruction (the diagnosed root cause of most misses).
+- **Enforced gates** (`src/evals/gates.py`) — the diagnosis's fixes applied in code, not just prompts:
+  the predicted move shrinks toward the prior close when analyst directional agreement is low or the
+  rolling edge vs baseline is negative, and confidence is replaced by a calibrated value (rolling
+  pass rate ± an analyst-agreement nudge). Fired gates are recorded per row (`gates_applied`).
 
 ## Layout
 ```

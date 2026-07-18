@@ -75,15 +75,43 @@ _JSON_INSTRUCTION = (
 )
 
 
-def _features_prompt(features: dict) -> str:
+def _features_prompt(features: dict, context_block: str = "") -> str:
     payload = {k: v for k, v in features.items() if k != "recent_ohlc"}
+    ctx = f"{context_block}\n\n" if context_block else ""
     return (
         f"Symbol: {settings.SYMBOL}\n"
         f"Prior close: {features.get('prev_close')}\n"
         f"Technical features (JSON):\n{json.dumps(payload, indent=2)}\n\n"
         f"Recent daily OHLCV:\n{features.get('recent_ohlc')}\n\n"
+        f"{ctx}"
         f"{_JSON_INSTRUCTION}"
     )
+
+
+def _context_block(name: str, context: dict | None) -> str:
+    """Learning feedback into the analyst layer: own track record + desk failure patterns.
+
+    Without this, analysts are frozen — only the judge's weights adapt, and the diagnosed
+    root cause (all lenses converging on the same timid consensus) can never be corrected.
+    """
+    if not context:
+        return ""
+    parts = []
+    card = (context.get("scorecards") or {}).get(name) or {}
+    if card.get("n"):
+        parts.append(
+            f"Your track record over {card['n']} scored days: closest-analyst rate "
+            f"{card.get('hit_rate', 0.0):.0%}, MAPE {card.get('mape', 0.0) * 100:.2f}%."
+        )
+    wnw = (context.get("whats_not_working") or "").strip()
+    if wnw:
+        parts.append(f"Desk failure review — recurring mistakes to avoid repeating:\n{wnw[:1500]}")
+    parts.append(
+        "Reason strictly from YOUR lens and commit to it. The desk's most repeated failure is "
+        "every analyst clustering on the same timid consensus near the prior close; if your "
+        "signals point to a real move, size it honestly and call the direction explicitly."
+    )
+    return "\n\n".join(parts)
 
 
 def _stub_prediction(name: str, features: dict) -> dict:
@@ -140,7 +168,7 @@ def _extract_from_blocks(resp) -> dict:
     return extract_json("".join(blocks))
 
 
-def _run_one(client, name: str, spec: dict, features: dict) -> dict | None:
+def _run_one(client, name: str, spec: dict, features: dict, context: dict | None = None) -> dict | None:
     prev = float(features.get("prev_close") or 0.0)
     if client is None:
         return _normalize(_stub_prediction(name, features), prev)
@@ -149,7 +177,8 @@ def _run_one(client, name: str, spec: dict, features: dict) -> dict | None:
             model=settings.ANALYST_MODEL,
             max_tokens=spec.get("max_tokens", settings.ANALYST_MAX_TOKENS),
             system=spec["system"],
-            messages=[{"role": "user", "content": _features_prompt(features)}],
+            messages=[{"role": "user",
+                       "content": _features_prompt(features, _context_block(name, context))}],
         )
         if spec.get("uses_web"):
             kwargs["tools"] = [
@@ -161,8 +190,12 @@ def _run_one(client, name: str, spec: dict, features: dict) -> dict | None:
         return None
 
 
-def run_analysts(features: dict, client=None) -> dict:
-    """Run all analysts (in parallel when a client is provided). Returns {name: prediction}."""
+def run_analysts(features: dict, client=None, context: dict | None = None) -> dict:
+    """Run all analysts (in parallel when a client is provided). Returns {name: prediction}.
+
+    `context` carries the learning loop into the analyst layer:
+    {"scorecards": {...}, "whats_not_working": "<markdown>"}.
+    """
     if client is None:
         return {
             name: pred
@@ -173,7 +206,7 @@ def run_analysts(features: dict, client=None) -> dict:
     results: dict[str, dict] = {}
     with ThreadPoolExecutor(max_workers=len(ANALYSTS)) as pool:
         futures = {
-            pool.submit(_run_one, client, name, spec, features): name
+            pool.submit(_run_one, client, name, spec, features, context): name
             for name, spec in ANALYSTS.items()
         }
         for fut in as_completed(futures):

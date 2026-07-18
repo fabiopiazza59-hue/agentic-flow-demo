@@ -30,6 +30,12 @@ class Settings(BaseModel):
     REFLECTOR_MAX_TOKENS: int = 1400
     LEARNINGS_CONTEXT_N: int = 5          # recent post-mortems fed into predict step
 
+    # --- guardrail gates (src/evals/gates.py) ---
+    GATE_EDGE_WINDOW: int = 10            # scored days used for the rolling-edge gate
+    GATE_MIN_SCORED: int = 5              # min real scored days before edge/confidence gating
+    GATE_CONSENSUS_MIN: float = 0.6       # below this analyst agreement, shrink the move
+    GATE_SHRINK: float = 0.5              # move multiplier per fired gate
+
     # --- paths ---
     DATA_DIR: Path = PROJECT_ROOT / "data"
     RESULTS_DIR: Path = PROJECT_ROOT / "results"
