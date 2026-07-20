@@ -1,0 +1,61 @@
+{
+  "labels": {
+    "a": "A \u2014 ensemble + gates",
+    "b": "B \u2014 raven prior + pulse"
+  },
+  "n_paired": 0,
+  "b_wins": 0,
+  "n_decisive": 0,
+  "mean_delta_a_minus_b": null,
+  "sign_test_p": null,
+  "verdict": "\u23f3 Only 0 paired scored day(s) \u2014 no verdict before 10.",
+  "arm_a": {
+    "rolling": {
+      "n": 20,
+      "n_all_time": 25,
+      "pass_rate": 0.4,
+      "directional_accuracy": 0.55,
+      "mape": 0.01583070890256885,
+      "baseline_mape": 0.015510583009620466,
+      "edge": -0.00032012589294838287,
+      "beats_baseline_overall": false,
+      "brier": 0.254755
+    },
+    "all_time": {
+      "n": 25,
+      "n_all_time": 25,
+      "pass_rate": 0.4,
+      "directional_accuracy": 0.48,
+      "mape": 0.016416844004770413,
+      "baseline_mape": 0.015686291051055644,
+      "edge": -0.0007305529537147692,
+      "beats_baseline_overall": false,
+      "brier": 0.25289200000000006
+    }
+  },
+  "arm_b": {
+    "rolling": {
+      "n": 0,
+      "n_all_time": 0,
+      "pass_rate": null,
+      "directional_accuracy": null,
+      "mape": null,
+      "baseline_mape": null,
+      "edge": null,
+      "beats_baseline_overall": false,
+      "brier": null
+    },
+    "all_time": {
+      "n": 0,
+      "n_all_time": 0,
+      "pass_rate": null,
+      "directional_accuracy": null,
+      "mape": null,
+      "baseline_mape": null,
+      "edge": null,
+      "beats_baseline_overall": false,
+      "brier": null
+    }
+  },
+  "pairs": []
+}
