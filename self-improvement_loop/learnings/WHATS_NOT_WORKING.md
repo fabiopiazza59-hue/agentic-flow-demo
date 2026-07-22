@@ -3,19 +3,21 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- Failure is overwhelmingly **directional**: 13 of 16 fails are wrong-direction, only 3 are magnitude-only. The model can't call which way AMZN moves, not just by how much.
-- On failures the model rarely beats baseline: most fails have ape ≥ baseline_ape. It's not just missing, it's underperforming a naive guess when it misses.
-- No single strategy is reliable — best (news) hits only 31%, worst (macro) 12%. All five are below coin-flip on direction. This is an ensemble of weak directional signals.
-- The biggest-error days cluster (2026-06-15/17/22/25/26/29, 07-15) at ape 3–5%, well above the 2.43% mean fail — these are large moves the model consistently fades or lags.
+- **Direction, not size, is the core failure.** 14 of 17 fails are directional misses (82%); only 3 are magnitude. The model consistently guesses the wrong side, not just the wrong distance.
+- **We lose to baseline on the misses.** Almost every failed day has `beats_baseline: false` and fail-day APE (2.38% mean) running above baseline — the ensemble is adding noise on hard days, not value.
+- **Big-move days destroy us.** The worst APEs (5.1% on 06-22, 3.7% on 06-17, 3.4% on 06-15, 3.5% on 06-25, 3.0% on 07-15) are all directional misses. When AMZN moves hard, we're on the wrong side.
+- **Overall hit rate is weak.** No strategy clears 30% directional hit rate; macro is a coin-flip-losing 11%.
 
 ## Unreliable under these conditions
-- **Macro-led** predictions: 3/26 hit rate, highest MAPE (1.80%), and it "won" on outright fails (06-08 aside, 07-13, 07-15). Macro strategy is actively harmful.
-- **Contrarian-led** days: 15% hit and it repeatedly loses when a move continues (06-26, 06-18) — the contrarian call is timing tops/bottoms wrong.
-- **Large-move regimes** (>3% daily): the model is nearly always wrong-direction, suggesting it defaults to mean-reversion/small-move priors and gets run over by trend/gap days.
-- Confidence is flat and low (0.38–0.58) — **no useful calibration signal**. 0 overconfident misses only because confidence is never high; higher-confidence days (0.55 on 06-30, 07-13) still failed.
+- **`macro` as winning strategy = red flag.** 3 wins / 27, 11% hit rate, worst MAPE (0.018). Every day macro "won" (06-12 region, 07-13, 07-15) it missed direction badly. It should not be steering.
+- **`momentum`-led calls in choppy/reversal tape.** momentum hit rate 22%, MAPE 0.017; led several large misses (06-12, 06-25). It chases and gets whipsawed.
+- **`news`-led high-volatility days.** news has the best relative record (30%) but still fronted the 5.1% 06-22 and 3.5% 06-25 disasters — it overreacts to headline days.
+- **Confidence is flat, not calibrated.** 0 overconfident misses only because confidence never rises — everything sits 0.40–0.58 regardless of outcome. Confidence carries zero information; it's not discriminating good days from bad.
+- **Low-signal near-equal weight days** (e.g. 06-15, 06-22 ~0.2 each) still miss — blending everything equally just averages into baseline error.
 
 ## Fixes to try next
-- Cut macro weight toward zero; it's the worst directional contributor. Redistribute to news/technical.
-- Add a **volatility/large-move regime detector**; suppress contrarian and mean-reversion logic when a trend or gap is in force.
-- Fix directional logic first — magnitude is fine; build a dedicated up/down classifier separate from the price-level regression.
-- Make confidence meaningful: currently it's noise. Widen the range and backtest so high confidence actually predicts hits before using it to size or gate.
+- **Down-weight or gate macro** (and de-emphasize momentum) when volatility is elevated; let news/technical lead only on quiet days.
+- **Add a directional confidence gate**: when strategies disagree on sign, shrink toward the naive/last-close baseline instead of committing to a side.
+- **Recalibrate confidence** so it actually spreads (isotonic/Platt on historical hits); flat 0.4–0.5 is useless for sizing.
+- **Build a volatility/regime detector**; suppress large predicted moves unless multiple strategies agree on direction.
+- **Track sign-accuracy per strategy per regime**, not just MAPE — our failure is directional, so optimize for that.

@@ -87,3 +87,9 @@ We predicted 225.3 vs actual 232.69 (3.18% APE, missed baseline too). The miss w
 ## 2026-07-20 — FAIL (APE 1.24%)
 - Predicted 246.9 vs actual 249.99 (prior 247.23); dir hit: False; beat baseline: False; closest analyst: news.
 **What went wrong:** The blend was directionally wrong (predicted −0.13%, actual +1.12%), and it lost to the naive baseline. **Root cause:** correlated-analyst herding — technical, momentum, macro, and contrarian all recycled the same 'overbought fade below SMAs' story and held 72% of weight, so the ensemble had no real diversity. The single independent view (news, citing +1% Nasdaq futures on Iran diplomacy and pre-earnings drift) nailed both direction and level but was structurally outvoted. The desk mistook consensus for confidence when it was actually redundancy. **The one change:** detect thesis-collinearity across analysts (e.g., cluster by rationale keywords/direction) and down-weight clusters so any single-source cluster caps at ~40% combined — this would have lifted news' effective weight and pulled the prediction toward 248+, likely beating baseline and hitting direction.
+
+## 2026-07-21 — FAIL (APE 1.45%)
+- Predicted 251.15 vs actual 247.55 (prior 249.99); dir hit: False; beat baseline: False; closest analyst: contrarian.
+- **What went wrong:** wrong direction; final blend 251.15 missed by 1.45%.
+- **Likely culprit:** analyst `news` was furthest from actual and pulled the blend.
+- **Try next:** reduce weight on `news` under today's conditions and lean on `contrarian`.
