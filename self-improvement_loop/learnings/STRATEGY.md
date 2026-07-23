@@ -29,3 +29,4 @@ Append-only insights. Newest at the bottom.
 - (2026-07-17) When RSI>75 coincides with a same-day bearish reversal candle, weight the down-consensus more heavily and discount any lone bullish (macro) call, targeting the nearest defined support zone rather than the raw blend.
 - (2026-07-20) When 4+ analysts share an identical technical thesis (RSI/SMA mean-reversion), treat them as one correlated vote and cap their combined weight so a lone fundamentally-driven dissenter (news/macro catalyst) isn't drowned out.
 - (2026-07-21) 2026-07-21: FAIL, did not beat baseline; closest contrarian, worst news.
+- (2026-07-22) When the news analyst flags a specific same-day risk-off catalyst (index futures down + macro shock) while technicals only cite range-bound consolidation, overweight news toward its solo call rather than blending — the catalyst dominates on the day.

@@ -93,3 +93,12 @@ We predicted 225.3 vs actual 232.69 (3.18% APE, missed baseline too). The miss w
 - **What went wrong:** wrong direction; final blend 251.15 missed by 1.45%.
 - **Likely culprit:** analyst `news` was furthest from actual and pulled the blend.
 - **Try next:** reduce weight on `news` under today's conditions and lean on `contrarian`.
+
+## 2026-07-22 — FAIL (APE 1.12%)
+- Predicted 247.59 vs actual 244.85 (prior 247.55); dir hit: False; beat baseline: False; closest analyst: news.
+## What went wrong
+Three analysts (technical 248.47, macro 248.80, momentum 248.10) all leaned on the same stale 'consolidation, mild drift up' read and collectively pulled the blend to a near-flat 247.59, while the actual close fell 1.09% to 244.85. News (245.60) and contrarian (246.80) both nailed the down direction and were far closer, but their votes were diluted.
+
+**Root cause**: the blend treated a live macro catalyst (Nasdaq futures -0.6%, oil surge, rate-hike odds) as equal to three variations of the same 'range-bound' technical thesis — effectively triple-counting a correlated bullish view and burying the one analyst reading the actual news tape.
+
+**One change to try**: when news flags a concrete same-day risk-off catalyst and disagrees with a cluster of correlated technical/momentum/macro bulls, cap the correlated-bull contribution and shift weight toward news (its scorecard already leads on hit_rate and mape). Test: would news-weighted blend have passed here? Yes (~0.30% ape).

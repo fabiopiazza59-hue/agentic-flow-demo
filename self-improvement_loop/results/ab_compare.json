@@ -3,58 +3,58 @@
     "a": "A \u2014 ensemble + gates",
     "b": "B \u2014 raven prior + pulse"
   },
-  "n_paired": 2,
-  "b_wins": 2,
-  "n_decisive": 2,
-  "mean_delta_a_minus_b": 0.001528,
-  "sign_test_p": 0.5,
-  "verdict": "\u23f3 Only 2 paired scored day(s) \u2014 no verdict before 10.",
+  "n_paired": 3,
+  "b_wins": 3,
+  "n_decisive": 3,
+  "mean_delta_a_minus_b": 0.002421,
+  "sign_test_p": 0.25,
+  "verdict": "\u23f3 Only 3 paired scored day(s) \u2014 no verdict before 10.",
   "arm_a": {
     "rolling": {
       "n": 20,
-      "n_all_time": 27,
-      "pass_rate": 0.4,
-      "directional_accuracy": 0.5,
-      "mape": 0.013307147014355541,
-      "baseline_mape": 0.012654286717940355,
-      "edge": -0.0006528602964151857,
+      "n_all_time": 28,
+      "pass_rate": 0.35,
+      "directional_accuracy": 0.45,
+      "mape": 0.013618926469211947,
+      "baseline_mape": 0.012923725936070041,
+      "edge": -0.0006952005331419056,
       "beats_baseline_overall": false,
-      "brier": 0.261095
+      "brier": 0.24597500000000005
     },
     "all_time": {
-      "n": 27,
-      "n_all_time": 27,
-      "pass_rate": 0.37037037037037035,
-      "directional_accuracy": 0.4444444444444444,
-      "mape": 0.016197189303790275,
-      "baseline_mape": 0.015298307871163106,
-      "edge": -0.0008988814326271691,
+      "n": 28,
+      "n_all_time": 28,
+      "pass_rate": 0.35714285714285715,
+      "directional_accuracy": 0.42857142857142855,
+      "mape": 0.016018379857623083,
+      "baseline_mape": 0.015145766857385825,
+      "edge": -0.0008726130002372576,
       "beats_baseline_overall": false,
-      "brier": 0.2507074074074075
+      "brier": 0.24381071428571438
     }
   },
   "arm_b": {
     "rolling": {
-      "n": 2,
-      "n_all_time": 2,
-      "pass_rate": 0.0,
-      "directional_accuracy": 0.0,
-      "mape": 0.011922967728646545,
-      "baseline_mape": 0.010448518122506393,
-      "edge": -0.001474449606140153,
-      "beats_baseline_overall": false,
-      "brier": 0.2132
+      "n": 3,
+      "n_all_time": 3,
+      "pass_rate": 0.3333333333333333,
+      "directional_accuracy": 0.3333333333333333,
+      "mape": 0.0102766010437931,
+      "baseline_mape": 0.010641398576804026,
+      "edge": 0.0003647975330109271,
+      "beats_baseline_overall": true,
+      "brier": 0.2756963333333333
     },
     "all_time": {
-      "n": 2,
-      "n_all_time": 2,
-      "pass_rate": 0.0,
-      "directional_accuracy": 0.0,
-      "mape": 0.011922967728646545,
-      "baseline_mape": 0.010448518122506393,
-      "edge": -0.001474449606140153,
-      "beats_baseline_overall": false,
-      "brier": 0.2132
+      "n": 3,
+      "n_all_time": 3,
+      "pass_rate": 0.3333333333333333,
+      "directional_accuracy": 0.3333333333333333,
+      "mape": 0.0102766010437931,
+      "baseline_mape": 0.010641398576804026,
+      "edge": 0.0003647975330109271,
+      "beats_baseline_overall": true,
+      "brier": 0.2756963333333333
     }
   },
   "pairs": [
@@ -81,6 +81,18 @@
       "predicted_a": 251.15,
       "predicted_b": 250.72,
       "actual": 247.55
+    },
+    {
+      "date": "2026-07-22",
+      "ape_a": 0.01119052481110888,
+      "ape_b": 0.006983867674086208,
+      "delta": 0.004207,
+      "b_wins": true,
+      "dir_hit_a": false,
+      "dir_hit_b": true,
+      "predicted_a": 247.59,
+      "predicted_b": 246.56,
+      "actual": 244.85
     }
   ]
 }
