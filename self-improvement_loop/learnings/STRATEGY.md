@@ -31,3 +31,4 @@ Append-only insights. Newest at the bottom.
 - (2026-07-21) 2026-07-21: FAIL, did not beat baseline; closest contrarian, worst news.
 - (2026-07-22) When the news analyst flags a specific same-day risk-off catalyst (index futures down + macro shock) while technicals only cite range-bound consolidation, overweight news toward its solo call rather than blending — the catalyst dominates on the day.
 - (2026-07-23) When multiple independent catalysts stack (regulatory probe + layoffs + macro yield spike) on a confirmed down day, widen the downside target beyond nearby 'support' zones — support levels fail during multi-catalyst selloffs, so extrapolate intraday velocity rather than anchoring to prior close.
+- (2026-07-24) When momentum AND macro agree on direction with confidence >0.55 and price is below all SMAs, cap combined bullish (news+contrarian+technical) weight at 50% — trend-continuation should not be overruled by a fragile premarket-gap bounce thesis.

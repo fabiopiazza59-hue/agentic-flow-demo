@@ -3,19 +3,20 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- **Direction, not magnitude, is the core failure.** 15 of 19 misses are directional (79%); only 4 are magnitude. The model is a coin-flip on up/down. Overall directional hit rate is ~52% (15/29) — basically random.
-- **We routinely lose to a naive baseline on misses.** Most failing days also have `beats_baseline=false`, meaning on the days we're wrong we're worse than doing nothing.
-- **Big-error days cluster and repeat.** APE >3% shows up again and again (06-15, 06-17, 06-22, 06-25, 06-26, 06-29, 07-15, 07-23) — these are gap/volatility days the model can't handle, always missing direction.
-- **No overconfidence flag firing, but confidence is uninformative.** Confidence sits in a dead 0.40–0.55 band on both wins and losses. It doesn't separate good from bad predictions — it's miscalibrated by being flat, not by being high on misses.
+- **Direction, not magnitude, is the killer**: 16 of 20 fails are directional misses (80%). The model gets the size roughly right but calls the wrong way. Magnitude-only fails are just 4.
+- Overall we fail 2 of every 3 days (20/30), and mean fail APE is 2.35% — large moves get missed, not just noise.
+- **We lose to the naive baseline on most fails**: on the big-error days (June 22, 25, 26, 29; July 15, 23) we are barely at or worse than baseline — no edge when it matters.
+- No overconfidence flag firing (0), but that's misleading: confidence sits in a dead 0.40–0.55 band regardless of outcome, so it carries zero discriminating signal. It's uncalibrated by being flat, not by being too high.
+- **News is the most-trusted strategy (highest weight ~0.22) yet only hits 33%** — it wins the ensemble often and is still wrong 2/3 of the time. It's leading us off cliffs.
 
 ## Unreliable under these conditions
-- **`macro` is the worst strategy** (10% hit rate, highest MAPE 0.0188) yet still carries ~0.177 weight. Every day it "wins" the ensemble (06-12, 07-13, 07-15) it fails.
-- **`momentum` and `contrarian` both underperform** (~17–21% hit rate). Momentum has the highest sum-APE. These fire during choppy/mean-reverting stretches and get whipsawed.
-- **High-volatility / large-move days** (APE >3%): direction misses are near-universal regardless of which strategy wins.
-- **`news` is the only reliable strategy** (34% hit rate, lowest MAPE) — still weak in absolute terms, but the rest are dragging it down via near-equal weighting.
+- **High-volatility / large-move days** (baseline APE >3%): near-total directional failure — June 15, 17, 22, 25, 26, 29; July 15, 23 all missed direction. The ensemble mean-reverts into trending/gapping tapes.
+- **macro-led days**: hit rate 0.10 (3/30) — essentially a coin flip that loses. macro should not be a winning strategy.
+- **momentum-led calls in choppy periods** (June 12, 16, 25; July 24): flips direction repeatedly.
+- Late-July low-confidence days (0.24) still logged as active predictions and still failing — near-abstention isn't stopping bad trades.
 
 ## Fixes to try next
-- **Cut or gate `macro`** (and demote momentum/contrarian); lean weight toward `news`. Equal-ish 0.18–0.22 weighting is diluting the one signal that works.
-- **Add a volatility regime filter**: when expected daily range is high, widen intervals or abstain rather than forcing a directional call.
-- **Recalibrate confidence** against realized hit rate — current outputs carry no information; a flat 0.4 is useless for sizing.
-- **Track a direction-only accuracy metric** as the primary KPI, not APE, since magnitude is already decent when direction is right.
+- Attack direction explicitly: build/score a separate sign classifier; stop optimizing APE alone.
+- Cut macro to near-zero weight; cap news influence — its high weight + low hit rate is a net drag.
+- Add a volatility regime gate: when expected move >~2.5%, widen/abstain rather than mean-revert.
+- Rebuild confidence so it spans a real range and correlates with hit rate; auto-abstain below a threshold instead of logging weak predictions.
