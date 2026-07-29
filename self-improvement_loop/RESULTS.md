@@ -3,37 +3,38 @@
 _Auto-generated each trading day. PASS = predicted close within ±1% of actual._
 
 ## Verdict
-❌ **No edge yet** — rolling MAPE 1.30% does not beat the random-walk baseline 1.30%. Keep learning.
+❌ **No edge yet** — rolling MAPE 1.15% does not beat the random-walk baseline 1.15%. Keep learning.
 
-**Today's open prediction (2026-07-28):** close ≈ **230.05** (down, confidence 32.00%) vs prior close 231.39.
+**Today's open prediction (2026-07-29):** close ≈ **230.55** (down, confidence 24.00%) vs prior close 230.86.
 
 ## Rolling metrics (last 20 scored days)
 
 | Metric | Rolling | All-time |
 |---|---|---|
-| Scored days | 20 | 31 |
-| PASS rate (±1%) | 35.00% | 35.48% |
-| Directional accuracy | 50.00% | 45.16% |
-| MAPE | 1.30% | 1.63% |
-| Baseline MAPE (random walk) | 1.30% | 1.55% |
-| Edge (baseline − model) | -0.01% | -0.08% |
-| Brier (confidence calib.) | 0.26 | 0.25 |
+| Scored days | 20 | 32 |
+| PASS rate (±1%) | 40.00% | 37.50% |
+| Directional accuracy | 55.00% | 46.88% |
+| MAPE | 1.15% | 1.59% |
+| Baseline MAPE (random walk) | 1.15% | 1.51% |
+| Edge (baseline − model) | -0.00% | -0.08% |
+| Brier (confidence calib.) | 0.27 | 0.26 |
 
 ## Per-strategy scorecards
 
 | Strategy | Obs | Win rate (closest) | MAPE | Weight hint |
 |---|---|---|---|---|
-| technical | 31 | 19.35% | 1.49% | 0.22 |
-| news | 31 | 32.26% | 1.50% | 0.22 |
-| contrarian | 31 | 16.13% | 1.63% | 0.20 |
-| momentum | 31 | 22.58% | 1.70% | 0.19 |
-| macro | 31 | 9.68% | 1.79% | 0.18 |
+| technical | 32 | 18.75% | 1.45% | 0.22 |
+| news | 32 | 31.25% | 1.47% | 0.22 |
+| contrarian | 32 | 15.62% | 1.62% | 0.20 |
+| momentum | 32 | 25.00% | 1.65% | 0.19 |
+| macro | 32 | 9.38% | 1.76% | 0.18 |
 
 ## Last 20 scored model predictions
 _(backfill seed rows are excluded from metrics and this table; they appear only as price-history context on the dashboard chart)_
 
 | Date | Predicted | Actual | APE | PASS | Dir hit | Beat baseline | Closest |
 |---|---|---|---|---|---|---|---|
+| 2026-07-28 | 230.05 | 230.86 | 0.35% | ✅ | ✅ | ❌ | momentum |
 | 2026-07-27 | 232.09 | 231.39 | 0.30% | ✅ | ✅ | ✅ | technical |
 | 2026-07-24 | 234.90 | 232.11 | 1.20% | ❌ | ❌ | ❌ | momentum |
 | 2026-07-23 | 243.50 | 233.66 | 4.21% | ❌ | ✅ | ✅ | news |
@@ -53,23 +54,22 @@ _(backfill seed rows are excluded from metrics and this table; they appear only 
 | 2026-07-02 | 241.85 | 242.67 | 0.34% | ✅ | ✅ | ✅ | momentum |
 | 2026-07-01 | 238.15 | 241.70 | 1.47% | ❌ | ❌ | ❌ | news |
 | 2026-06-30 | 240.85 | 238.34 | 1.05% | ❌ | ❌ | ❌ | technical |
-| 2026-06-29 | 232.30 | 240.14 | 3.26% | ❌ | ❌ | ❌ | news |
 
 ## 🅰️/🅱️ A/B test — ensemble+gates vs raven-style prior+pulse
 
 _Both arms predict the same sessions from the same pre-open snapshot (paired test)._
 
-**Verdict:** ⏳ Only 6 paired scored day(s) — no verdict before 10.
+**Verdict:** ⏳ Only 7 paired scored day(s) — no verdict before 10.
 
-**B's open prediction (2026-07-28):** close ≈ **230.38** (down, adj -0.25σ, 8 evidence items).
+**B's open prediction (2026-07-29):** close ≈ **231.04** (up, adj 0.05σ, 8 evidence items).
 
 | Rolling metric | A — ensemble+gates | B — raven prior+pulse |
 |---|---|---|
-| Scored days | 20 | 6 |
-| PASS rate (±1%) | 35.00% | 50.00% |
-| Directional accuracy | 50.00% | 66.67% |
-| MAPE | 1.30% | 1.34% |
-| Edge vs baseline | -0.01% | 0.15% |
+| Scored days | 20 | 7 |
+| PASS rate (±1%) | 40.00% | 57.14% |
+| Directional accuracy | 55.00% | 71.43% |
+| MAPE | 1.15% | 1.18% |
+| Edge vs baseline | -0.00% | 0.14% |
 
-Paired days: 6; B wins 5/6 decisive; mean daily APE delta (A−B) 0.25%; sign test p = 0.2188.
+Paired days: 7; B wins 6/7 decisive; mean daily APE delta (A−B) 0.23%; sign test p = 0.125.
 _This is a research experiment, not financial advice._
