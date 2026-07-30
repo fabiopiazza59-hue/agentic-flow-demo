@@ -34,3 +34,4 @@ Append-only insights. Newest at the bottom.
 - (2026-07-24) When momentum AND macro agree on direction with confidence >0.55 and price is below all SMAs, cap combined bullish (news+contrarian+technical) weight at 50% — trend-continuation should not be overruled by a fragile premarket-gap bounce thesis.
 - (2026-07-27) 2026-07-27: PASS, beat baseline; closest technical, worst contrarian.
 - (2026-07-28) When 5d momentum is strongly negative and RSI is oversold (30-40) with a flat premarket, predict a modest continuation drift smaller than the naive carry-forward — full trend extrapolation overshoots because oversold conditions dampen further downside.
+- (2026-07-29) When 3+ analysts agree on direction with a strong multi-day trend (5d < −5%), cap the aggregate weight of the dissenting mean-reversion analysts (news+contrarian) below 0.30 so the blend commits to the trend magnitude instead of flattening toward prior_close.
