@@ -35,3 +35,4 @@ Append-only insights. Newest at the bottom.
 - (2026-07-27) 2026-07-27: PASS, beat baseline; closest technical, worst contrarian.
 - (2026-07-28) When 5d momentum is strongly negative and RSI is oversold (30-40) with a flat premarket, predict a modest continuation drift smaller than the naive carry-forward — full trend extrapolation overshoots because oversold conditions dampen further downside.
 - (2026-07-29) When 3+ analysts agree on direction with a strong multi-day trend (5d < −5%), cap the aggregate weight of the dissenting mean-reversion analysts (news+contrarian) below 0.30 so the blend commits to the trend magnitude instead of flattening toward prior_close.
+- (2026-07-30) When RSI < 30 AND price is 6%+ below SMA20/SMA50, cap momentum-analyst weight at 0.15 and let mean-reversion voters lead — deep-oversold trend-continuation calls historically underperform.

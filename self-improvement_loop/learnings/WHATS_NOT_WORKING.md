@@ -3,19 +3,20 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- **Directional errors dominate: 16 of 21 fails are wrong-direction, not just magnitude.** The model can size a move but repeatedly picks the wrong sign. This is the core problem, not calibration.
-- Overall directional hit rate is coin-flip-or-worse. Every strategy's standalone hit rate is below 50% — best is news at 30%, worst is macro at 12%.
-- The worst APE fails cluster on high-volatility days (2026-06-22 5.1%, 2026-07-23 4.2%, 2026-06-17 3.7%, 2026-06-25 3.6%, 2026-06-15/26/29 ~3.2%). On big-move days the model both misses direction and undershoots magnitude.
-- The system rarely beats a naive baseline on fails — most fails have ape ≥ baseline_ape, so the ensemble is actively adding error, not just failing to help.
+- **Direction, not magnitude, is the core failure**: 17 of 22 misses are directional. The model calls the sign wrong far more often than it sizes the move wrong. Fixing APE won't help; we're guessing up/down.
+- **Overall directional hit rate is poor** (~50% at best across strategies; individual strategy hit rates 15–29%). We are near coin-flip and losing to baseline on most fail days (beats_baseline false on nearly every miss).
+- **Big-move days are systematically blown**: the worst APEs (3–5%: 06-22, 06-25, 06-17, 06-15, 07-23, 07-30) cluster on large realized moves, and we almost always get the sign wrong on them. The model reverts to a small predicted move and gets run over.
+- **No strategy is reliable.** News is "best" at 29% hit / 0.153 MAPE but still loses more than it wins. Contrarian and macro are the worst (15% hit) yet still carry ~19% weight each — dead weight.
 
 ## Unreliable under these conditions
-- **Large true moves (>2.5%):** near-universally missed, usually wrong direction. The model is anchored to small-move regimes.
-- **`macro` as winning strategy is a red flag:** 3 of its appearances (06-12? no — 06-08 pass, but 07-13, 07-15 fails) skew bad; 12% hit rate overall. When macro wins the blend, expect a miss.
-- **News-weighted days after gaps:** news carries the highest weight (~0.42 on several fails: 07-23, 07-24, 06-17) yet still misses direction — heavy news tilt does not rescue big days.
-- Confidence is NOT the problem: overconfident_misses = 0, and fails cluster at low confidence (0.4). If anything the model is under-confident on its rare wins (07-27 conf 0.10 passed).
+- **High-volatility / gap days**: whenever the true move exceeds ~2%, directional accuracy collapses. All 3–5% APE days are directional misses.
+- **When macro or contrarian is the winning strategy**: 06-15, 07-13, 07-15, 07-30 (macro) and 06-26, 07-21 (contrarian) are almost all fails. These strategies win the vote but lose reality.
+- **Confidence is uninformative, not overconfident**: overconfident_misses = 0, but that's because confidence is uniformly low (0.1–0.58). Some passes came at conf 0.1 (07-27) and some fails at 0.55 (06-30, 07-13). Confidence carries near-zero signal — it's flat noise, not calibrated.
+- **Empty-weights days** (06-30, 07-22, 07-24, 07-28) are a config/plumbing red flag — weights aren't being populated, yet predictions still ship.
 
 ## Fixes to try next
-- Build an explicit **volatility regime gate**: when expected move >2%, widen the band and de-weight the mean-reversion/contrarian and macro strategies.
-- **Add a directional meta-model** — the magnitude is roughly OK; a dedicated sign classifier could fix the 16 directional misses.
-- Cut or floor `macro` and `contrarian` weights (both <16% hit); redistribute toward news/momentum, and only trust news when a same-day catalyst is confirmed.
-- Recalibrate confidence upward on clean setups — current confidence carries no signal (fails and passes both ~0.4).
+- Add a **volatility regime gate**: on expected-high-move days, widen predicted magnitude and stop defaulting to small mean-reversion.
+- **Cut or down-weight macro and contrarian** (15% hit); rebalance toward news/momentum and require directional agreement before committing.
+- **Rebuild confidence as a calibrated, directional probability** — current values are meaningless; suppress trades when true directional confidence is low.
+- Fix the **empty-weights bug**; audit those days separately.
+- Track and report a **directional-accuracy-by-volatility-bucket** metric; APE is hiding the real problem.
