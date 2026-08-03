@@ -121,3 +121,13 @@ Three analysts (technical 248.47, macro 248.80, momentum 248.10) all leaned on t
 **What went wrong:** We shipped a near-flat 226.35 into a +3.9% rally, missing both direction and magnitude. Momentum (0.34 weight) was the only bearish voice and it dominated the blend, overriding four analysts who correctly called 'up' off a 27.4 RSI and -7.4% 5-day slide.
 **Root cause:** The meta-judge over-trusted trailing-trend momentum at a statistical extreme — exactly where trend-continuation is weakest. Momentum's scorecard (23% hit, 0.017 MAPE) didn't justify its 0.34 weight, and the oversold mean-reversion signal was structurally underweighted. Even the bulls capped upside at +1.2%, so the desk never had a path to +3.9%.
 **One change to try:** Add a regime override — when RSI < 30 and price > 6% below SMA20, force momentum weight down to ≤0.15 and raise contrarian/macro; test whether this recovers directional hits on oversold-bounce days without hurting trending days.
+
+## 2026-07-31 — FAIL (APE 13.21%)
+- Predicted 235.7 vs actual 271.5799865722656 (prior 235.5); dir hit: True; beat baseline: True; closest analyst: news.
+## What Went Wrong
+
+**Direction correct, magnitude catastrophically short.** We predicted +0.2 into a +36 move. The single analyst who correctly read the day — news, citing an ~11% earnings gap to ~$263 with 0.78 confidence — was buried at 0.12 weight, while momentum (0.28) and technical (0.27) dominated the blend with pre-gap chart levels (SMA5=231, RSI=40) that the earnings report had already invalidated.
+
+**Root cause:** The meta-judge applied normal-regime weighting to an earnings-day regime. It rewarded low-MAPE chart analysts whose signals are structurally useless the morning after a blowout print, and discounted the one analyst pricing the actual overnight news.
+
+**The one change:** Add an earnings-gap regime detector — when news flags a >5% premarket gap at high confidence, hard-floor news weight to 0.6+ and cap momentum/technical to 0.1 each. This one fix likely turns 13.2% APE into ~3%.
