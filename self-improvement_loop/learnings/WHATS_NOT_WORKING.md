@@ -3,19 +3,22 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- **Directional errors dominate:** 17 of 23 misses (74%) are wrong on *direction*, not just magnitude. This is a sign problem, not a calibration/tuning problem — the model can't tell up from down on most fail days.
-- **We barely beat a naive baseline.** On most fails baseline_ape ≈ our ape (e.g. 06-15, 06-17, 06-22, 07-15, 07-29). We're adding no edge on hard days.
-- **Big-move days are catastrophic.** APE spikes on 06-22 (5.1%), 07-23 (4.2%), 07-30 (3.9%), 07-31 (13.2%) — the model has no handle on volatility regime shifts / gap days.
-- **macro as winning_strategy is a red flag:** when macro "wins" it's usually on high-APE fails (06-12, 07-13, 07-15, 07-30). It gets picked in the absence of a better signal.
+- **Direction is the core problem.** 17 of 23 fails (74%) are directional misses, not magnitude. The model calls the sign wrong and loses regardless of tight error bars.
+- **We rarely beat baseline on fails.** Most failing days the ensemble lands worse than or barely at the naive baseline — we're adding noise, not signal.
+- **News is the crutch.** It gets the top weight_hint (0.23) and highest hit rate (0.31), but that's still a coin-flip that loses. When news is the winning strategy, outcomes are split at best.
+- **Every strategy is sub-random on direction.** Best is news at 31%; technical/contrarian/macro all sit at ~14-17% hit rate. That's structurally broken sign prediction, not one bad regime.
+- **Tail blowups.** 2026-07-31 (13.2% APE) and multiple 3-5% days (06-22, 06-25, 07-15, 07-23, 07-30) cluster on macro/news wins during large moves.
 
 ## Unreliable under these conditions
-- **High-volatility / large daily moves:** every APE >3% is a fail; magnitude is systematically underestimated.
-- **contrarian and macro are the worst strategies** (hit rate 14% each, MAPE ~2.0%). technical isn't much better (17%). None should carry ~19–20% weight.
-- **Confidence is uninformative, not overconfident.** overconfident_misses=0, but confidence is compressed (0.1–0.58) and clusters at 0.40 on both wins and fails — no discrimination. Low-conf days (0.10, 0.24) fail just as often. Calibration is dead, not miscalibrated.
-- **Empty-weights days (06-30, 07-22, 07-28) still get scored** — pipeline/fallback bug producing predictions with no strategy blend.
+- **High-volatility / large-move days:** APE spikes to 3-13% cluster around macro- and news-led calls; the model cannot size big moves.
+- **Macro-led days:** hit rate 14%, worst MAPE (0.020). Macro as winner correlates with the biggest misses (07-15, 07-30, 07-31).
+- **Contrarian and technical as winners:** lowest hit rates; contrarian especially fails on trend continuation.
+- **Confidence is uninformative, not overconfident.** 0 overconfident misses, but confidence is flat/low (0.4 dominant) on both wins and fails — it carries no signal. Some 0.55 calls fail (06-12, 06-30, 07-13, 07-20); some 0.1 calls pass. Calibration is dead.
+- **Empty-weights days** (06-30, 07-22, 07-28, 08-03) show config gaps slipping through.
 
 ## Fixes to try next
-- **Attack the direction problem first:** add a regime/volatility filter; when expected move is large, widen intervals and down-weight point-direction bets.
-- **Reweight by realized hit rate:** boost news (31%, best MAPE), cut contrarian and macro toward zero; stop letting macro "win" by default.
-- **Rebuild confidence:** recalibrate so it actually separates hits from misses, or drop it until it earns predictive value.
-- **Fix the empty-`weights` fallback path** and audit those days.
+- **Attack the sign problem directly:** train/evaluate a dedicated direction classifier; stop grading magnitude when sign is wrong.
+- **Down-weight macro, technical, contrarian** toward zero on high-vol days; gate ensemble to news+momentum when realized vol is elevated.
+- **Add a volatility regime detector** and widen/scale predictions on large-move days to avoid systematic under-sizing.
+- **Rebuild confidence calibration** — current scores are noise; suppress trades when calibrated confidence is low rather than emitting flat 0.4.
+- **Fix empty-weights path**; no prediction should ship without a resolved weight vector.
