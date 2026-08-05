@@ -131,3 +131,12 @@ Three analysts (technical 248.47, macro 248.80, momentum 248.10) all leaned on t
 **Root cause:** The meta-judge applied normal-regime weighting to an earnings-day regime. It rewarded low-MAPE chart analysts whose signals are structurally useless the morning after a blowout print, and discounted the one analyst pricing the actual overnight news.
 
 **The one change:** Add an earnings-gap regime detector — when news flags a >5% premarket gap at high confidence, hard-floor news weight to 0.6+ and cap momentum/technical to 0.1 each. This one fix likely turns 13.2% APE into ~3%.
+
+## 2026-08-04 — FAIL (APE 2.26%)
+- Predicted 283.69 vs actual 277.42 (prior 284.02); dir hit: True; beat baseline: True; closest analyst: contrarian.
+## What went wrong
+The desk got direction right (down) but massively under-shot magnitude: predicted -0.12%, actual -2.32%. The blend was diluted by momentum's contrarian +284.5 up-call carrying 0.24 weight — the second-highest — despite four analysts unanimously flagging exhaustion at a 252-week high after a +22% surge with a $4.07B Bezos insider-sale overhang.
+
+**Root cause:** the ensemble averaged toward the prior close instead of respecting a strong consensus overextension signal; momentum's low-conviction (0.45) up-call should never have offset four down-calls, two of which (news, contrarian) targeted 279-280 — much closer to the 277.42 outcome.
+
+**One change to try:** when analysts show ≥80% directional agreement backed by a concrete supply catalyst, drop the dissenting analyst's weight to near-zero and anchor the blend to the median of the agreeing down-targets (~280.1), not the confidence-weighted mean.
