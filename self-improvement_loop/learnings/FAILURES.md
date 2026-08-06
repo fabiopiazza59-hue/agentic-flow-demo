@@ -140,3 +140,9 @@ The desk got direction right (down) but massively under-shot magnitude: predicte
 **Root cause:** the ensemble averaged toward the prior close instead of respecting a strong consensus overextension signal; momentum's low-conviction (0.45) up-call should never have offset four down-calls, two of which (news, contrarian) targeted 279-280 — much closer to the 277.42 outcome.
 
 **One change to try:** when analysts show ≥80% directional agreement backed by a concrete supply catalyst, drop the dissenting analyst's weight to near-zero and anchor the blend to the median of the agreeing down-targets (~280.1), not the confidence-weighted mean.
+
+## 2026-08-05 — FAIL (APE 1.34%)
+- Predicted 276.3 vs actual 272.65 (prior 277.42); dir hit: True; beat baseline: True; closest analyst: contrarian.
+- **What went wrong:** right direction, magnitude off; final blend 276.3 missed by 1.34%.
+- **Likely culprit:** analyst `news` was furthest from actual and pulled the blend.
+- **Try next:** reduce weight on `news` under today's conditions and lean on `contrarian`.

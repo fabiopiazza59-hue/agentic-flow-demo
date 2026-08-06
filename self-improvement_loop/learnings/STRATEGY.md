@@ -39,3 +39,4 @@ Append-only insights. Newest at the bottom.
 - (2026-07-31) When the news analyst flags an earnings gap >5% with confidence >0.7, override meta-weights and set news weight to at least 0.6 — chart-based analysts (momentum/technical) are structurally blind to overnight fundamental repricing.
 - (2026-08-03) When AMZN sits exactly at a 252-day high with zero premarket gap after a >20% multi-day surge, predicting near-flat (|move|<0.3%) beats both mean-reversion and continuation extremes — test whether an explicit 'consolidation' prior at fresh highs improves MAPE.
 - (2026-08-04) When 4+ of 5 analysts agree on direction AND cite an overextension (RSI>65, >10% above SMA20) plus a fresh supply catalyst (insider sale), scale the blend toward the most aggressive down-target rather than blunting it with the lone contrarian up-call.
+- (2026-08-05) 2026-08-05: FAIL, beat baseline; closest contrarian, worst news.

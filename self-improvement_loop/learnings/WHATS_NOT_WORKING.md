@@ -3,20 +3,21 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- **Directional misses dominate**: 17 of 24 failures are wrong-direction, not just magnitude. This is a *sign* problem, not a calibration-of-size problem. The model can't call which way AMZN closes.
-- **Barely beats baseline**: on most fails APE ≈ baseline_ape (e.g. 06-17 .0373 vs .0358, 07-15 .0298 vs .0293). We're adding no edge over a naive predictor on hard days.
-- **Fat-tail blowups**: 07-31 APE 13.2%, 06-22 5.1%, 07-30 3.9% — large one-directional gaps swamp the mean_fail_ape (2.83%).
-- **All strategies are weak**: best is news at 29.7% hit rate; technical/contrarian/macro sit at 13-16%. No strategy is reliably right — this is a coin-flip ensemble.
+- **Directional errors dominate**: 17 of 25 fails are wrong-direction (68%), only 8 pure magnitude. The system can't call the sign, not just the size. This is the core problem.
+- **We lose to the naive baseline constantly**: of the 25 fails, the vast majority also have `beats_baseline=false`. On many days we'd do better predicting "no change."
+- **Big-move blindness**: on high-APE days (0.03–0.13) the model consistently under-reacts and picks the wrong side — 2026-06-22, 06-25, 07-15, 07-30, 07-31. It smooths through regime shifts.
+- **No overconfident misses flagged (0), but calibration is inverted**: confidence is uniformly low (0.1–0.55) and barely tracks outcomes. Some passes came at conf 0.1 (07-27, 08-03) while misses sit at 0.5+ (06-30, 07-13, 07-20). Confidence carries almost no signal.
 
 ## Unreliable under these conditions
-- **High-volatility / large-move days**: whenever the true move is big (>3%), the model consistently under-shoots and gets direction wrong (06-15, 06-22, 06-25, 07-15, 07-23, 07-31).
-- **macro-led and news-led calls on volatile days**: macro wins only 13.5% and is the pick on several worst blowups (07-30, 07-31 region, 06-08 the lone macro win is luck). news is "best" but still misses direction on big days.
-- **Confidence is NOT overconfident — it's uninformative**: 0 overconfident misses, but confidence clusters at 0.4 regardless of outcome. Passes and fails share the same ~0.4 confidence. It carries zero discriminative signal.
-- **Empty-weights days** (06-30, 07-22, 07-24, 07-28) are mixed-to-bad — fallback path is unmanaged.
+- **Macro-led days**: hit rate 0.132, worst MAPE (0.020). When `winning_strategy=macro` we usually miss (07-13, 07-15, 07-30). Macro should not lead.
+- **Technical-led days**: hit rate 0.158 — nearly as bad. Heavy technical/momentum weighting (07-08, 06-17) precedes misses.
+- **High-volatility / large-gap sessions**: all worst APEs cluster on trend days the model treats as mean-reverting.
+- **Contrarian in trending tape**: contrarian "wins" often on days we still fail directionally — it flips us onto the wrong side during momentum runs.
+- **News is the only relative bright spot** (hit rate 0.289, lowest MAPE) but still <30% — nothing is actually reliable.
 
 ## Fixes to try next
-- Treat this as a **directional classification problem first**; stop optimizing magnitude when sign is wrong 46% of the time.
-- **Down-weight technical, contrarian, macro** (hit rates ≤16%); lean on news but cap it — it's still <30%.
-- Build a **volatility regime gate**: on high-vol days widen intervals or defer to baseline instead of committing to a direction.
-- **Recalibrate confidence** — current 0.4-flat output is meaningless; force separation so low-confidence days are actually predictive of misses.
-- Audit the empty-`weights` fallback; it should never silently fire.
+- Cut macro and technical weight hints; they're the worst performers. Lean the ensemble toward news.
+- Add an explicit trend/regime filter so contrarian is suppressed when momentum is strong — stop fighting large moves.
+- Recalibrate confidence against realized hit rate; current values are noise. Suppress trades when calibrated confidence is low.
+- Build a volatility-aware magnitude scaler so big-move days aren't smoothed toward zero.
+- Gate against baseline: if the ensemble can't beat "no change," default to baseline.
