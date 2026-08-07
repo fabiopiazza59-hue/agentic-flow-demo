@@ -3,21 +3,19 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- **Directional errors dominate**: 17 of 25 fails are wrong-direction (68%), only 8 pure magnitude. The system can't call the sign, not just the size. This is the core problem.
-- **We lose to the naive baseline constantly**: of the 25 fails, the vast majority also have `beats_baseline=false`. On many days we'd do better predicting "no change."
-- **Big-move blindness**: on high-APE days (0.03–0.13) the model consistently under-reacts and picks the wrong side — 2026-06-22, 06-25, 07-15, 07-30, 07-31. It smooths through regime shifts.
-- **No overconfident misses flagged (0), but calibration is inverted**: confidence is uniformly low (0.1–0.55) and barely tracks outcomes. Some passes came at conf 0.1 (07-27, 08-03) while misses sit at 0.5+ (06-30, 07-13, 07-20). Confidence carries almost no signal.
+- **Directional failure is the dominant problem**: 17 of 25 fails (68%) are direction misses, not just magnitude. The model isn't sized wrong — it's pointed wrong. This is a signal problem, not a calibration one.
+- **We barely beat the naive baseline.** On failed days, mean fail APE (2.77%) roughly matches or exceeds baseline_ape repeatedly (e.g. 06-12, 06-15, 06-25, 07-13, 07-21, 07-24). We're adding noise, not edge.
+- **Big-move days are catastrophic**: 07-31 (13.2% APE), 06-22 (5.1%), 07-30 (3.9%), 07-23 (4.2%). The model has no capacity to catch or contain large single-day swings — likely earnings/gap events.
+- **News-weighted days go wrong most often.** When news weight is high (~0.30-0.42) the prediction frequently misses direction (06-25, 07-01, 07-13, 07-20, 07-21, 07-24). News is over-weighted (0.2269 hint) relative to its real reliability.
 
 ## Unreliable under these conditions
-- **Macro-led days**: hit rate 0.132, worst MAPE (0.020). When `winning_strategy=macro` we usually miss (07-13, 07-15, 07-30). Macro should not lead.
-- **Technical-led days**: hit rate 0.158 — nearly as bad. Heavy technical/momentum weighting (07-08, 06-17) precedes misses.
-- **High-volatility / large-gap sessions**: all worst APEs cluster on trend days the model treats as mean-reverting.
-- **Contrarian in trending tape**: contrarian "wins" often on days we still fail directionally — it flips us onto the wrong side during momentum runs.
-- **News is the only relative bright spot** (hit rate 0.289, lowest MAPE) but still <30% — nothing is actually reliable.
+- **High-volatility / gap days (APE > 3%)**: every strategy fails; macro and news "win" these days but only because everything else is worse.
+- **When macro is the winning strategy**: hit_rate 0.128, worst MAPE (0.0197). Macro winning is a red flag it's a leftover/default, not a real signal.
+- **Technical as winner**: hit_rate 0.154 — nearly a coin-flip loser. Weighted at 0.207 but underperforms news.
+- **Low-confidence regime doesn't correlate with misses cleanly** — some 0.1 confidence days pass (07-27, 08-03), some fail (07-30). Confidence carries no information.
 
 ## Fixes to try next
-- Cut macro and technical weight hints; they're the worst performers. Lean the ensemble toward news.
-- Add an explicit trend/regime filter so contrarian is suppressed when momentum is strong — stop fighting large moves.
-- Recalibrate confidence against realized hit rate; current values are noise. Suppress trades when calibrated confidence is low.
-- Build a volatility-aware magnitude scaler so big-move days aren't smoothed toward zero.
-- Gate against baseline: if the ensemble can't beat "no change," default to baseline.
+- **Cut news and macro weight**; both are over-weighted vs. their hit rates. Tilt toward momentum/news blend only when they agree on direction.
+- **Add a direction-gate**: if strategies disagree on sign, output a smaller/near-flat move rather than committing — most damage is wrong-sign conviction.
+- **Detect high-vol/event days** (earnings calendar, prior-day range) and either widen intervals or abstain; these days drive the tail losses.
+- **Recalibrate confidence** — it's currently uninformative; either fix it or stop reporting it. Overconfident_misses=0 suggests confidence is uniformly low/meaningless, not well-calibrated.
