@@ -41,3 +41,4 @@ Append-only insights. Newest at the bottom.
 - (2026-08-04) When 4+ of 5 analysts agree on direction AND cite an overextension (RSI>65, >10% above SMA20) plus a fresh supply catalyst (insider sale), scale the blend toward the most aggressive down-target rather than blunting it with the lone contrarian up-call.
 - (2026-08-05) 2026-08-05: FAIL, beat baseline; closest contrarian, worst news.
 - (2026-08-06) 2026-08-06: PASS, did not beat baseline; closest momentum, worst contrarian.
+- (2026-08-07) When all five analysts agree on direction, treat the consensus magnitude as unreliable and blend the point estimate 50/50 toward prior_close, since correlated bearish priors misfired here despite a technical pass.

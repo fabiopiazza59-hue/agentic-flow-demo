@@ -3,19 +3,22 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- **Directional failure is the dominant problem**: 17 of 25 fails (68%) are direction misses, not just magnitude. The model isn't sized wrong — it's pointed wrong. This is a signal problem, not a calibration one.
-- **We barely beat the naive baseline.** On failed days, mean fail APE (2.77%) roughly matches or exceeds baseline_ape repeatedly (e.g. 06-12, 06-15, 06-25, 07-13, 07-21, 07-24). We're adding noise, not edge.
-- **Big-move days are catastrophic**: 07-31 (13.2% APE), 06-22 (5.1%), 07-30 (3.9%), 07-23 (4.2%). The model has no capacity to catch or contain large single-day swings — likely earnings/gap events.
-- **News-weighted days go wrong most often.** When news weight is high (~0.30-0.42) the prediction frequently misses direction (06-25, 07-01, 07-13, 07-20, 07-21, 07-24). News is over-weighted (0.2269 hint) relative to its real reliability.
+- **Direction, not magnitude, is the core problem**: 17 of 25 fails are directional misses (68%). The model gets the sign wrong far more than it gets the size wrong. On small-move days the APE is fine but the coin-flip on direction sinks the score.
+- **Systematically overweighting `news`**: news carries the highest weight_hint (0.227) and highest single-strategy influence, yet only hits 27.5% of the time. Many fails (06-15, 06-22, 06-29, 07-01, 07-20, 07-23) have news as the winning strategy while direction is wrong.
+- **Big misses cluster on high-volatility / event days**: 07-31 (13.2% APE), 06-22 (5.1%), 07-23 (4.2%), 07-30 (3.9%), 07-15 (3.0%) — the model is blind to large gaps and cannot even beat baseline meaningfully on them.
+- **Weakly beats baseline on losses**: most fails have ape ≈ baseline_ape, meaning the model adds no edge exactly when it's wrong.
+- Confidence is NOT the issue: 0 overconfident misses, and passing days often had low confidence (0.1). Confidence signal is essentially noise/uninformative, not miscalibrated-high.
 
 ## Unreliable under these conditions
-- **High-volatility / gap days (APE > 3%)**: every strategy fails; macro and news "win" these days but only because everything else is worse.
-- **When macro is the winning strategy**: hit_rate 0.128, worst MAPE (0.0197). Macro winning is a red flag it's a leftover/default, not a real signal.
-- **Technical as winner**: hit_rate 0.154 — nearly a coin-flip loser. Weighted at 0.207 but underperforms news.
-- **Low-confidence regime doesn't correlate with misses cleanly** — some 0.1 confidence days pass (07-27, 08-03), some fail (07-30). Confidence carries no information.
+- **Large-move / event days** (APE > 3%): every strategy fails, macro and news worst.
+- **`macro`-led predictions**: 12.5% hit rate, highest MAPE (0.0196) — near-useless as a lead strategy.
+- **`technical`-led**: 15% hit rate despite 2nd-highest weight; drop its influence.
+- **`contrarian`-led**: 17.5% hit; contrarian consistently gets deprioritized in weights (often ~0.05–0.15) yet still leads losses.
+- Empty-weights entries (07-22, 07-24, 07-28, 08-05) coincide with fails/low-conf — pipeline dropouts.
 
 ## Fixes to try next
-- **Cut news and macro weight**; both are over-weighted vs. their hit rates. Tilt toward momentum/news blend only when they agree on direction.
-- **Add a direction-gate**: if strategies disagree on sign, output a smaller/near-flat move rather than committing — most damage is wrong-sign conviction.
-- **Detect high-vol/event days** (earnings calendar, prior-day range) and either widen intervals or abstain; these days drive the tail losses.
-- **Recalibrate confidence** — it's currently uninformative; either fix it or stop reporting it. Overconfident_misses=0 suggests confidence is uniformly low/meaningless, not well-calibrated.
+- Cut `news` and `macro` weight; promote `momentum`/`news` only on their higher-hit regimes; demote `technical` and `macro` to tie-breakers.
+- Build a **direction-first classifier** separate from magnitude — the ensemble optimizes size but flips sign.
+- Add a **volatility/event gate**: on high-expected-move days, widen intervals or abstain rather than commit a direction.
+- Recalibrate or retire the confidence field — it currently has no predictive relationship to passing.
+- Fix empty-`weights` dropouts; they correlate with degraded outcomes.
