@@ -146,3 +146,7 @@ The desk got direction right (down) but massively under-shot magnitude: predicte
 - **What went wrong:** right direction, magnitude off; final blend 276.3 missed by 1.34%.
 - **Likely culprit:** analyst `news` was furthest from actual and pulled the blend.
 - **Try next:** reduce weight on `news` under today's conditions and lean on `contrarian`.
+
+## 2026-08-10 — FAIL (APE 1.37%)
+- Predicted 274.29 vs actual 278.09 (prior 274.48); dir hit: False; beat baseline: False; closest analyst: news.
+**What went wrong:** Directional AND magnitude fail — blend said flat-to-down (274.29) vs actual +1.31% (278.09), missing baseline too. The bearish cluster (contrarian/macro/technical/momentum all ≤273.8) dragged the blend below prior close, when the correct read was a bull-flag breakout above the 272-278 chop. **Root cause:** every analyst anchored to the same 'RSI 62.93 + extended above SMA20' mean-reversion thesis; news correctly saw upside catalysts (Zoox launch, positive futures) but capped itself at SMA-5 276.17 despite noting price already tagged 278.31. **One change:** when analyst directions are ≥80% one-sided on pure technical-extension logic (no fresh catalyst), cap the crowd's weight and let the single catalyst-driven (news) analyst set the directional sign, then extend its target past the noted intraday high rather than anchoring to SMA-5.
