@@ -43,3 +43,4 @@ Append-only insights. Newest at the bottom.
 - (2026-08-06) 2026-08-06: PASS, did not beat baseline; closest momentum, worst contrarian.
 - (2026-08-07) When all five analysts agree on direction, treat the consensus magnitude as unreliable and blend the point estimate 50/50 toward prior_close, since correlated bearish priors misfired here despite a technical pass.
 - (2026-08-10) When 4+ analysts cluster bearish on 'extended above SMA / mild overbought RSI<65' during consolidation near 52W highs, treat that unanimity as a contrarian breakout signal and shade the blend toward the highest up-caller, not the mean.
+- (2026-08-11) When contrarian+technical agree on 'down' from an extended RSI/SMA-stretch setup, their combined weight should not be overridden by a news analyst quoting stale intraday positive drift — test capping news weight when its rationale relies on same-day price action.

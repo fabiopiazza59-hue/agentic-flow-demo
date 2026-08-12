@@ -3,20 +3,19 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- **Direction is the primary failure**: 18 of 26 fails are directional misses (69%). The model gets the size roughly right but the sign wrong — it's a directional coin-flip on hard days.
-- **Baseline-parity trap**: On most big-APE fails the prediction barely differs from baseline (e.g. 06-15, 06-22, 06-25, 07-15, 07-30), meaning the ensemble adds nothing when it matters — it just tracks yesterday's price and eats the move.
-- **Fat-tail blowups**: 07-31 (13.2% APE) and the 3–5% cluster (06-17, 06-22, 07-23, 07-30) show the model has no defense against large single-day gaps (likely earnings/news shocks).
-- **macro is dead weight**: 12% hit rate, worst MAPE, and it "wins" precisely on the worst days (07-13, 07-15, 07-30). When macro is the deciding strategy, expect a fail.
+- **Direction is the core problem, not magnitude.** 19 of 27 fails are directional misses (70%). Mean fail APE of 2.7% means when we're wrong, we're wrong on the sign, and the size hurts. Getting the level roughly right doesn't save us when we call the wrong way.
+- **We barely beat the naive baseline.** On failed days APE is routinely at/above baseline_ape (e.g. 06-12, 06-15, 06-17, 06-22, 06-25, 07-13, 07-15, 07-20, 07-21, 07-24, 08-10). We're adding noise, not signal, on hard days.
+- **Big misses cluster around specific dates** (07-31 at 13.2% APE, 06-22/06-25/07-15/07-30 near 3–5%) — likely earnings/gap events the model doesn't anticipate.
+- **All strategies have losing directional hit-rates.** Best is news at 28.6%; that's worse than a coin flip across the board. This is a systemic edge problem, not a rotation problem.
 
 ## Unreliable under these conditions
-- **High-volatility / gap days**: every APE >3% is a directional miss where the ensemble hugged baseline. No regime detection.
-- **macro-led and technical-led days**: macro (12% hit) and technical (14.6% hit) are near-random; both are over-weighted (~0.20 hint) relative to their skill.
-- **Mid-confidence band (0.4–0.55)**: this is where the fails cluster (06-12, 06-25, 07-13, 08-07, 08-10). Not classic overconfidence (0 flagged), but confidence is flat/uninformative — it doesn't separate hits from misses. Effectively miscalibrated by being noise.
-- **News-led days are the least-bad** (29% hit, best MAPE) but still fail more than half the time — no strategy is reliable standalone.
+- **Macro and technical are dead weight**: macro hit_rate 11.9%, technical 14.3%, both with the highest MAPE. When macro "wins" the blend (06-12, 07-13, 07-15, 07-30) it loses directionally and misses big.
+- **High-volatility / gap days** (APE >3%): the model consistently misses direction and lands at baseline — no regime awareness for large moves.
+- **News-heavy weight days** underperform despite news being the "best" strategy — heavy news tilts (07-13, 07-23, 07-24 at 0.40+ news) still failed.
+- **Confidence is uninformative, not overconfident**: 0 overconfident misses, but low-confidence days (0.1–0.24) pass and fail almost at random (07-27 pass@0.1, 07-30 fail@0.1). Confidence carries no predictive information either way.
 
 ## Fixes to try next
-- **Cut or down-weight macro and technical hard**; shift mass toward news (best MAPE/hit) and momentum. Current weight hints reward the worst performers.
-- **Add a volatility/gap regime flag**: on high-vol days, widen intervals and stop hugging baseline — that's where directional misses concentrate.
-- **Rebuild the directional model separately from magnitude** — sign is the bottleneck, not scale.
-- **Recalibrate confidence**: it currently carries no signal (fails span 0.1–0.58). Tie confidence to strategy agreement and recent regime, then suppress trades in the 0.4–0.55 dead zone.
-- **Earnings/event calendar overlay** to pre-empt the 07-31-style tail blowups.
+- Attack direction directly: train/evaluate a separate sign classifier and gate magnitude on it; stop optimizing APE alone.
+- Cut or heavily down-weight macro and technical; they lose more than they add.
+- Build a gap/volatility regime flag (earnings calendar, prior-day range) and widen or abstain on those days rather than defaulting to baseline.
+- Recalibrate confidence against realized directional hits — current scores are flat noise; if it can't separate, drop it.
