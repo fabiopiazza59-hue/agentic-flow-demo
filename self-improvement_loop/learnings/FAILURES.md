@@ -154,3 +154,11 @@ The desk got direction right (down) but massively under-shot magnitude: predicte
 ## 2026-08-11 — FAIL (APE 2.16%)
 - Predicted 278.15 vs actual 272.27 (prior 278.09); dir hit: False; beat baseline: False; closest analyst: contrarian.
 **What went wrong:** The blend was flat (278.15) on a day AMZN fell to 272.27. News (0.34) and momentum (0.26) both called 'up' on trend/post-earnings momentum and dominated, drowning out contrarian and technical which correctly called 'down' from an overextended RSI 66 / +10% above SMA20 setup. **Root cause:** Meta-judge over-trusted news despite its rationale being anchored to a stale intraday +1.6% quote ('trading at 278.85') that had no forward information — a lookahead-flavored anchor, not a catalyst. Momentum reward for a strongly-stretched name ignored that stretch is precisely the mean-reversion risk the contrarian flagged. **The one change:** When RSI>65 AND price >8% above SMA20, down-weight momentum and news by half and let contrarian/technical drive; test this gate on the next 10 extended-stretch days.
+
+## 2026-08-12 — FAIL (APE 1.77%)
+- Predicted 272.01 vs actual 267.28 (prior 272.27); dir hit: True; beat baseline: True; closest analyst: contrarian.
+**What went wrong:** Unanimous down-call was right on sign but the blend (-0.10%) captured a fraction of the actual -1.83% drop. The panel clustered in a 2-point band anchored to a '270-271 support' that failed to hold, and the meta-blend averaged toward prior-close.
+
+**Root cause:** Consensus support-level anchoring in a 4%-vol regime — analysts named the same floor as a target rather than a level that could break, so magnitude was systematically compressed toward zero.
+
+**One change to try:** When direction is unanimous, override the blend to at least 0.5x the trailing realized-vol move in that direction rather than snapping to the nearest cited support; test whether magnitude-scaling on high-conviction consensus days reduces MAPE without hurting the (already correct) hit rate.
