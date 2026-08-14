@@ -4,66 +4,66 @@
   "rolling_window": 20,
   "rolling": {
     "n": 20,
-    "n_all_time": 43,
-    "pass_rate": 0.3,
+    "n_all_time": 44,
+    "pass_rate": 0.35,
     "directional_accuracy": 0.55,
-    "mape": 0.020805742599880897,
-    "baseline_mape": 0.020865059362441922,
-    "edge": 5.931676256102497e-05,
-    "beats_baseline_overall": true,
-    "brier": 0.23391999999999996
+    "mape": 0.020273068589929125,
+    "baseline_mape": 0.02025607447777595,
+    "edge": -1.699411215317498e-05,
+    "beats_baseline_overall": false,
+    "brier": 0.24821999999999994
   },
   "all_time": {
-    "n": 43,
-    "n_all_time": 43,
-    "pass_rate": 0.3488372093023256,
-    "directional_accuracy": 0.4883720930232558,
-    "mape": 0.018719709132851124,
-    "baseline_mape": 0.018102565682036293,
-    "edge": -0.0006171434508148305,
+    "n": 44,
+    "n_all_time": 44,
+    "pass_rate": 0.36363636363636365,
+    "directional_accuracy": 0.5,
+    "mape": 0.018416842573188038,
+    "baseline_mape": 0.017875444403685853,
+    "edge": -0.0005413981695021851,
     "beats_baseline_overall": false,
-    "brier": 0.24390465116279078
+    "brier": 0.24887045454545464
   },
   "scorecards": {
     "technical": {
-      "n": 43,
-      "wins": 6,
-      "sum_ape": 0.7429724214717592,
-      "hit_rate": 0.13953488372093023,
-      "mape": 0.017278428406319983,
-      "weight_hint": 0.2075
+      "n": 44,
+      "wins": 7,
+      "sum_ape": 0.7440285071655699,
+      "hit_rate": 0.1590909090909091,
+      "mape": 0.0169097387992175,
+      "weight_hint": 0.2087
     },
     "momentum": {
-      "n": 43,
+      "n": 44,
       "wins": 11,
-      "sum_ape": 0.8243636883414813,
-      "hit_rate": 0.2558139534883721,
-      "mape": 0.01917124856608096,
-      "weight_hint": 0.187
+      "sum_ape": 0.8257592301511596,
+      "hit_rate": 0.25,
+      "mape": 0.01876725523070817,
+      "weight_hint": 0.188
     },
     "contrarian": {
-      "n": 43,
+      "n": 44,
       "wins": 9,
-      "sum_ape": 0.7937556891082581,
-      "hit_rate": 0.20930232558139536,
-      "mape": 0.01845943463042461,
-      "weight_hint": 0.1942
+      "sum_ape": 0.7961318819193319,
+      "hit_rate": 0.20454545454545456,
+      "mape": 0.018093906407257544,
+      "weight_hint": 0.195
     },
     "news": {
-      "n": 43,
+      "n": 44,
       "wins": 12,
-      "sum_ape": 0.6822507596043592,
-      "hit_rate": 0.27906976744186046,
-      "mape": 0.0158662967349851,
-      "weight_hint": 0.2259
+      "sum_ape": 0.6987332398970458,
+      "hit_rate": 0.2727272727272727,
+      "mape": 0.015880300906751042,
+      "weight_hint": 0.2222
     },
     "macro": {
-      "n": 43,
+      "n": 44,
       "wins": 5,
-      "sum_ape": 0.8315855019982226,
-      "hit_rate": 0.11627906976744186,
-      "mape": 0.019339197720888896,
-      "weight_hint": 0.1854
+      "sum_ape": 0.8339616948092964,
+      "hit_rate": 0.11363636363636363,
+      "mape": 0.018953674882029464,
+      "weight_hint": 0.1862
     }
   },
   "series": [
@@ -705,79 +705,92 @@
       "ape": 0.017696797366058135,
       "baseline_ape": 0.018669560011972498,
       "pass": false
+    },
+    {
+      "date": "2026-08-13",
+      "predicted_close": 266.56,
+      "actual_close": 265.13,
+      "prior_close": 267.28,
+      "ape": 0.005393580507675506,
+      "baseline_ape": 0.008109229434616895,
+      "pass": true
     }
   ],
   "pending": {
-    "date": "2026-08-13",
-    "created_at": "2026-08-13T12:12:57.822277+00:00",
-    "prior_close": 267.28,
-    "predicted_close": 266.56,
+    "date": "2026-08-14",
+    "created_at": "2026-08-14T12:12:01.623086+00:00",
+    "prior_close": 265.13,
+    "predicted_close": 264.05,
     "predicted_direction": "down",
-    "confidence": 0.32,
-    "weights": {},
+    "confidence": 0.5,
+    "weights": {
+      "news": 0.26,
+      "momentum": 0.22,
+      "contrarian": 0.19,
+      "technical": 0.19,
+      "macro": 0.14
+    },
     "analyst_predictions": {
-      "contrarian": {
-        "predicted_close": 264.5,
+      "momentum": {
+        "predicted_close": 264.2,
         "direction": "down",
-        "confidence": 0.62,
-        "rationale": "RSI at 68.12 is elevated and price is 4.8% above SMA20 and 7.9% above SMA50, signaling overextension ripe for mean reversion. The stock has already pulled back two consecutive days with declining volume, and with premarket flat and momentum fading, the contrarian lean is continued reversion toward the SMA20."
+        "confidence": 0.52,
+        "rationale": "Short-term momentum is clearly negative with 1d return of -0.80% and 5d return of -2.62%, price is below the 5-day SMA (271.45) and has been declining for two consecutive sessions; no pre-market gap to indicate reversal, so trend persistence favors modest continuation lower toward 264."
+      },
+      "contrarian": {
+        "predicted_close": 263.5,
+        "direction": "down",
+        "confidence": 0.52,
+        "rationale": "RSI at 67.68 is elevated and approaching overbought territory, price sits 3.7% above SMA20 and 6.9% above SMA50 \u2014 stretched conditions favor mean reversion. Recent 5-day return is already negative (-2.6%) and the stock has been fading from its 252-week high, suggesting continued downside pressure toward the SMA20."
       },
       "macro": {
-        "predicted_close": 264.5,
+        "predicted_close": 263.5,
         "direction": "down",
-        "confidence": 0.58,
-        "rationale": "AMZN has been in a clear short-term downtrend (ret_1d -1.8%, ret_5d -2.0%), trading below its 5-day SMA of 272.88 with yesterday's close at a recent low of 267.28; RSI at 68 is elevated but momentum is rolling over, and with no pre-market gap the path of least resistance follows yesterday's selling pressure lower toward the 264-265 support zone."
-      },
-      "momentum": {
-        "predicted_close": 265.5,
-        "direction": "down",
-        "confidence": 0.58,
-        "rationale": "Short-term momentum is clearly negative (1d: -1.83%, 5d: -1.97%), the stock is below its 5d SMA (272.88) and has been in a 3-day downtrend from 278 to 267, RSI at 68 is elevated suggesting no bounce catalyst, and pre-market shows no gap reversal. Trend persistence favors continuation of the recent selling pressure toward ~265."
+        "confidence": 0.52,
+        "rationale": "AMZN has been in a clear 5-day downtrend (-2.6%), with the last three sessions all closing lower, sitting below SMA_5 (271.45) and with RSI near 68 still moderately elevated suggesting room to correct further. Pre-market shows no gap, but the bearish momentum and distance above SMA_20 (~3.7%) suggest continued mean-reversion pressure toward the ~263 area."
       },
       "technical": {
-        "predicted_close": 265.41,
+        "predicted_close": 263.41,
         "direction": "down",
-        "confidence": 0.58,
-        "rationale": "AMZN has posted two consecutive down days with accelerating selling pressure (277.42 \u2192 272.65 \u2192 267.28), closing at the low of the recent range near the 267.10 intraday low from yesterday; RSI at 68.12 remains elevated suggesting continued mean-reversion pressure, the 5-day SMA at 272.88 is now acting as overhead resistance, and pre-market shows no gap support \u2014 momentum is clearly downward with no catalyst for reversal."
+        "confidence": 0.52,
+        "rationale": "The stock has been in a clear 5-day downtrend (-2.6%), trading well below the SMA-5 (271.45) with recent closes making lower lows; RSI at 67.68 remains elevated and is likely rolling over from overbought territory, suggesting continued selling pressure. No premarket gap provides no support catalyst, and the recent breakdown below 267 opens a path toward the 264-265 support zone with continuation risk."
       },
       "news": {
-        "predicted_close": 269.5,
-        "direction": "up",
-        "confidence": 0.54,
-        "rationale": "Zero premarket gap anchors to 267.28, but Nasdaq futures +0.6%, a benign CPI, and analyst buy calls (Goldman, TipRanks top picks) provide modest upside tailwinds to bounce off the 5-session selloff from the post-earnings high; near-term resistance at the 5-SMA (~272.88), NJ antitrust suit, and Bezos insider selling cap the upside, yielding a ~+0.8% recovery move."
+        "predicted_close": 263.3,
+        "direction": "down",
+        "confidence": 0.38,
+        "rationale": "Flat pre-market, mildly negative AMZN-specific flow (Twitch AI backlash, institutional stake trims), RSI at 67.68 and price extended above SMA20 amid a 5-day downtrend; Nasdaq futures nearly flat and 10-year yield near 4.69% are headwinds, though retail sales data introduces upside risk that keeps conviction modest."
       }
     },
-    "rationale": "Four of five analysts agree on down with a coherent thesis: two consecutive down days (277\u2192272\u2192267), price closing at range lows, and RSI still elevated at 68 leaving no oversold bounce support. The lone news up-call relies on futures/CPI drift with capped upside and has led many big misses, so I weight it modestly. Post-mortems repeatedly show the desk under-shooting magnitude by anchoring to prior close, so I commit toward the consensus 264-265 zone rather than flattening, landing near the momentum/technical cluster. [gates: negative_edge_shrink; consensus 0.80; rolling edge -0.03%]",
-    "gates_applied": [
-      "negative_edge_shrink"
-    ],
+    "rationale": "All five analysts agree down and cluster tightly at 263.3-264.2 from an RSI-68 overextension setup; the recent 08-13 post-mortem shows this exact continuation-down thesis nailed the last close. Per notes, I lean toward the lower-APE news/technical magnitude rather than blunting toward prior_close, but keep confidence modest since direction calls are historically weak and moves under ~1% dominate passes. Macro is down-weighted (worst hit rate) and news up-weighted (best hit rate) per the failure playbook. [gates: none; consensus 1.00; rolling edge 0.01%]",
+    "gates_applied": [],
     "quote_source": "alphavantage",
     "status": "pending",
     "actual_close": null
   },
-  "updated_count": 71,
+  "updated_count": 72,
   "variant_b": {
     "rolling": {
-      "n": 18,
-      "n_all_time": 18,
-      "pass_rate": 0.4444444444444444,
-      "directional_accuracy": 0.7222222222222222,
-      "mape": 0.019323835318212242,
-      "baseline_mape": 0.021458502669509414,
-      "edge": 0.0021346673512971717,
+      "n": 19,
+      "n_all_time": 19,
+      "pass_rate": 0.42105263157894735,
+      "directional_accuracy": 0.6842105263157895,
+      "mape": 0.01894004574568524,
+      "baseline_mape": 0.020755909341357175,
+      "edge": 0.0018158635956719363,
       "beats_baseline_overall": true,
-      "brier": 0.2829933333333334
+      "brier": 0.27518784210526315
     },
     "all_time": {
-      "n": 18,
-      "n_all_time": 18,
-      "pass_rate": 0.4444444444444444,
-      "directional_accuracy": 0.7222222222222222,
-      "mape": 0.019323835318212242,
-      "baseline_mape": 0.021458502669509414,
-      "edge": 0.0021346673512971717,
+      "n": 19,
+      "n_all_time": 19,
+      "pass_rate": 0.42105263157894735,
+      "directional_accuracy": 0.6842105263157895,
+      "mape": 0.01894004574568524,
+      "baseline_mape": 0.020755909341357175,
+      "edge": 0.0018158635956719363,
       "beats_baseline_overall": true,
-      "brier": 0.2829933333333334
+      "brier": 0.27518784210526315
     },
     "series": [
       {
@@ -905,31 +918,38 @@
         "actual_close": 267.28,
         "ape": 0.018669560011972498,
         "pass": false
+      },
+      {
+        "date": "2026-08-13",
+        "predicted_close": 268.32,
+        "actual_close": 265.13,
+        "ape": 0.01203183344019914,
+        "pass": false
       }
     ],
     "pending": {
-      "date": "2026-08-13",
-      "created_at": "2026-08-13T12:13:22.972585+00:00",
+      "date": "2026-08-14",
+      "created_at": "2026-08-14T12:12:24.658134+00:00",
       "variant": "b",
-      "prior_close": 267.28,
-      "predicted_close": 268.32,
-      "predicted_direction": "up",
-      "confidence": 0.367,
+      "prior_close": 265.13,
+      "predicted_close": 264.1,
+      "predicted_direction": "down",
+      "confidence": 0.329,
       "prior": {
-        "center": 267.28,
-        "sigma_pct": 0.03907,
-        "drift_pct": 0.0002,
-        "p10": 253.96,
-        "p50": 267.2,
-        "p90": 281.04,
+        "center": 265.13,
+        "sigma_pct": 0.0388,
+        "drift_pct": 2e-05,
+        "p10": 251.96,
+        "p50": 265.0,
+        "p90": 278.63,
         "centered_on": "premarket_quote",
-        "prev_close": 267.28
+        "prev_close": 265.13
       },
-      "pulse_summary": "Market tone into Thursday is cautiously positive, with futures modestly higher and oil prices falling as investors await the July PPI report following Wednesday's inflation-driven rally. AMZN-specific news is mixed: an ongoing New Jersey antitrust lawsuit and split institutional flows are offset by inclusion on analysts' top consumer-cyclical picks list, with no major AMZN-specific catalyst dominating today's tape.",
-      "n_evidence": 7,
-      "adjustment_sigma": 0.1,
+      "pulse_summary": "AMZN enters the session with no fresh company-specific catalysts, trading near record highs after a strong Q2 beat, but is contending with a minor negative headline around Twitch's AI-training auto-enrollment controversy and continued insider/institutional selling. The macro backdrop is mixed-to-slightly positive with the S&P 500 at record highs and Nasdaq futures modestly up, tempered by elevated yields and Middle East geopolitical risk, while Wall Street analysts remain overwhelmingly bullish on the stock's longer-term outlook.",
+      "n_evidence": 8,
+      "adjustment_sigma": -0.1,
       "caps_applied": [],
-      "rationale": "Evidence is mixed and macro-dominated: modestly positive futures and falling oil support upside, but AMZN-specific news (antitrust overhang, split flows) offsets it, with no dominant catalyst. A pending PPI print keeps direction uncertain, so only a small upward tilt off the prior is warranted. [prior 267.28 \u00b1 3.91%\u03c3 (premarket_quote); adj +0.10\u03c3; caps: none]",
+      "rationale": "Evidence is genuinely mixed: mildly positive macro/tech tape and bullish analyst consensus are offset by an AMZN-specific negative headline, insider/institutional selling, elevated yields, and geopolitical risk, with no fresh catalyst today. The slight tilt of company-specific news (Twitch controversy, Bezos selling) leans marginally negative, warranting a small downward nudge. The failure log shows small adjustments repeatedly whipsawed on direction, so I keep this near neutral. [prior 265.13 \u00b1 3.88%\u03c3 (premarket_quote); adj -0.10\u03c3; caps: none]",
       "quote_source": "alphavantage",
       "status": "pending",
       "actual_close": null
@@ -940,11 +960,11 @@
       "a": "A \u2014 ensemble + gates",
       "b": "B \u2014 raven prior + pulse"
     },
-    "n_paired": 18,
+    "n_paired": 19,
     "b_wins": 13,
-    "n_decisive": 18,
-    "mean_delta_a_minus_b": 0.002594,
-    "sign_test_p": 0.0963,
-    "verdict": "Arm B leads on paired MAPE (mean daily delta 0.26% in B's favor); B wins 13/18 decisive days (sign test p=0.0963, not significant)."
+    "n_decisive": 19,
+    "mean_delta_a_minus_b": 0.002108,
+    "sign_test_p": 0.1671,
+    "verdict": "Arm B leads on paired MAPE (mean daily delta 0.21% in B's favor); B wins 13/19 decisive days (sign test p=0.1671, not significant)."
   }
 }

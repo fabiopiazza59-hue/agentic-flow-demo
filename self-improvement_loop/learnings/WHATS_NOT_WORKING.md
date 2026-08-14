@@ -3,20 +3,19 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- **Direction is the core failure**: 19 of 28 misses are directional (68%), not magnitude. The model gets the price *level* close but the *sign* of the move wrong. It's essentially predicting "flat/persistence" and getting run over on real moves.
-- Fails **beat baseline barely or not at all** on most losses — on many misses (e.g., 06-25, 06-26, 07-13, 07-20, 07-21, 07-24) APE is worse than the naive baseline. We're adding negative value on those days.
-- **News-led calls dominate the loss column**: news is the winning strategy on ~9 of 28 misses despite being the highest-weighted strategy (0.226 hint). Highest weight, mediocre 28% hit rate.
-- The 07-31 blowup (APE 13%) is a real event/gap the model completely under-scoped — magnitude collapse on a large gap.
+- **Directional errors dominate**: 19 of 28 fails are direction misses (68%). The system can't call the sign, not just the size. This is the core problem, not magnitude.
+- **We barely beat a naive baseline.** On most fails `ape ≈ baseline_ape` (e.g. 06-15, 06-22, 06-25, 07-15), meaning the ensemble adds nothing over the previous-close guess and sometimes underperforms it.
+- **Blowups on gap days**: 07-31 (ape 13.2%), 06-22 (5.1%), 07-23 (4.2%), 07-30 (3.9%) — clustered large-move days where the model completely fails to size the move.
+- **Overconfidence flag reads 0, but calibration is still off**: passes and fails share the same confidence band (~0.4–0.5). Confidence 0.5–0.58 fails (06-12, 06-30, 07-13, 07-20, 08-07) while confidence 0.1 sometimes passes (07-27, 08-03). Confidence carries almost no signal.
 
 ## Unreliable under these conditions
-- **High-magnitude / gap days** (baseline_ape >3%): model consistently misses direction AND magnitude (06-15, 06-22, 06-25, 07-15, 07-23, 07-30, 07-31). It cannot handle regime breaks or news gaps.
-- **When macro or technical is the winning strategy**: macro hit rate 11.6%, technical 14% — both near-useless. Macro-led days (07-13, 07-15, 07-30) are almost all fails.
-- **Momentum during reversals**: momentum-led calls fail when the trend flips (06-12, 06-25, 07-08, 07-24) — classic momentum-chasing into turns.
-- **Confidence is NOT the problem**: 0 overconfident misses, and confidence is generally low (0.1–0.55). If anything the model is *under*-confident on wins (07-27 hit at conf 0.1). Calibration is flat/uninformative — confidence carries no signal.
+- **High-volatility / large-move days**: whenever the true move exceeds ~2–3%, direction and magnitude both collapse. Small quiet days are where nearly all passes live.
+- **macro-led predictions are the worst**: 11.4% hit rate, highest MAPE (0.019). Every macro-winning day here (06-12 region, 07-13, 07-15, 07-30) failed or misfired.
+- **technical-led is nearly as bad**: 15.9% hit rate despite the 2nd-highest weight hint (0.21) — overweighted relative to performance.
+- **news-heavy weighting into event days backfires**: high news weight (0.40–0.42) days (07-13, 07-23, 08-03, 07-24) repeatedly miss direction/magnitude.
 
 ## Fixes to try next
-- Treat this as a **directional problem first**: add a dedicated up/down classifier and stop optimizing pure APE, which rewards the flat-prediction bias.
-- **Down-weight or gate macro and technical** (hit rates 12–14%); redistribute toward news/momentum, but cap news since it leads many big misses.
-- **Regime detector for high-volatility/gap days**: widen intervals and suppress momentum on detected reversals; don't let momentum extrapolate into turns.
-- **Rebuild confidence**: current scores are noise (uncorrelated with outcomes). Recalibrate against realized direction; a flat 0.4 signal is useless for sizing.
-- Add explicit **event/earnings flag** to avoid 07-31-style magnitude blowups.
+- **Cut macro and technical weight**, raise news/momentum (best hit rates: 0.27 / 0.25). Current weight_hints are inverted vs. realized skill.
+- **Add a volatility regime gate**: on high-expected-move days, widen predicted magnitude and de-trust the point estimate — the model systematically under-sizes big moves.
+- **Recalibrate confidence entirely** — it's uncorrelated with outcomes; rebuild it from realized hit rate per regime/strategy, not model self-report.
+- **Attack direction first**: build/track a standalone sign classifier; 68% of fails are sign errors, so magnitude tuning is secondary.
