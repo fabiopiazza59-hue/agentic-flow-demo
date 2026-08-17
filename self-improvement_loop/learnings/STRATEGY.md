@@ -46,3 +46,4 @@ Append-only insights. Newest at the bottom.
 - (2026-08-11) When contrarian+technical agree on 'down' from an extended RSI/SMA-stretch setup, their combined weight should not be overridden by a news analyst quoting stale intraday positive drift — test capping news weight when its rationale relies on same-day price action.
 - (2026-08-12) When all analysts agree on direction AND cite a specific support level as the target floor, widen the blend toward the far side of the move (support levels break); size the forecast to realized-vol, not to the nearest support anchor.
 - (2026-08-13) When 4+ analysts agree on direction AND RSI>65 confirms overextension, weight the lowest-APE technical analyst's magnitude more heavily than the blended midpoint — test whether this reduces the systematic high-bias seen when actual undershoots consensus.
+- (2026-08-14) 2026-08-14: PASS, beat baseline; closest news, worst momentum.
