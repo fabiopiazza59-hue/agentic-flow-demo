@@ -47,3 +47,4 @@ Append-only insights. Newest at the bottom.
 - (2026-08-12) When all analysts agree on direction AND cite a specific support level as the target floor, widen the blend toward the far side of the move (support levels break); size the forecast to realized-vol, not to the nearest support anchor.
 - (2026-08-13) When 4+ analysts agree on direction AND RSI>65 confirms overextension, weight the lowest-APE technical analyst's magnitude more heavily than the blended midpoint — test whether this reduces the systematic high-bias seen when actual undershoots consensus.
 - (2026-08-14) 2026-08-14: PASS, beat baseline; closest news, worst momentum.
+- (2026-08-17) When ret_5d < -3% AND price is above SMA20 with 4+ consecutive down closes, tilt the blend toward the momentum/contrarian down-calls rather than news mean-reversion bounces.

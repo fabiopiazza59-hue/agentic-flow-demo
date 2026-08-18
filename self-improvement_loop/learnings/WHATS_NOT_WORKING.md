@@ -3,20 +3,21 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- **Directional errors dominate**: 19 of 28 fails are direction misses (68%). The system isn't just sizing moves wrong — it's picking the wrong sign. This is the core problem, not magnitude.
-- **Barely beating a naive baseline**: On most fails APE ≈ baseline_ape (e.g. 0.017/0.019, 0.032/0.031, 0.132/0.133). The model adds little over persistence and gets dragged down alongside it on big-move days.
-- **News is the least-bad strategy but still weak**: highest hit rate (0.29) and lowest MAPE, yet it's the winning strategy on many of the worst fails (07-15, 07-23, 07-31). It wins by default, not by skill.
-- **Macro and technical are dead weight**: macro hit rate 0.11, technical 0.16. Both routinely "win" the ensemble on losing days (macro on 07-13, 07-15, 07-30; technical on 06-17, 06-30).
-- **Big-move blowups**: 07-31 (13% APE), 06-22 (5%), 07-23 (4.2%), 07-30 (3.9%). The model has no handle on gap/volatility days.
+- **Directional misses dominate**: 19 of 28 fails (68%) are wrong-direction, not just off-magnitude. The system can't call the sign, which is worse than a coin flip on fail days.
+- **We rarely beat baseline on fails**: most fails also lose to baseline, meaning the model adds noise, not signal, in the exact regimes it struggles.
+- **News is the most-trusted strategy (weight_hint 0.22, top winner) yet its hit rate is only 28%** — we're leaning hardest on a strategy that's right barely 1-in-4 times.
+- **Macro is dead weight**: 10.9% hit rate, highest MAPE (0.0185). Every day it "wins" the ensemble (6/12/15, 7/13, 7/15, 7/30) it fails. It's a reliable loss signal.
+- **Tail blowups**: 7/31 APE 13.2%, 6/22 5.1%, 6/17/25/26/29 all ~3-5% — clustered magnitude errors on high-volatility days the model doesn't widen for.
 
 ## Unreliable under these conditions
-- **High-volatility / gap days**: every large-APE fail coincides with a large baseline_ape — the model can't anticipate regime shifts and just tracks yesterday.
-- **When macro or technical wins the ensemble**: these are the lowest-hit-rate strategies; their "wins" correlate with directional misses.
-- **Confidence is uninformative, not overconfident**: overconfident_misses=0, but confidence hovers 0.4 and shows no signal — passes happen at conf 0.1 (07-27, 08-03) and fails at conf 0.55 (06-30, 07-13). Calibration is flat/random, which is its own failure.
-- **June cluster**: 06-12 through 06-29 was near-total failure (8 straight fails minus one). Sustained trending regime the model fought the whole way.
+- **High-volatility / gap days** (baseline_ape >3%): model tracks the miss rather than correcting it — 6/15, 6/17, 6/22, 6/25, 6/29, 7/15, 7/30, 7/31 all fail directionally.
+- **Whenever macro or news is the winning strategy** in choppy tape: near-automatic fail.
+- **Mid-confidence band (0.4–0.55)**: this is where most fails live. Confidence is essentially flat/uninformative — overconfident_misses=0 only because confidence never gets high, not because it's calibrated. Low conf (0.1–0.32) days pass about as often as they fail, so confidence carries no discriminating power.
+- **Late-June cluster (6/12–6/29): 8 straight fails** — a sustained regime the model never adapted to.
 
 ## Fixes to try next
-- **Add a direction-first gate**: since misses are directional, optimize/select for sign accuracy separately from magnitude before blending.
-- **Down-weight or bench macro & technical**; let news/momentum/contrarian carry, and stop letting sub-0.2-hit-rate strategies "win" days.
-- **Volatility regime detector**: widen intervals and defer to baseline when expected move is large; the ensemble is worst exactly there.
-- **Recalibrate confidence** against realized outcomes — current scores carry no predictive info; either fix it or stop reporting it.
+- **Cut or floor macro weight to ~0** and redistribute; it's a net-negative contributor.
+- **Stop trusting news's high weight**: cap it until its directional hit rate improves; require corroboration from a second strategy before acting on news-driven signals.
+- **Add a volatility regime gate**: when recent baseline_ape or realized vol is elevated, widen intervals and lower position/confidence — the tail blowups all came from not respecting vol.
+- **Rebuild confidence calibration**: current scores don't separate wins from losses. Tie confidence to cross-strategy agreement and recent regime stability.
+- **Attack the sign problem directly**: 68% of fails are directional — add a dedicated up/down classifier and only commit magnitude when direction agreement is strong.
