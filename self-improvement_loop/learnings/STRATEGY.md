@@ -48,3 +48,4 @@ Append-only insights. Newest at the bottom.
 - (2026-08-13) When 4+ analysts agree on direction AND RSI>65 confirms overextension, weight the lowest-APE technical analyst's magnitude more heavily than the blended midpoint — test whether this reduces the systematic high-bias seen when actual undershoots consensus.
 - (2026-08-14) 2026-08-14: PASS, beat baseline; closest news, worst momentum.
 - (2026-08-17) When ret_5d < -3% AND price is above SMA20 with 4+ consecutive down closes, tilt the blend toward the momentum/contrarian down-calls rather than news mean-reversion bounces.
+- (2026-08-18) When all analysts agree on direction during an established multi-day trend with no pre-market gap, weight the *median* target rather than the confidence-weighted mean, since the disagreement is about magnitude not direction.

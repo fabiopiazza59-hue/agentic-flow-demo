@@ -3,21 +3,19 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- **Directional misses dominate**: 19 of 28 fails (68%) are wrong-direction, not just off-magnitude. The system can't call the sign, which is worse than a coin flip on fail days.
-- **We rarely beat baseline on fails**: most fails also lose to baseline, meaning the model adds noise, not signal, in the exact regimes it struggles.
-- **News is the most-trusted strategy (weight_hint 0.22, top winner) yet its hit rate is only 28%** — we're leaning hardest on a strategy that's right barely 1-in-4 times.
-- **Macro is dead weight**: 10.9% hit rate, highest MAPE (0.0185). Every day it "wins" the ensemble (6/12/15, 7/13, 7/15, 7/30) it fails. It's a reliable loss signal.
-- **Tail blowups**: 7/31 APE 13.2%, 6/22 5.1%, 6/17/25/26/29 all ~3-5% — clustered magnitude errors on high-volatility days the model doesn't widen for.
+- **Direction is the core problem, not magnitude.** 19 of 28 fails are directional misses (68%). The model gets the size roughly right but the sign wrong — it's a coin-flip on up/down, and that's what kills pass rates.
+- **Barely beating a naive baseline.** On most fails APE ≈ baseline_ape (e.g. 07-15 0.0298 vs 0.0293, 06-17 0.0373 vs 0.0358). The ensemble adds almost no edge over "predict yesterday's close."
+- **Fat-tail blowups on gap days.** 07-31 APE 13.2%, plus repeated 3-5% misses (06-22, 06-25, 07-23, 07-30). These large-move sessions are systematically mispredicted in direction.
+- **`macro` and `technical` are dead weight.** macro hit_rate 10.6%, technical 17%. Yet macro repeatedly wins the ensemble on fail days (06-12, 07-13, 07-15, 07-30) — the weight-selection is picking the worst strategy at the worst time.
 
 ## Unreliable under these conditions
-- **High-volatility / gap days** (baseline_ape >3%): model tracks the miss rather than correcting it — 6/15, 6/17, 6/22, 6/25, 6/29, 7/15, 7/30, 7/31 all fail directionally.
-- **Whenever macro or news is the winning strategy** in choppy tape: near-automatic fail.
-- **Mid-confidence band (0.4–0.55)**: this is where most fails live. Confidence is essentially flat/uninformative — overconfident_misses=0 only because confidence never gets high, not because it's calibrated. Low conf (0.1–0.32) days pass about as often as they fail, so confidence carries no discriminating power.
-- **Late-June cluster (6/12–6/29): 8 straight fails** — a sustained regime the model never adapted to.
+- **High-volatility / gap sessions:** the largest APEs cluster where the daily move is big; the model damps toward small moves and misses sign.
+- **When `macro` or `news` "wins":** macro-led days fail ~persistently; news wins often but its directional calls flip on volatile days (07-23, 07-31 large misses even when nominally "beats baseline").
+- **Confidence is uninformative, not overconfident.** 0 overconfident misses only because confidence is uniformly low (0.1–0.6). It has no separation: passes at 0.1, fails at 0.55. Calibration is flat — confidence carries zero signal.
 
 ## Fixes to try next
-- **Cut or floor macro weight to ~0** and redistribute; it's a net-negative contributor.
-- **Stop trusting news's high weight**: cap it until its directional hit rate improves; require corroboration from a second strategy before acting on news-driven signals.
-- **Add a volatility regime gate**: when recent baseline_ape or realized vol is elevated, widen intervals and lower position/confidence — the tail blowups all came from not respecting vol.
-- **Rebuild confidence calibration**: current scores don't separate wins from losses. Tie confidence to cross-strategy agreement and recent regime stability.
-- **Attack the sign problem directly**: 68% of fails are directional — add a dedicated up/down classifier and only commit magnitude when direction agreement is strong.
+- Add an explicit **direction classifier** separate from magnitude; current blend optimizes size and ignores sign.
+- **Down-weight or drop macro** (0.106 hit rate) and cap technical; stop letting the selector crown low-hit-rate strategies on volatile days.
+- **Regime gate:** detect high-vol/gap days (overnight move, earnings/event dates) and switch to a wider, sign-aware model or abstain.
+- **Recalibrate confidence** against realized hit rate — right now it's noise; either fix it or stop reporting it.
+- Benchmark hard against persistence baseline; kill any config that doesn't clear it on directional hit rate, not just APE.
