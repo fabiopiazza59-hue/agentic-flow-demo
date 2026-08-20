@@ -3,19 +3,20 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- **Direction is the core problem, not magnitude.** 19 of 28 fails are directional misses (68%). The model gets the size roughly right but the sign wrong — it's a coin-flip on up/down, and that's what kills pass rates.
-- **Barely beating a naive baseline.** On most fails APE ≈ baseline_ape (e.g. 07-15 0.0298 vs 0.0293, 06-17 0.0373 vs 0.0358). The ensemble adds almost no edge over "predict yesterday's close."
-- **Fat-tail blowups on gap days.** 07-31 APE 13.2%, plus repeated 3-5% misses (06-22, 06-25, 07-23, 07-30). These large-move sessions are systematically mispredicted in direction.
-- **`macro` and `technical` are dead weight.** macro hit_rate 10.6%, technical 17%. Yet macro repeatedly wins the ensemble on fail days (06-12, 07-13, 07-15, 07-30) — the weight-selection is picking the worst strategy at the worst time.
+- **Directional errors dominate**: 20 of 29 fails are wrong-direction, only 9 are magnitude-only. This is a sign/timing problem, not a scaling problem. The model is coin-flipping direction.
+- **The ensemble rarely beats baseline on fails**: most failing days have ape ≈ or worse than baseline_ape, meaning the blend adds noise, not edge. On clean days it barely edges baseline (e.g. 08-06, 07-14 lose to baseline despite passing).
+- **No strategy is reliable**: best hit-rate is news at 27% and macro at 12%. Every strategy loses direction more than 70% of the time — the "winning strategy" label is retrospective luck, not predictive.
+- **Big-move days blow up**: fails cluster at high APE (0.03–0.13; e.g. 07-31 at 13%, 06-22 at 5%). The model cannot handle gap/large-range days and gets both direction and magnitude wrong.
 
 ## Unreliable under these conditions
-- **High-volatility / gap sessions:** the largest APEs cluster where the daily move is big; the model damps toward small moves and misses sign.
-- **When `macro` or `news` "wins":** macro-led days fail ~persistently; news wins often but its directional calls flip on volatile days (07-23, 07-31 large misses even when nominally "beats baseline").
-- **Confidence is uninformative, not overconfident.** 0 overconfident misses only because confidence is uniformly low (0.1–0.6). It has no separation: passes at 0.1, fails at 0.55. Calibration is flat — confidence carries zero signal.
+- **macro-led days**: 6 wins/48, mostly on losing fails (06-12, 07-13, 07-15, 07-30, 08-19). Whenever macro is the winning strategy it's usually a miss.
+- **High-volatility / large-move regimes**: all worst APE days are directional misses — model has no volatility awareness.
+- **Higher-confidence calls are NOT safer**: 08-19 (conf 0.62) and 06-12 (0.58) both failed; passes occur at conf 0.1–0.32 as often as at 0.5+. Confidence is essentially uncorrelated with correctness — flat/miscalibrated even if only 1 flagged "overconfident."
+- **news-heavy weighting on quiet days**: news carries top weight_hint (0.22) but still misses direction 73% of the time.
 
 ## Fixes to try next
-- Add an explicit **direction classifier** separate from magnitude; current blend optimizes size and ignores sign.
-- **Down-weight or drop macro** (0.106 hit rate) and cap technical; stop letting the selector crown low-hit-rate strategies on volatile days.
-- **Regime gate:** detect high-vol/gap days (overnight move, earnings/event dates) and switch to a wider, sign-aware model or abstain.
-- **Recalibrate confidence** against realized hit rate — right now it's noise; either fix it or stop reporting it.
-- Benchmark hard against persistence baseline; kill any config that doesn't clear it on directional hit rate, not just APE.
+- Attack **direction first**: add a separate directional classifier / sign-vote gate; magnitude is not the bottleneck.
+- **Down-weight or benchmark-out macro and technical** (hit rates 12.5% / 16.7%); test a news+momentum-only blend.
+- **Recalibrate confidence** against realized hit-rate; current confidence is decorative. Suppress/abstain when strategies disagree.
+- Add a **volatility/gap detector** and widen intervals or abstain on high-range days — that's where the worst APEs live.
+- Since ensemble barely beats baseline, **prove edge vs baseline explicitly** before trusting any blend; consider defaulting to baseline when confidence is low.

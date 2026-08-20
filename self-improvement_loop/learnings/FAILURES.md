@@ -162,3 +162,11 @@ The desk got direction right (down) but massively under-shot magnitude: predicte
 **Root cause:** Consensus support-level anchoring in a 4%-vol regime — analysts named the same floor as a target rather than a level that could break, so magnitude was systematically compressed toward zero.
 
 **One change to try:** When direction is unanimous, override the blend to at least 0.5x the trailing realized-vol move in that direction rather than snapping to the nearest cited support; test whether magnitude-scaling on high-conviction consensus days reduces MAPE without hurting the (already correct) hit rate.
+
+## 2026-08-19 — FAIL (APE 2.89%)
+- Predicted 258.15 vs actual 265.84 (prior 259.45); dir hit: False; beat baseline: False; closest analyst: macro.
+**What went wrong:** The blend was directionally and magnitudinally wrong — predicted -0.5%, actual +2.46%. Bearish herding (4/5 analysts within 258±0.7) drowned out the lone correct up-call from macro, which had the right thesis (oversold snapback) but was penalized to 7% weight for its poor historical record.
+
+**Root cause:** A -4.7% 5-day decline was treated as trend-continuation evidence by momentum/technical/contrarian/news alike, when it was actually setting up an oversold bounce that overshot. The desk had no mechanism to detect that unanimous bearishness itself was the contrarian tell.
+
+**One change to try:** Add a 'consensus-crowding' override — when analyst predictions cluster within 1% AND the setup is a multi-day oversold decline, cap the consensus direction's weight and boost the dissenting mean-reversion analyst, testing whether crowded bearish agreement systematically precedes reversals.

@@ -49,3 +49,4 @@ Append-only insights. Newest at the bottom.
 - (2026-08-14) 2026-08-14: PASS, beat baseline; closest news, worst momentum.
 - (2026-08-17) When ret_5d < -3% AND price is above SMA20 with 4+ consecutive down closes, tilt the blend toward the momentum/contrarian down-calls rather than news mean-reversion bounces.
 - (2026-08-18) When all analysts agree on direction during an established multi-day trend with no pre-market gap, weight the *median* target rather than the confidence-weighted mean, since the disagreement is about magnitude not direction.
+- (2026-08-19) When 4+ analysts cluster within 1% on 'downtrend continuation' after a >4% 5-day drop with RSI still elevated (>65), fade the consensus toward mean-reversion — over-extended one-directional agreement is a reversal signal, not confirmation.
