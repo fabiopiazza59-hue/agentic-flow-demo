@@ -3,20 +3,19 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- **Directional errors dominate**: 20 of 29 fails are wrong-direction, only 9 are magnitude-only. This is a sign/timing problem, not a scaling problem. The model is coin-flipping direction.
-- **The ensemble rarely beats baseline on fails**: most failing days have ape ≈ or worse than baseline_ape, meaning the blend adds noise, not edge. On clean days it barely edges baseline (e.g. 08-06, 07-14 lose to baseline despite passing).
-- **No strategy is reliable**: best hit-rate is news at 27% and macro at 12%. Every strategy loses direction more than 70% of the time — the "winning strategy" label is retrospective luck, not predictive.
-- **Big-move days blow up**: fails cluster at high APE (0.03–0.13; e.g. 07-31 at 13%, 06-22 at 5%). The model cannot handle gap/large-range days and gets both direction and magnitude wrong.
+- **Directional misses dominate**: 21 of 30 failures (70%) are wrong-direction, not magnitude. The model can't call which way AMZN moves — sizing errors are the minority (9). This is a signal problem, not a calibration-of-magnitude problem.
+- **Barely beating a coin flip on direction**: best strategy (news) hits 26.5%, macro just 12%. Aggregate directional skill is negative — a naive persistence baseline would likely do better on many of these days.
+- **We lose to baseline constantly**: most failures have ape ≈ baseline_ape (e.g., 06-15, 06-22, 06-29, 07-15, 07-30), meaning the ensemble adds nothing over the trivial forecast on hard days.
+- **Big-move days blow up**: 07-31 (13.2% ape) and clustered 3-5% errors (06-22, 06-25, 06-26, 07-23, 08-19) show the model completely fails to anticipate large gaps.
 
 ## Unreliable under these conditions
-- **macro-led days**: 6 wins/48, mostly on losing fails (06-12, 07-13, 07-15, 07-30, 08-19). Whenever macro is the winning strategy it's usually a miss.
-- **High-volatility / large-move regimes**: all worst APE days are directional misses — model has no volatility awareness.
-- **Higher-confidence calls are NOT safer**: 08-19 (conf 0.62) and 06-12 (0.58) both failed; passes occur at conf 0.1–0.32 as often as at 0.5+. Confidence is essentially uncorrelated with correctness — flat/miscalibrated even if only 1 flagged "overconfident."
-- **news-heavy weighting on quiet days**: news carries top weight_hint (0.22) but still misses direction 73% of the time.
+- **Macro-led days are the worst**: winning_strategy=macro went 12% hit rate and produced several of the largest misses (07-15, 07-30, 08-19). Do not trust macro as the deciding vote.
+- **High-volatility / large-move sessions**: whenever the actual move is large (>3%), direction is missed and error tracks baseline — the model reverts to mean and gets run over.
+- **News-heavy weighting on failure days**: many misses carry news weight 0.30–0.42 (07-13, 07-23, 07-24, 08-11) yet still miss direction — news signal is noisy and over-weighted.
+- **Confidence is mildly miscalibrated on the high end**: only 1 flagged overconfident miss, but note 08-19 (conf 0.62) and 08-20 (0.54) were misses, while several low-conf (0.1–0.24) days passed. Confidence has near-zero correlation with being right.
 
 ## Fixes to try next
-- Attack **direction first**: add a separate directional classifier / sign-vote gate; magnitude is not the bottleneck.
-- **Down-weight or benchmark-out macro and technical** (hit rates 12.5% / 16.7%); test a news+momentum-only blend.
-- **Recalibrate confidence** against realized hit-rate; current confidence is decorative. Suppress/abstain when strategies disagree.
-- Add a **volatility/gap detector** and widen intervals or abstain on high-range days — that's where the worst APEs live.
-- Since ensemble barely beats baseline, **prove edge vs baseline explicitly** before trusting any blend; consider defaulting to baseline when confidence is low.
+- **Add a volatility regime filter**: on high-vol / gap-risk days, widen intervals and de-weight all trend strategies; stop fighting large moves.
+- **Cut macro weight hard** (near zero as a deciding strategy) and cap news weight (~0.20); rebalance toward the least-bad performers.
+- **Recalibrate confidence**: current scores don't predict hits — retrain/scale confidence against realized directional accuracy, or collapse to a flat prior until it's informative.
+- **Introduce a directional gate**: only take a directional stance when ≥3 strategies agree; otherwise default to persistence baseline, which we're failing to beat.

@@ -170,3 +170,11 @@ The desk got direction right (down) but massively under-shot magnitude: predicte
 **Root cause:** A -4.7% 5-day decline was treated as trend-continuation evidence by momentum/technical/contrarian/news alike, when it was actually setting up an oversold bounce that overshot. The desk had no mechanism to detect that unanimous bearishness itself was the contrarian tell.
 
 **One change to try:** Add a 'consensus-crowding' override — when analyst predictions cluster within 1% AND the setup is a multi-day oversold decline, cap the consensus direction's weight and boost the dissenting mean-reversion analyst, testing whether crowded bearish agreement systematically precedes reversals.
+
+## 2026-08-20 — FAIL (APE 2.23%)
+- Predicted 265.91 vs actual 260.11 (prior 265.84); dir hit: False; beat baseline: False; closest analyst: contrarian.
+**What went wrong:** We predicted +0.07pt (flat) into a -2.16% drop — both direction and magnitude wrong. The blend was dragged bullish by news+macro+momentum (62% weight, all up), while the two down-calls (contrarian, technical) that correctly read mean-reversion were under-weighted at 38%.
+
+**Root cause:** The +6.39pt prior-session bounce was mistaken for durable momentum when it was a corrective bounce inside a downtrend (5d return negative, extended vs SMAs, RSI 66.6). News catalysts (Rosenblatt, drone) were priced as fresh upside but were already stale/discounted. Even contrarian's 263.5 undershot 260.11 — nobody sized the reversal aggressively enough.
+
+**One change:** When a >2% single-day bounce occurs after a multi-day selloff with RSI>65 and price >5% above SMA50, boost contrarian+technical combined weight above 0.50 and discount same-day news initiations as non-catalytic. That single tilt would have pulled the blend toward 263.5 and cut the error nearly in half.
