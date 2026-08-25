@@ -3,20 +3,19 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- **Direction, not magnitude, is the core problem.** 21 of 30 fails (70%) are directional misses; APE is often only marginally worse than baseline. The model gets the price roughly right but the sign wrong — it's essentially tracking the prior close, not predicting the move.
-- **The system barely beats a naive baseline.** Many fails have ape ≈ baseline_ape (e.g. 06-15, 06-22, 07-15, 08-20), meaning no edge is being added on hard days.
-- **Every strategy has a losing directional hit rate.** Best is news at 26%, worst is macro at 12% — all below a coin flip. This isn't a strategy-selection problem; the underlying signals lack directional information.
-- **Big-magnitude tail blowups.** 07-31 (13% APE) and repeated ~3-5% misses drag MAPE up; these cluster on high-volatility days.
+- **Directional errors dominate**: 22 of 31 fails are wrong-direction (71%), not magnitude. The model can't call the sign, which no amount of magnitude tuning fixes.
+- Overall it's a coin flip at best — no single strategy clears a 26% hit rate. This is a directional prediction system that doesn't predict direction.
+- Fails cluster on big-move days: worst APEs (0.13, 0.051, 0.042, 0.039, 0.037, 0.034) are all directional misses. The model gets steamrolled on volatile/gap sessions and never beats baseline meaningfully — it just tracks baseline.
+- **Macro is the worst offender**: 11.8% hit rate, highest MAPE. Every macro-winning day here is either a fail or a directional miss (06-12, 07-13, 07-15, 07-30, 08-19). It should not be winning weight.
 
 ## Unreliable under these conditions
-- **`macro` as winning strategy is a red flag.** 12% hit rate, worst MAPE (0.0182); nearly every macro-led day fails (06-12 setup, 07-13, 07-15, 07-30, 08-19). Stop trusting macro-driven calls.
-- **High-confidence misses on volatile days.** Confidence ≥0.5 fails: 06-12, 07-13, 07-20, 08-07, 08-19, 08-20. Late-Aug cluster (08-19/20 at conf 0.62/0.54) shows confidence rising precisely when accuracy collapses — mild but real miscalibration despite the "1 overconfident" flag.
-- **News-heavy weightings (news ≥0.34) underdeliver** on directional turns (06-17, 07-13, 07-24, 08-11) — heavy news tilt correlates with directional whiffs.
-- **Large-move days (baseline_ape >0.03)** are almost never caught correctly regardless of strategy.
+- **High-volatility / large-move days** (baseline_ape > ~0.02): near-universal directional misses regardless of strategy.
+- **When macro takes the lead**: consistently loses. Same for momentum on trend-reversal days (06-12, 06-25, 07-08, 07-30).
+- **Confidence is mildly miscalibrated on the upside**: the higher-confidence fails cluster at 0.5–0.62 (06-30, 07-13, 08-07, 08-19 @0.62, 08-20 @0.54). When the model is "sure," it's often wrong on direction — 08-19 and 08-20 are back-to-back confident directional misses.
+- **Low confidence is not informative either**: passes and fails both scatter across 0.1–0.3, so confidence carries almost no signal.
 
 ## Fixes to try next
-- Attack direction directly: add a dedicated sign/regime classifier and score/reward directional hit, not just APE.
-- Cut or floor `macro` weight; it's the weakest on both hit rate and MAPE.
-- Recalibrate confidence — cap confidence on high-volatility (high baseline_ape) days; current confidence trends up when it should trend down.
-- Cap/dampen news weight above ~0.30; heavy news tilts precede directional misses.
-- Add a volatility guard: on expected large-move days, widen intervals or abstain rather than emit a confident point estimate.
+- Cap or drop **macro** weight; it's pure noise here. Redistribute toward news/technical (best MAPE), but don't expect miracles — all are weak.
+- Build a **volatility regime filter**: on high-expected-move days, widen intervals or abstain rather than emit a confident point/direction.
+- **Recalibrate confidence** against realized directional hits — current high-confidence outputs are anti-predictive; consider inverting or flattening above 0.5.
+- Attack the sign problem directly: add a dedicated gap/overnight-drift feature and test a directional-only classifier separate from magnitude.
