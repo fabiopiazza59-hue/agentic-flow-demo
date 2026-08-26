@@ -3,19 +3,20 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- **Directional errors dominate**: 22 of 31 fails are wrong-direction (71%), not magnitude. The model can't call the sign, which no amount of magnitude tuning fixes.
-- Overall it's a coin flip at best — no single strategy clears a 26% hit rate. This is a directional prediction system that doesn't predict direction.
-- Fails cluster on big-move days: worst APEs (0.13, 0.051, 0.042, 0.039, 0.037, 0.034) are all directional misses. The model gets steamrolled on volatile/gap sessions and never beats baseline meaningfully — it just tracks baseline.
-- **Macro is the worst offender**: 11.8% hit rate, highest MAPE. Every macro-winning day here is either a fail or a directional miss (06-12, 07-13, 07-15, 07-30, 08-19). It should not be winning weight.
+- **Direction, not magnitude, is the core failure**: 22 of 31 misses are directional (71%). The model sizes moves roughly right but bets the wrong way. APE on fails averages 2.62% — big for daily AMZN.
+- **Directional coin-flip overall**: hit rate is barely above 50% and no strategy clears 25%. This is a sign-prediction problem, not a calibration one.
+- **Baseline-beating is weak**: a large share of fails also fail to beat baseline — the ensemble is adding noise, not edge, on hard days.
+- **Confidence is mostly honest but flat**: only 1 overconfident miss flagged, yet the highest-confidence days (0.58, 0.62, 0.54, 0.55) are disproportionately misses. Confidence signal is nearly useless — high conf ≠ better outcome.
 
 ## Unreliable under these conditions
-- **High-volatility / large-move days** (baseline_ape > ~0.02): near-universal directional misses regardless of strategy.
-- **When macro takes the lead**: consistently loses. Same for momentum on trend-reversal days (06-12, 06-25, 07-08, 07-30).
-- **Confidence is mildly miscalibrated on the upside**: the higher-confidence fails cluster at 0.5–0.62 (06-30, 07-13, 08-07, 08-19 @0.62, 08-20 @0.54). When the model is "sure," it's often wrong on direction — 08-19 and 08-20 are back-to-back confident directional misses.
-- **Low confidence is not informative either**: passes and fails both scatter across 0.1–0.3, so confidence carries almost no signal.
+- **macro is the worst regime pick**: 13.5% hit rate, highest MAPE. When macro "wins" the ensemble (06-12, 07-13, 07-15, 07-30, 08-19), it repeatedly misses — often on high confidence (0.55, 0.62). Macro-driven days are red flags.
+- **High-volatility days blow up**: the 07-31 miss (13.2% APE) plus clustered 3-5% APE fails (06-22, 07-23, 08-19) show the model has no handle on gap/large-move days.
+- **technical wins credited but low reliability**: 17% hit rate despite second-highest weight_hint — overweighted relative to performance.
+- **news-heavy weighting on fail days**: many misses carry news weight 0.30-0.42; heavy news tilt correlates with directional misses (07-23, 07-24, 08-10).
 
 ## Fixes to try next
-- Cap or drop **macro** weight; it's pure noise here. Redistribute toward news/technical (best MAPE), but don't expect miracles — all are weak.
-- Build a **volatility regime filter**: on high-expected-move days, widen intervals or abstain rather than emit a confident point/direction.
-- **Recalibrate confidence** against realized directional hits — current high-confidence outputs are anti-predictive; consider inverting or flattening above 0.5.
-- Attack the sign problem directly: add a dedicated gap/overnight-drift feature and test a directional-only classifier separate from magnitude.
+- **Cap or gate macro**: down-weight macro when it's the lead strategy; it's actively harmful.
+- **Rebuild confidence calibration** — current scores don't separate wins from losses; consider abstaining above a confidence threshold that historically underperforms.
+- **Attack the sign problem directly**: add a regime filter (trend vs chop) and a volatility flag to widen/suppress predictions on gap days.
+- **Rebalance weights toward hit rate, not just MAPE**: trim technical, test news/contrarian as leads only in low-vol regimes.
+- **Flag large-move days for no-trade** rather than forcing a directional call.
