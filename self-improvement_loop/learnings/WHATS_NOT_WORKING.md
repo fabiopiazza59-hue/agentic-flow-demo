@@ -3,21 +3,20 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- **Direction, not magnitude, is the core failure.** 22 of 31 misses (71%) are directional. Most fails have APE within ~0.1% of baseline (e.g. 07-15, 08-20, 08-24) — the model is basically tracking the naive baseline and losing the sign, not blowing out on size.
-- **We rarely beat baseline on fails.** Nearly all failing days also fail `beats_baseline`, meaning on hard days the ensemble adds nothing over "yesterday's close."
-- **Macro is the weakest winning strategy** (13% hit rate, highest MAPE 0.0173) yet still gets picked as the winner on several big-miss days (06-08 good, but 07-13, 07-15, 07-30, 08-19, 08-25 all fails/near-fails).
-- **Technical wins the ensemble often but has the worst standalone hit rate (16.7%)** — it's being over-trusted as a tiebreak strategy.
-- **Big tail miss 07-31 (APE 13.2%)** — likely a split/earnings/data event the model didn't flag; directional hit but magnitude catastrophic.
+- **Direction, not magnitude, is the core failure.** 22 of 31 misses are directional (71%). The model gets the size roughly right but bets the wrong way. This is a sign/regime problem, not a scaling problem.
+- **We barely beat a naive baseline.** Many fails have ape ≈ baseline_ape (e.g. 06-15, 06-17, 06-22, 07-15, 07-30), meaning on hard days the model just tracks yesterday's price and adds no edge.
+- **News-weighted days are a recurring trap.** News is the winning strategy on a disproportionate share of the big misses (06-15, 06-22, 06-25→06-29 cluster, 07-20, 08-10) despite only a 25% hit rate.
+- **Macro is the weakest link:** 12.7% hit rate, highest MAPE (0.0171), and it "wins" on several large-ape blowups (07-15, 07-30, 08-19). It's chosen precisely when it shouldn't be.
 
 ## Unreliable under these conditions
-- **High-volatility / large-move days** (baseline_ape >2.5%): the model consistently misses direction — 06-15, 06-22, 06-25, 06-29, 07-15, 07-30, 08-19. On big-move days it's essentially a coin flip that loses.
-- **Macro-led and news-led regimes:** macro and news win-days cluster in the fail list. Event-driven days (earnings/macro prints) overwhelm the technical/momentum signal.
-- **Confidence is flat and uninformative, not overconfident.** Only 1 overconfident miss flagged, but confidence hovers 0.4–0.5 on both wins and losses (miss 08-19 @0.62, miss 08-20 @0.54; win 08-18 @0.6). Confidence carries almost no discriminating signal — it's noise, not calibration.
-- **Low-confidence days aren't safer either** (0.1 conf still both passes and fails), so the score isn't measuring anything real.
+- **High-volatility / gap days** (ape 3–5%: 06-22, 06-25, 07-15, 07-23, 07-30, 08-19). Directional accuracy collapses here — the ensemble smooths through the move.
+- **When macro or news carries the top weight in a choppy tape.** These two account for most oversized, wrong-direction misses.
+- **Confidence is flat and uninformative, not overconfident.** Only 1 overconfident miss, but confidence (0.1–0.64) shows no relationship to outcome: 0.62 conf → miss (08-19), 0.1 conf → pass (07-27). Calibration is essentially noise.
+- **Late-July regime break (07-29→07-31)** shows a sustained miss streak — the model lagged a trend change for multiple days.
 
 ## Fixes to try next
-- **Attack the sign problem directly:** add a directional-classifier head and gate predictions on it; stop optimizing APE alone since we're already at baseline magnitude.
-- **Cut or floor macro weight** on non-event days; only elevate macro when an actual scheduled macro/earnings event is present.
-- **Down-weight technical as ensemble winner** given its 16.7% standalone hit rate; require corroboration before it wins.
-- **Add an event/volatility flag** (earnings, macro prints, gap detection) to abstain or widen intervals on high-baseline-ape days where we currently coin-flip.
-- **Rebuild confidence calibration** — current scores don't separate wins from losses; retrain confidence against realized directional hits.
+- **Add a volatility gate:** when expected daily range is high, widen tolerance and down-weight macro/news; don't force a directional call.
+- **Cut macro weight** (0.187 → near floor) or gate it to genuine macro-event days only; it's a net drag.
+- **Rebuild the directional layer** — magnitude is fine, sign is broken. Add a regime/trend filter so we stop fading real moves.
+- **Recalibrate confidence** against realized hit rate; current scores carry no signal and should not be trusted for sizing.
+- **Track "beats_baseline" as a gating metric** — on days we can't beat naive persistence, flag low-conviction rather than committing.
