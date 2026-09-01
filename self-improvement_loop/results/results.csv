@@ -82,4 +82,5 @@ date,prior_close,predicted_close,actual_close,predicted_direction,directional_hi
 2026-08-26,261.06,260.35,260.28,down,True,0.00026894114031062713,True,0.0029967727063163886,True,0.54,momentum,scored
 2026-08-27,256.26,256.85,256.26,up,False,0.002302349176617622,True,0.0,False,0.64,momentum,scored
 2026-08-28,266.43,265.99,266.43,down,True,0.0016514656757872525,True,0.0,False,0.64,news,scored
-2026-08-31,266.43,265.87,,down,,,,,,0.72,,pending
+2026-08-31,266.43,265.87,259.77,down,True,0.02348231127535906,False,0.025638064441621533,True,0.72,news,scored
+2026-09-01,259.77,258.91,,down,,,,,,0.54,,pending

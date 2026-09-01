@@ -3,20 +3,20 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- **Direction, not magnitude, is the core failure.** 22 of 31 misses are directional (71%). The model gets the size roughly right but bets the wrong way. This is a sign/regime problem, not a scaling problem.
-- **We barely beat a naive baseline.** Many fails have ape ≈ baseline_ape (e.g. 06-15, 06-17, 06-22, 07-15, 07-30), meaning on hard days the model just tracks yesterday's price and adds no edge.
-- **News-weighted days are a recurring trap.** News is the winning strategy on a disproportionate share of the big misses (06-15, 06-22, 06-25→06-29 cluster, 07-20, 08-10) despite only a 25% hit rate.
-- **Macro is the weakest link:** 12.7% hit rate, highest MAPE (0.0171), and it "wins" on several large-ape blowups (07-15, 07-30, 08-19). It's chosen precisely when it shouldn't be.
+- **Direction, not magnitude, is the core failure**: 22 of 32 misses (69%) are directional. The model calls the sign wrong far more than it mis-sizes moves. Point-estimate tuning won't fix this.
+- **The ensemble is barely better than a coin flip on direction.** Best strategy (news) hits 27%, worst (macro) 12.5%. All five are below 30% hit rate — that's systematically *anti*-predictive on direction, not merely noisy.
+- **Baseline beats us on most misses**: on failing days APE (2.61%) routinely exceeds baseline APE, meaning the model adds error vs. naive persistence rather than reducing it.
+- **Large-move days are where damage concentrates**: 2026-07-31 (13.2% APE), 06-22 (5.1%), 07-23 (4.2%), 06-17/06-15/06-25/07-30 all ~3-5%. These high-magnitude days dominate total error and are almost all directional misses.
 
 ## Unreliable under these conditions
-- **High-volatility / gap days** (ape 3–5%: 06-22, 06-25, 07-15, 07-23, 07-30, 08-19). Directional accuracy collapses here — the ensemble smooths through the move.
-- **When macro or news carries the top weight in a choppy tape.** These two account for most oversized, wrong-direction misses.
-- **Confidence is flat and uninformative, not overconfident.** Only 1 overconfident miss, but confidence (0.1–0.64) shows no relationship to outcome: 0.62 conf → miss (08-19), 0.1 conf → pass (07-27). Calibration is essentially noise.
-- **Late-July regime break (07-29→07-31)** shows a sustained miss streak — the model lagged a trend change for multiple days.
+- **Macro-led days are the worst**: winning_strategy=macro (06-12, 07-13, 07-15, 07-30, 08-19, 08-25) is mostly failures, and macro has the lowest hit rate (12.5%). Macro should not be trusted as a tiebreaker.
+- **News-heavy weighting (news ≥ 0.3) precedes many big misses** (06-25, 07-01, 07-13, 07-23, 07-24, 08-11) — news gets overweighted right before gap days it can't call.
+- **Confidence is mildly miscalibrated on the high end**: only 2 flagged overconfident misses, but 08-19 (0.62), 08-20 (0.54), 08-31 (0.72), 06-30 (0.55) are confident failures. High confidence is NOT tracking accuracy — passes occur at conf 0.1 and fails at 0.6+.
+- Errors cluster in **volatile/large-gap regimes**; in calm periods (early August) the model passes with small APE.
 
 ## Fixes to try next
-- **Add a volatility gate:** when expected daily range is high, widen tolerance and down-weight macro/news; don't force a directional call.
-- **Cut macro weight** (0.187 → near floor) or gate it to genuine macro-event days only; it's a net drag.
-- **Rebuild the directional layer** — magnitude is fine, sign is broken. Add a regime/trend filter so we stop fading real moves.
-- **Recalibrate confidence** against realized hit rate; current scores carry no signal and should not be trusted for sizing.
-- **Track "beats_baseline" as a gating metric** — on days we can't beat naive persistence, flag low-conviction rather than committing.
+- Since directional hit rate is <30% across all strategies, **test inverting the ensemble's directional signal** — it may be systematically contrarian to reality.
+- **Down-weight or gate macro** (weight_hint already lowest; consider dropping it as a winning_strategy selector) and cap news weight to reduce pre-gap overreaction.
+- **Decouple magnitude from direction**: predict direction with a separately calibrated classifier; use ensemble only for sizing.
+- **Recalibrate confidence** against realized hit rate — current confidence carries no discriminative signal; shrink toward 0.5 until proven.
+- Add a **volatility/large-move detector** and widen intervals (or abstain) on high-vol days where nearly all catastrophic misses occur.
