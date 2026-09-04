@@ -3,20 +3,20 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- Direction is the primary failure mode: 22 of 33 fails are directional misses (67%). We aren't magnitude-off, we're getting the sign of the move wrong.
-- Overall directional hit rate is coin-flip-or-worse across every strategy (best is news at 27.6%, macro at 12%). The ensemble adds little edge over baseline — many fails have ape ≈ baseline_ape (e.g., 07-15, 08-20, 08-24).
-- Big-move days are where damage concentrates: fails cluster at 3–5% APE (06-22, 06-25, 07-15, 07-23, 07-30) and one 13% blowup (07-31). The model reverts to small moves and gets run over on volatility.
-- macro is the worst engine (12% hit, highest MAPE .0172) yet keeps getting picked as winning_strategy on losing days (06-08 aside, see 07-13, 07-15, 07-30, 08-19).
+- **Direction, not magnitude, is the core failure**: 23 of 34 misses (68%) are directional. The system prices the level roughly right but gets the sign of the move wrong. It's essentially guessing next-day direction.
+- **Fails to beat a naive baseline routinely**: many misses have ape ≈ baseline_ape (e.g., 06-17, 06-22, 07-15, 08-20), meaning the model adds nothing over "assume no change."
+- **Big-move days are consistently blown**: whenever the true move is large (07-31 ape 13%, 06-22 5%, 07-23 4.2%, 07-30 3.9%), the model badly undershoots. It systematically mean-reverts/dampens and can't anticipate jumps.
+- **macro is the worst strategy** (hit rate 11.9%, highest MAPE 0.0172) yet keeps getting chosen as winning strategy on losing days (06-12→? , 07-13, 07-15, 07-30, 08-19, 08-25). When macro drives, it usually loses.
 
 ## Unreliable under these conditions
-- High-volatility / gap days: whenever the true move is large, direction flips and APE spikes. The system has no regime awareness.
-- macro-led and contrarian-led predictions: both low hit rate; contrarian fails repeatedly late-Aug (08-11, 08-20, 08-24) even at moderate confidence.
-- Late-period confidence inflation: confidence crept up (0.5–0.72 in late Aug) while still missing — 08-19 (conf .62, fail), 08-20 (.54, fail), 08-31 (.72, fail). Calibration is drifting the wrong way despite only 2 flagged "overconfident" misses (threshold too loose).
-- Days with empty weights blob still get scored — several fails (06-30, 07-22, 07-24) suggest a config/plumbing gap.
+- **High-volatility / gap days**: all worst APEs cluster here; every strategy misses direction together, so ensembling doesn't help.
+- **macro- and contrarian-led predictions**: both under 21% hit rate; contrarian misses direction repeatedly (08-11, 08-20, 08-24, 09-03).
+- **Rising-confidence regime is miscalibrated**: late-window high-confidence calls (0.62 on 08-19, 0.54 on 08-20, 0.62 on 09-03) are misses. Overconfident_misses=3 undercounts because confidence is compressed low (0.1–0.6); confidence barely correlates with being right.
+- **No strategy exceeds 27% directional hit rate** — the whole ensemble is below coin-flip on direction. This is a systemic signal problem, not a single bad strategy.
 
 ## Fixes to try next
-- Add a volatility regime filter; widen predicted move (stop mean-reverting) or abstain when expected range is high.
-- Cut macro weight hard and down-weight contrarian; it should not win on high-vol days.
-- Recalibrate confidence: recent high-confidence misses mean the mapping is stale — refit on last ~20 days and tighten the overconfidence flag threshold.
-- Treat this as a direction-first problem: build/evaluate a dedicated sign classifier separate from magnitude; current blend barely beats baseline.
-- Investigate empty-weights predictions — likely silent fallback producing bad calls.
+- **Drop or heavily down-weight macro** (and cap contrarian) until it demonstrates >50% direction; current weight_hints reward losers.
+- **Add a volatility gate**: on high-expected-move days, widen intervals and abstain rather than committing a direction the model can't call.
+- **Recalibrate confidence** against realized hit rate — current confidence has near-zero discriminative power; force it to track a validated probability.
+- **Attack the sign problem directly**: train/evaluate on directional accuracy, not just APE, since magnitude is already near baseline.
+- **Investigate the dampening bias**: model systematically underestimates large moves — check for over-smoothing/mean-reversion in features.
