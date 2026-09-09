@@ -10,12 +10,15 @@ import itertools
 import json
 import random
 import statistics as st
+import sys
 from math import comb
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from src.evals.integrity import is_late  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
 NAMES = ["technical", "momentum", "contrarian", "news", "macro"]
-OPEN_HOUR_UTC = 13  # 09:30 ET == 13:30 UTC; rows stamped later were not made pre-open
 
 
 def load(path: Path) -> list[dict]:
@@ -196,22 +199,24 @@ def finding_5_confidence(sc: list[dict]) -> None:
 
 
 def finding_6_timing(sc: list[dict]) -> None:
-    head("F6  Timing-luck and same-session contamination (paper canon 17 and 9)")
-    def hour(r):
-        return int((r.get("created_at") or "T00")[11:13])
-    late = [r for r in sc if hour(r) > OPEN_HOUR_UTC]
-    print(f"  rows stamped after the 13:30 UTC open: {len(late)}/{len(sc)}"
-          f" (latest {max((hour(r) for r in late), default=0)}:00 UTC)")
-    bad = [r for r in sc if abs(r["prior_close"] - r["actual_close"]) < 1e-9]
-    for r in bad:
-        print(f"    CONTAMINATED {r['date']} created {r['created_at'][11:16]}Z  "
-              f"prior_close == actual_close == {r['actual_close']}  baseline_ape=0.0")
+    head("F6  Pre-open integrity (paper canon 9 and 17)")
+    late = [r for r in sc if is_late(r)]
+    print(f"  scored rows created at/after the 13:30 UTC open: {len(late)}/{len(sc)}")
+    post_close = [r for r in late if (r.get("late_minutes") or 0) > 390]
+    for r in sorted(post_close, key=lambda r: r["date"]):
+        flat = abs(r["prior_close"] - r["actual_close"]) < 1e-9
+        print(f"    {r['date']} created {r['created_at'][11:16]}Z  "
+              f"+{r['late_minutes']} min after open (after the close)"
+              + ("  prior_close == actual_close" if flat else ""))
+    clean = [r for r in sc if not is_late(r)]
     def edge(rs):
         return st.mean([r["baseline_ape"] for r in rs]) - st.mean([r["ape"] for r in rs])
-    keep = [r for r in sc if r not in bad]
-    print(f"  rolling-20 edge  as reported          {100 * edge(sc[-20:]):+.4f}%")
-    print(f"  rolling-20 edge  minus contaminated   {100 * edge(keep[-20:]):+.4f}%   <- headline flips")
-    print(f"  all-time   edge  as reported          {100 * edge(sc):+.4f}%")
+    print(f"  all-time edge, every row      {100 * edge(sc):+.4f}%  (n={len(sc)})")
+    print(f"  all-time edge, pre-open only  {100 * edge(clean):+.4f}%  (n={len(clean)})")
+    print(f"  rolling-20 edge, every row     {100 * edge(sc[-20:]):+.4f}%")
+    print(f"  rolling-20 edge, pre-open only {100 * edge(clean[-20:]):+.4f}%")
+    print("  Both effects are ~1e-4 of MAPE — far under this series' day-to-day noise, so")
+    print("  neither sign is readable. The record has to be clean before the number means anything.")
 
 
 def finding_7_redundancy(sc: list[dict]) -> None:

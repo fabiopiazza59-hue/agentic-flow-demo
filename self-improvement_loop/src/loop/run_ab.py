@@ -36,6 +36,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--date", default=None, help="target session YYYY-MM-DD (default today UTC)")
     parser.add_argument("--dry-run", action="store_true", help="no git commit; offline if no key")
     parser.add_argument("--no-commit", action="store_true")
+    parser.add_argument("--allow-late", action="store_true",
+                        help="write predictions even after the session has opened (flagged)")
     args = parser.parse_args(argv)
 
     settings.ensure_dirs()
@@ -76,10 +78,15 @@ def main(argv: list[str] | None = None) -> int:
         log(f"shared snapshot: prev_close {features['prev_close']}, "
             f"gap {features.get('premarket_gap_pct')}, quote via {features.get('quote_source')}.")
 
-        rows_a, _ = do_predict(rows_a, target_date, client, features=features)
+        rows_a, row_a = do_predict(rows_a, target_date, client, features=features,
+                                   allow_late=args.allow_late)
         write_jsonl(settings.LEDGER_PATH, rows_a)
-        rows_b, _ = do_predict_b(rows_b, target_date, client, features, history)
-        write_jsonl(settings.LEDGER_B_PATH, rows_b)
+        # Both arms predict or neither does — a paired test needs both sides of every day.
+        if row_a is None:
+            log("arm A declined to predict (post-open); skipping arm B to keep the pairing clean.")
+        else:
+            rows_b, _ = do_predict_b(rows_b, target_date, client, features, history)
+            write_jsonl(settings.LEDGER_B_PATH, rows_b)
 
     metrics = report.generate()
     _emit_ci_summary(metrics)

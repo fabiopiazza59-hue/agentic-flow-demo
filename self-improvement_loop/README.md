@@ -33,6 +33,15 @@ honestly says "no edge yet."
   *across all failures* for recurring patterns; it's fed to the meta-judge before the next shot.
 - **Analyst-level feedback** — each analyst also sees its own scorecard and the failure review, with
   an explicit anti-groupthink instruction (the diagnosed root cause of most misses).
+- **Pre-open integrity** (`src/evals/integrity.py`) — a row only counts as a forecast if it was
+  created before its session opened. Every row carries `late_minutes`; `RESULTS.md` reports the
+  record with and without the late ones, and the verdict is read off the pre-open column only.
+  New post-open predictions are refused (`--allow-late` overrides, and still flags the row).
+- **Verdict needs evidence** (`src/evals/paired.py`) — "edge confirmed" requires a paired
+  day-level test on pre-open rows (90% bootstrap CI excluding zero *and* a sign test at p<0.05),
+  so a nominal +0.02% reads as noise instead of a win.
+- **Measurable gates** — each row stores `predicted_close_raw`, the pre-gate prediction, so the
+  gates' own effect is reported as a paired per-day number instead of being assumed.
 - **Enforced gates** (`src/evals/gates.py`) — the diagnosis's fixes applied in code, not just prompts:
   the predicted move shrinks toward the prior close when analyst directional agreement is low or the
   rolling edge vs baseline is negative, and confidence is replaced by a calibrated value (rolling
@@ -83,7 +92,12 @@ python -m src.loop.run_daily --mode daily --dry-run   # score + predict + report
 python -m src.loop.run_daily --mode daily --no-commit
 ```
 Modes: `daily` (default), `score`, `predict`, `report`, `backfill`. Flags: `--date YYYY-MM-DD`,
-`--dry-run`, `--no-commit`.
+`--dry-run`, `--no-commit`, `--allow-late`.
+
+```bash
+python -m tools.audit_review        # reproduce the findings in spec/improvements-from-2609.05663.md
+python -m tools.backfill_integrity  # one-time: stamp late_minutes on historical rows
+```
 
 ## Activation on GitHub (one-time)
 1. **Secrets** (repo → Settings → Secrets → Actions): `ANTHROPIC_API_KEY`, and `ALPHAVANTAGE_API_KEY`

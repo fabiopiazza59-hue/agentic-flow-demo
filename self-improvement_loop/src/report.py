@@ -14,7 +14,9 @@ import json
 from pathlib import Path
 
 from .config import settings
-from .evals.metrics import aggregate
+from .evals import integrity
+from .evals.metrics import aggregate, ape
+from .evals.paired import paired_effect
 from .evals.scorecard import load_scorecards
 from .utils import read_jsonl
 
@@ -42,9 +44,51 @@ def write_csv(rows: list[dict], path: Path) -> None:
             writer.writerow({k: r.get(k) for k in CSV_FIELDS})
 
 
+def gate_effect(rows: list[dict]) -> dict:
+    """Paired day-level effect of the guardrail gates: ungated APE minus gated APE.
+
+    Positive means the gates helped. Only rows carrying a `predicted_close_raw` counterfactual
+    can contribute, so this fills in from the first run after that field shipped.
+    """
+    deltas, fired = [], 0
+    for r in rows:
+        raw, actual = r.get("predicted_close_raw"), r.get("actual_close")
+        if raw is None or actual in (None, 0) or r.get("status") != "scored" or r.get("seed"):
+            continue
+        deltas.append(ape(float(raw), float(actual)) - float(r["ape"]))
+        if r.get("gates_applied"):
+            fired += 1
+    effect = paired_effect(deltas)
+    effect["n_gates_fired"] = fired
+    return effect
+
+
+def baseline_effect(rows: list[dict], window: int | None = None) -> dict:
+    """Paired day-level advantage over the random-walk baseline, on pre-open rows only.
+
+    This is the headline verdict's evidence: an `edge` of 1e-4 in a series whose daily APE swings
+    by whole percent is not skill, it is noise with a sign. Canon rule 1 makes the day the
+    inferential unit; the FIRM bar (interval excludes zero AND the sign test agrees) decides
+    whether the dashboard is allowed to claim an edge at all.
+    """
+    scored = sorted(
+        (r for r in rows
+         if r.get("status") == "scored" and not r.get("seed") and not integrity.is_late(r)
+         and r.get("ape") is not None and r.get("baseline_ape") is not None),
+        key=lambda r: r.get("date", ""),
+    )
+    if window:
+        scored = scored[-window:]
+    return paired_effect([float(r["baseline_ape"]) - float(r["ape"]) for r in scored])
+
+
 def build_metrics(rows: list[dict], scorecards: dict) -> dict:
     rolling = aggregate(rows, window=settings.ROLLING_WINDOW)
     alltime = aggregate(rows, window=None)
+    # The same aggregates restricted to rows created before their session opened. Rows written
+    # after the open saw part of the tape they forecast, so this is the honest record.
+    rolling_pre_open = aggregate(rows, window=settings.ROLLING_WINDOW, pre_open_only=True)
+    alltime_pre_open = aggregate(rows, window=None, pre_open_only=True)
     scored = [r for r in rows if r.get("status") == "scored"]
     series = [
         {
@@ -65,6 +109,11 @@ def build_metrics(rows: list[dict], scorecards: dict) -> dict:
         "rolling_window": settings.ROLLING_WINDOW,
         "rolling": rolling,
         "all_time": alltime,
+        "rolling_pre_open": rolling_pre_open,
+        "all_time_pre_open": alltime_pre_open,
+        "n_late_rows": sum(1 for r in scored if not r.get("seed") and integrity.is_late(r)),
+        "gate_effect": gate_effect(rows),
+        "baseline_effect": baseline_effect(rows, window=settings.ROLLING_WINDOW),
         "scorecards": scorecards,
         "series": series,
         "pending": pending[-1] if pending else None,
@@ -72,18 +121,61 @@ def build_metrics(rows: list[dict], scorecards: dict) -> dict:
     }
 
 
+def _render_integrity(metrics: dict) -> str:
+    """A short, always-visible note on what the headline excludes and what the gates are worth."""
+    late = metrics.get("n_late_rows", 0)
+    g = metrics.get("gate_effect") or {}
+    lines = ["### Integrity & mechanism", ""]
+    if late:
+        lines.append(
+            f"- **{late} scored row(s) were created after their session opened** and are excluded "
+            f"from the pre-open column. They saw part of the tape they forecast, so they cannot "
+            f"carry the verdict. New post-open rows are refused (`--allow-late` to override)."
+        )
+    else:
+        lines.append("- All scored rows were created before their session opened. ✅")
+    if g.get("n"):
+        ci = f"[{_pct(g.get('ci_low'))}, {_pct(g.get('ci_high'))}]"
+        lines.append(
+            f"- **Gate effect** (ungated − gated APE, paired over {g['n']} days): "
+            f"{_pct(g.get('mean'))} 90% CI {ci}, gates helped on {g.get('wins', 0)}/"
+            f"{g.get('n_decisive', 0)} decisive days (sign test p={g.get('sign_test_p')}). "
+            f"Gates fired on {g.get('n_gates_fired', 0)} of them."
+        )
+    else:
+        lines.append(
+            "- **Gate effect**: not measurable yet — accrues from the first run that records an "
+            "ungated counterfactual (`predicted_close_raw`) on each row."
+        )
+    return "\n".join(lines)
+
+
 def render_results_md(metrics: dict, rows: list[dict]) -> str:
     r = metrics["rolling"]
     a = metrics["all_time"]
-    edge = r.get("edge")
-    if edge is None:
+    # The verdict is read off pre-open rows only: a row written after the open saw part of the
+    # tape it was forecasting, so including it would let lookahead carry the headline.
+    p = metrics.get("rolling_pre_open") or r
+    # An edge is only claimed when the paired day-level test clears the FIRM bar: the bootstrap
+    # interval excludes zero AND the sign test agrees. A positive `edge` of 1e-4 is noise.
+    eff = metrics.get("baseline_effect") or {}
+    edge = p.get("edge")
+    evidence = (f"paired over {eff.get('n', 0)} pre-open days: mean {_pct(eff.get('mean'))}, "
+                f"90% CI [{_pct(eff.get('ci_low'))}, {_pct(eff.get('ci_high'))}], "
+                f"beat baseline on {eff.get('wins', 0)}/{eff.get('n_decisive', 0)} decisive days, "
+                f"sign test p={eff.get('sign_test_p')}")
+    if edge is None or not eff.get("n"):
         verdict = "⏳ **Not enough scored days yet** to judge edge vs the random-walk baseline."
+    elif eff.get("significant"):
+        verdict = (f"✅ **Edge confirmed** — rolling MAPE {_pct(p['mape'])} beats the random-walk "
+                   f"baseline {_pct(p['baseline_mape'])} ({evidence}).")
     elif edge > 0:
-        verdict = (f"✅ **Edge confirmed** — rolling MAPE {_pct(r['mape'])} beats the random-walk "
-                   f"baseline {_pct(r['baseline_mape'])} by {_pct(edge)}.")
+        verdict = (f"❌ **No edge yet** — rolling MAPE {_pct(p['mape'])} is nominally ahead of the "
+                   f"random-walk baseline {_pct(p['baseline_mape'])} by {_pct(edge)}, but the "
+                   f"difference is not distinguishable from noise ({evidence}).")
     else:
-        verdict = (f"❌ **No edge yet** — rolling MAPE {_pct(r['mape'])} does not beat the "
-                   f"random-walk baseline {_pct(r['baseline_mape'])}. Keep learning.")
+        verdict = (f"❌ **No edge yet** — rolling MAPE {_pct(p['mape'])} does not beat the "
+                   f"random-walk baseline {_pct(p['baseline_mape'])} ({evidence}). Keep learning.")
 
     pending = metrics.get("pending")
     pending_line = ""
@@ -107,15 +199,17 @@ def render_results_md(metrics: dict, rows: list[dict]) -> str:
         "## Rolling metrics "
         f"(last {min(r.get('n', 0), metrics['rolling_window'])} scored days)",
         "",
-        "| Metric | Rolling | All-time |",
-        "|---|---|---|",
-        f"| Scored days | {r.get('n', 0)} | {a.get('n_all_time', 0)} |",
-        f"| PASS rate (±1%) | {_pct(r.get('pass_rate'))} | {_pct(a.get('pass_rate'))} |",
-        f"| Directional accuracy | {_pct(r.get('directional_accuracy'))} | {_pct(a.get('directional_accuracy'))} |",
-        f"| MAPE | {_pct(r.get('mape'))} | {_pct(a.get('mape'))} |",
-        f"| Baseline MAPE (random walk) | {_pct(r.get('baseline_mape'))} | {_pct(a.get('baseline_mape'))} |",
-        f"| Edge (baseline − model) | {_pct(r.get('edge'))} | {_pct(a.get('edge'))} |",
-        f"| Brier (confidence calib.) | {_num(r.get('brier'))} | {_num(a.get('brier'))} |",
+        "| Metric | Rolling (pre-open) | Rolling (all rows) | All-time |",
+        "|---|---|---|---|",
+        f"| Scored days | {p.get('n', 0)} | {r.get('n', 0)} | {a.get('n_all_time', 0)} |",
+        f"| PASS rate (±1%) | {_pct(p.get('pass_rate'))} | {_pct(r.get('pass_rate'))} | {_pct(a.get('pass_rate'))} |",
+        f"| Directional accuracy | {_pct(p.get('directional_accuracy'))} | {_pct(r.get('directional_accuracy'))} | {_pct(a.get('directional_accuracy'))} |",
+        f"| MAPE | {_pct(p.get('mape'))} | {_pct(r.get('mape'))} | {_pct(a.get('mape'))} |",
+        f"| Baseline MAPE (random walk) | {_pct(p.get('baseline_mape'))} | {_pct(r.get('baseline_mape'))} | {_pct(a.get('baseline_mape'))} |",
+        f"| Edge (baseline − model) | {_pct(p.get('edge'))} | {_pct(r.get('edge'))} | {_pct(a.get('edge'))} |",
+        f"| Brier (confidence calib.) | {_num(p.get('brier'))} | {_num(r.get('brier'))} | {_num(a.get('brier'))} |",
+        "",
+        _render_integrity(metrics),
         "",
         "## Per-strategy scorecards",
         "",

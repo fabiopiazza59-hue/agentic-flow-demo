@@ -53,6 +53,9 @@ def apply_gates(final: dict, analyst_predictions: dict, rows: list[dict],
         return final, gates
 
     final = dict(final)
+    # The ungated value is kept so the gate's own effect stays measurable after the fact:
+    # without a counterfactual per row, the one real mechanism in this system is unfalsifiable.
+    final["predicted_close_raw"] = round(float(final["predicted_close"]), 2)
     move = float(final["predicted_close"]) - prev_close
     consensus = directional_consensus(analyst_predictions, final.get("direction"))
     stats = aggregate(rows, window=settings.GATE_EDGE_WINDOW)

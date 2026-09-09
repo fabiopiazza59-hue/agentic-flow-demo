@@ -21,6 +21,11 @@ class Settings(BaseModel):
     ROLLING_WINDOW: int = 20              # trading days for rolling aggregates
     LOOKBACK_DAYS: int = 120             # history pulled for feature engineering
 
+    # --- integrity: a prediction only counts if it was made before the session opened ---
+    SESSION_OPEN_UTC_HOUR: int = 13       # 09:30 ET regular-session open, in UTC
+    SESSION_OPEN_UTC_MINUTE: int = 30
+    ENFORCE_PRE_OPEN: bool = True         # refuse to write a prediction row after the open
+
     # --- models ---
     ANALYST_MODEL: str = "claude-sonnet-4-6"
     JUDGE_MODEL: str = "claude-opus-4-8"

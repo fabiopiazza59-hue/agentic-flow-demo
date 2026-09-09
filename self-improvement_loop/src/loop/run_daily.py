@@ -11,6 +11,7 @@ Flags:
   --date YYYY-MM-DD   override the target session (default: today, UTC)
   --dry-run           no git commit; uses offline stubs if no ANTHROPIC_API_KEY
   --no-commit         run fully but skip the git commit step
+  --allow-late        write a prediction even after the session opened (row is flagged)
 """
 
 from __future__ import annotations
@@ -27,6 +28,7 @@ from ..agents.reflector import diagnose_failures, reflect
 from ..config import PROJECT_ROOT, settings
 from ..data.market_calendar import is_trading_day, last_n_trading_days, previous_trading_day
 from ..data.providers import get_actual_close, get_history, get_quote
+from ..evals import integrity
 from ..evals.gates import apply_gates
 from ..evals.metrics import score_row
 from ..evals.scorecard import load_scorecards, save_scorecards, update_scorecards
@@ -160,8 +162,26 @@ def _refresh_whats_not_working(rows: list[dict], scorecards: dict, client) -> No
 # --------------------------------------------------------------------------------- predicting
 
 def do_predict(rows: list[dict], target_date: date, client,
-               features: dict | None = None) -> tuple[list[dict], dict]:
-    """Predict today's close. Pass a pre-built `features` snapshot for a fair A/B run."""
+               features: dict | None = None,
+               allow_late: bool = False) -> tuple[list[dict], dict | None]:
+    """Predict today's close. Pass a pre-built `features` snapshot for a fair A/B run.
+
+    Refuses to write a row for *today's* session once that session has opened: a forecast made
+    after the open has seen part of the tape it is forecasting, and 26 of the first 60 rows in
+    this ledger were written that way (two of them after the close). Pass `allow_late` to
+    override deliberately.
+
+    A past-dated `--date` is a replay, not a live forecast, so the guard stays out of its way;
+    such rows are still stamped `late_minutes` and so are still excluded from the pre-open
+    headline by `aggregate(pre_open_only=True)`.
+    """
+    targets_today = target_date.isoformat() == iso_today()
+    if settings.ENFORCE_PRE_OPEN and targets_today and not allow_late \
+            and not integrity.is_pre_open_now(target_date.isoformat()):
+        log(f"{target_date} has already opened — refusing to write a post-open 'prediction'. "
+            f"Use --allow-late to override (the row is then flagged late_minutes).")
+        return rows, None
+
     if features is None:
         history = get_history(settings.SYMBOL, settings.LOOKBACK_DAYS)
         quote = get_quote(settings.SYMBOL)
@@ -188,6 +208,7 @@ def do_predict(rows: list[dict], target_date: date, client,
         "created_at": now_iso(),
         "prior_close": prior_close,
         "predicted_close": final["predicted_close"],
+        "predicted_close_raw": final.get("predicted_close_raw"),
         "predicted_direction": final["direction"],
         "confidence": final["confidence"],
         "weights": final.get("weights", {}),
@@ -198,6 +219,7 @@ def do_predict(rows: list[dict], target_date: date, client,
         "status": "pending",
         "actual_close": None,
     }
+    integrity.annotate(row)
     rows = upsert_ledger_row(rows, row)
     log(f"predicted {target_date.isoformat()}: close ≈ {row['predicted_close']} "
         f"({row['predicted_direction']}, conf {row['confidence']}) from {len(analyst_predictions)} analysts"
@@ -286,6 +308,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--date", default=None, help="target session YYYY-MM-DD (default today UTC)")
     parser.add_argument("--dry-run", action="store_true", help="no git commit; offline if no key")
     parser.add_argument("--no-commit", action="store_true")
+    parser.add_argument("--allow-late", action="store_true",
+                        help="write a prediction even after the session has opened (flagged)")
     args = parser.parse_args(argv)
 
     settings.ensure_dirs()
@@ -314,7 +338,7 @@ def main(argv: list[str] | None = None) -> int:
             write_jsonl(settings.LEDGER_PATH, rows)
 
         if args.mode in ("daily", "predict"):
-            rows, _ = do_predict(rows, target_date, client)
+            rows, _ = do_predict(rows, target_date, client, allow_late=args.allow_late)
             write_jsonl(settings.LEDGER_PATH, rows)
 
         metrics = report.generate()

@@ -10,22 +10,13 @@ paired test: per-day APE deltas, B-wins rate, and a two-sided binomial sign test
 from __future__ import annotations
 
 import json
-from math import comb
 
 from .config import settings
 from .evals.metrics import aggregate
+from .evals.paired import sign_test_p
 from .utils import read_jsonl
 
 ARM_LABELS = {"a": "A — ensemble + gates", "b": "B — raven prior + pulse"}
-
-
-def sign_test_p(wins: int, n: int) -> float | None:
-    """Two-sided exact binomial sign test p-value under H0: P(win)=0.5 (ties excluded)."""
-    if n == 0:
-        return None
-    k = max(wins, n - wins)
-    p = sum(comb(n, i) for i in range(k, n + 1)) / 2 ** n * 2
-    return round(min(1.0, p), 4)
 
 
 def paired_days(rows_a: list[dict], rows_b: list[dict]) -> list[dict]:

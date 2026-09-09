@@ -131,27 +131,35 @@ low half), so the ranking is real and only the *scale* is wrong — `calibrated_
 (`src/evals/gates.py:35-44`) anchors on the rolling PASS rate but adds a ±0.1 consensus nudge that
 overshoots. Paper canon 13: calibrate against a null arm before reading the table.
 
-### F6 — Same-session contamination, and the headline verdict rests on it. **FIRM**
+### F6 — Nearly half the record was not made before the open. **FIRM**
 
 Canon 9 ("check the calendar footprint before believing any group difference" — this overturned
 two of the lab's own claims within an hour) and canon 17 ("know your timing-luck floor").
 
-- **18 of 60 predictions were stamped after the 13:30 UTC open**, i.e. not pre-open at all. Two
-  (2026-08-27 at 21:08Z, 2026-08-28 at 21:29Z) were created *after the 20:00 UTC close*.
-- On those two days `prior_close == actual_close` exactly and `baseline_ape == 0.0`: the "previous
-  close" the row was scored against was the target session's own close. Both rows are in the
-  headline metrics and are not flagged as seeds.
-- Effect on the repo's one stated success criterion:
+- **26 of 60 scored rows (43%) were created at or after the 13:30 UTC open**, so they are not
+  pre-open forecasts. Two (2026-08-27 at 21:08Z, +458 min; 2026-08-28 at 21:29Z, +479 min) were
+  created after the *close*; on both, `prior_close == actual_close` exactly and `baseline_ape`
+  is 0.0 — the "previous close" they were scored against was the target session's own close.
+- Restricting the record to the 34 genuine pre-open rows moves the headline:
 
-  | rolling-20 edge vs baseline | value |
-  |---|---|
-  | as reported in `RESULTS.md` / `metrics.json` | **+0.0014%** |
-  | with the two contaminated rows removed | **−0.0149%** |
+  | edge vs baseline | every row | pre-open only |
+  |---|---|---|
+  | all-time | −0.0439% (n=60) | **+0.0133% (n=34)** |
+  | rolling-20 | +0.0014% | **+0.0160%** |
 
-  The published "beats_baseline_overall: true" is carried by two rows that could not have been
-  predictions. The true effect size (+1.4e-5) is also ~2 orders of magnitude below the daily noise
-  in this series, which is canon 17's point about most compared effect sizes sitting under the
-  timing-luck floor.
+  Do not read either sign as a result. Both are ~1e-4 of MAPE, orders of magnitude under this
+  series' day-to-day noise, and canon 17's whole point is that most compared effect sizes sit
+  below the timing-luck floor. The finding is that **the record cannot be read at all** until
+  every row is a real forecast — not that the edge is positive or negative.
+
+> **Retraction (this document, first revision).** An earlier version of F6 claimed the rolling
+> edge "flips negative once the two contaminated rows are removed." That was wrong twice over: it
+> counted late rows with an hour-granularity heuristic that missed the 13:31–13:59 window (18
+> instead of 26), and dropping only the two post-close rows removes the two days on which the
+> *baseline* scored a perfect 0.0 APE, which mechanically penalizes the model. The principled
+> exclusion — every post-open row — moves the number the other way. Both versions are under the
+> noise floor, so nothing downstream changes; the correction is recorded rather than quietly
+> edited, per the paper's §2.4 evidence-class discipline.
 
 Related: `learnings/FAILURES.md` for 2026-08-31 and 2026-09-01 diagnoses that "news anchors to a
 real-time intraday quote already >1.5% off prior close" and prescribes **raising** news's weight to
@@ -174,9 +182,14 @@ gate would be optimizing a phantom.
 The paper orders its development program by effect-size class: harness levers first (FIRM, large,
 cheap), then deployable checks, then model work, with benchmarking throughout. Same ordering here.
 
+> **Status.** P0.1, P0.2, P1.5 and the verdict's evidence bar are **implemented** (see
+> `src/evals/integrity.py`, `src/evals/paired.py`, `report.gate_effect` / `report.baseline_effect`,
+> and `tests/test_integrity.py`). P0.3, P0.4, P0.5 and P1.1–P1.4 are not — they change forecasting
+> behaviour or add an arm, and are the owner's call.
+
 ### P0 — Harness fixes. Cheap, mechanical, measured.
 
-**P0.1 Log the counterfactual so the mechanism becomes measurable.**
+**P0.1 Log the counterfactual so the mechanism becomes measurable.** — ✅ *shipped*
 The gates are the only true mechanism in this system and their effect is currently *unknowable*:
 zero of 60 rows record the pre-gate prediction. The paper could state "the bracket earns +39.0 bps
 per position [+21.3, +56.5]" only because both arms of every entry were recoverable.
@@ -185,15 +198,15 @@ per position [+21.3, +56.5]" only because both arms of every entry were recovera
 `report.py` next to the headline. Any future gate must clear this bar before it stays.
 *Verify:* a `gate_effect` block in `metrics.json` with a bootstrap CI over days.
 
-**P0.2 Make the pre-open guarantee real, and quarantine the contaminated rows.**
+**P0.2 Make the pre-open guarantee real, and label the late rows.** — ✅ *shipped*
 → In `run_daily.do_predict` / `run_ab`, refuse to write a prediction row whose timestamp is at or
 after the session open (13:30 UTC), exiting cleanly the way the non-trading-day guard does.
-→ Add an assertion at score time that `prior_close != actual_close` for the target session, and
-mark 2026-08-27 and 2026-08-28 `contaminated: true` so `aggregate()` excludes them the way it
-excludes seeds. Restate the headline honestly — the rolling edge is −0.015%, not +0.001%. This is
-the paper's own retraction discipline (§2.4), and doing it in public is the point of the repo's
-"honesty over vanity" principle.
-*Verify:* `metrics.json` edge changes sign; `RESULTS.md` says "no edge yet."
+→ Every row now carries `late_minutes` (derived from its own `created_at`), and `aggregate()`
+takes `pre_open_only` so `RESULTS.md` and `metrics.json` report the record both ways with the
+verdict read off the pre-open column. Rows are labelled, never deleted — the ledger is the
+experiment log, and the paper's discipline is to flag rather than pool silently (§2.3).
+*Verify:* `RESULTS.md` shows a "Rolling (pre-open)" column, an "Integrity & mechanism" section
+naming the 26 late rows, and a verdict that no longer claims an edge on a 0.02% difference.
 
 **P0.3 Demote the meta-judge to a bounded adjuster; make the mean the default.**
 F1 is a measured, day-clustered, sign-test-confirmed result that the LLM synthesis layer costs
@@ -250,12 +263,13 @@ never audited: `_run_one` catches exceptions, but a response containing zero sea
 hallucinated catalyst returns clean JSON and full weight.
 → Record `n_search_results` per analyst run; treat a zero-result news call as a dropped analyst.
 
-**P1.5 Report what the primary metric throws away (canon 12).**
+**P1.5 Report what the primary metric throws away (canon 12).** — ✅ *partly shipped*
 PASS(±1%) is largely a volatility thermometer: it measures P(|move| ≤ 1%) more than skill, which is
 why the shipped system can post a 55% rolling PASS rate with a negative edge.
-→ Keep `edge` as the sole headline (the spec already says so — enforce it in `RESULTS.md`'s
-ordering), and publish PASS alongside the realized share of days with |move| ≤ 1% so the reader can
-see the confound.
+→ Done for the verdict: it now quotes the paired evidence (mean, 90% CI, wins, sign-test p) and
+claims an edge only when the interval excludes zero *and* the sign test agrees, so a nominal
++0.02% reads as "not distinguishable from noise" instead of "✅ Edge confirmed". Still to do:
+publish PASS next to the realized share of days with |move| ≤ 1%, so the vol confound is visible.
 
 ### P2 — Model and cost work. Last, because the paper says it buys the least.
 
