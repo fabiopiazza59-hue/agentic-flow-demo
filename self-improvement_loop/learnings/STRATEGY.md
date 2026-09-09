@@ -62,3 +62,4 @@ Append-only insights. Newest at the bottom.
 - (2026-09-02) When RSI < 40 (oversold) and 1d realized move is small, bias the blended prediction toward prior_close, since directional drift bets underperform the naive baseline in choppy oversold regimes.
 - (2026-09-03) When 4+ analysts cluster within 0.3% citing the SAME trend inputs (ret_5d/20d, RSI, SMA gap), treat it as correlated single-signal risk and boost the dissenting contrarian weight when RSI < 40 (oversold bounce zone).
 - (2026-09-04) 2026-09-04: PASS, beat baseline; closest technical, worst momentum.
+- (2026-09-08) When all momentum/technical/news analysts agree on direction and premarket gap is zero, tilt the ensemble ~0.2% further past the mild-drift consensus, since realized down-moves on such days exceeded the timid blend.
