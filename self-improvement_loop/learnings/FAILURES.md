@@ -194,3 +194,9 @@ The desk got direction right (down) but massively under-shot magnitude: predicte
 ## 2026-09-03 — FAIL (APE 1.62%)
 - Predicted 254.7 vs actual 258.9 (prior 254.98); dir hit: False; beat baseline: False; closest analyst: contrarian.
 **What went wrong:** The blend was a bearish monoculture — technical, momentum, macro, and news all recited the same downtrend/RSI-39.9 evidence and landed 253.5-253.7, while AMZN rallied +1.54% to 258.9. **Root cause:** false consensus. The four bearish analysts weren't independent signals; they were one trend signal counted four times, and the meta-judge rewarded that redundancy with 84% aggregate weight. The contrarian correctly flagged RSI-39.9 as an oversold bounce setup near SMA50 support but was drowned out. **The one change:** implement a correlation penalty — when the top-N analysts share the same core inputs (detected by rationale overlap or predictions within 0.3%), cap their combined weight and force the dissenting view to at least 30%, especially with RSI in the 35-42 mean-reversion band.
+
+## 2026-09-09 — FAIL (APE 1.60%)
+- Predicted 256.44 vs actual 252.4 (prior 256.97); dir hit: True; beat baseline: True; closest analyst: news.
+- **What went wrong:** right direction, magnitude off; final blend 256.44 missed by 1.60%.
+- **Likely culprit:** analyst `contrarian` was furthest from actual and pulled the blend.
+- **Try next:** reduce weight on `contrarian` under today's conditions and lean on `news`.
