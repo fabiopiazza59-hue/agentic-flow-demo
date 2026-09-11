@@ -3,20 +3,20 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- **Direction is the core problem, not magnitude.** 23 of 35 fails are directional misses (66%). The model calls the wrong way more than it under/over-shoots. On many days ape barely beats baseline even on "passes" — you're tracking, not predicting.
-- **The whole ensemble is a coin-flip on direction.** Best strategy (news) hits only 27%; macro is 13%. All five sit below 28% directional hit rate — that's worse than random. The blend has no directional edge.
-- **On large-move days it collapses.** 6/22, 6/25, 6/26, 7/15, 7/30, 7/31 (13% ape!), 8/19 — big-APE days are almost all misses and almost all wrong-direction. The model reverts to a small drift and gets run over on volatility spikes.
-- **Barely beats baseline anywhere.** Mean fail APE 2.52%, and passes often lose to baseline (beats_baseline=false on many "passes"). Value-add over naive carry-forward is thin.
+- **Direction is the core problem.** 23 of 35 failures (66%) are directional misses, not magnitude. The model gets the size roughly right but bets the wrong way — a sign-prediction failure, not a scaling one.
+- **Weak overall hit rate.** Best strategy (news) hits direction only 27%; macro is a coin-flip-losing 13%. No strategy clears 30%. The ensemble is effectively worse than random on direction.
+- **Barely beats baseline.** Many fails have ape ≈ baseline_ape (e.g. 06-15, 06-22, 07-15, 08-20). On losing days the model isn't adding value over naive persistence — it's just tracking it and occasionally overshooting.
+- **Big-move blindness.** On high-volatility days (07-31 ape 13%, 06-22 5%, 07-23 4%, 06-17 3.7%) the model badly under/over-shoots. Tail days dominate mean_fail_ape (2.52%).
 
 ## Unreliable under these conditions
-- **macro as winning_strategy = red flag.** When macro wins (6/12? no — 7/13, 7/15, 7/30, 8/19, 8/25), it's a fail most of the time. macro should not be driving.
-- **High-volatility / gap days** (ape > 2.5%): systematically wrong direction.
-- **Overconfidence is emerging late.** Recent high-confidence calls miss: 8/19 (conf .62, fail), 8/20 (.54, fail), 9/03 (.62, fail), 8/31 (.72, fail), 9/09 (.72, fail). The 4 flagged overconfident misses are clustered in the last 3 weeks — calibration is drifting worse, not better.
-- **News-heavy weightings** don't reliably help direction despite news being the "best" strategy; weight ≠ hit.
+- **macro-led and contrarian-led days.** When winning_strategy is macro, results are consistently poor (12.7% hit rate); contrarian is nearly as bad. These two are dragging the ensemble.
+- **Large-gap / gap-open days.** The worst APEs cluster on days with big baseline moves — the model fails to size or direction regime shifts.
+- **Rising confidence late in sample is NOT earned.** Confidence climbed to 0.62–0.72 in Sept, yet 08-19 (0.62), 08-31 (0.72), 09-03 (0.62), 09-09 (0.72) all failed. Overconfident_misses is only tagged 4, but calibration is drifting up while accuracy isn't — confidence is becoming decorative.
+- **Low-confidence days aren't safer either** (07-30 conf 0.1 failed at 3.9%), so confidence carries almost no discriminative signal.
 
 ## Fixes to try next
-- Stop optimizing APE; optimize **directional accuracy** directly. Add a sign-classification head with its own loss.
-- **Demote/gate macro** — its winner days lose. Cap macro weight or use only as regime filter.
-- Add a **volatility regime detector**; on high-expected-move days widen intervals and lower confidence rather than emitting a tight small-drift point estimate.
-- **Recalibrate confidence** — recent .6–.72 calls are missing. Refit confidence-to-hit mapping on the last 20 days; penalize confidence when regime is volatile.
-- Investigate the 7/31 13% ape outlier (split/earnings/data error?) before it poisons weight_hints.
+- **Cut macro and contrarian weight** (raise news/technical) or gate them to specific regimes; they're the lowest-hit, highest-mape strategies.
+- **Attack direction directly:** add a separate sign classifier / regime filter; don't let magnitude models set direction.
+- **Recalibrate confidence** against realized hit rate — current high-confidence Sept predictions are miscalibrated; apply isotonic/Platt scaling and shrink toward 0.5.
+- **Add a volatility-aware widening** on flagged high-move days; the tail misses (07-31) alone distort the mean.
+- **Set an abstain/baseline-fallback** rule when ensemble disagreement is high, since on those days it merely matches persistence.
