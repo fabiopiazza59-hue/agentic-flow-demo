@@ -65,3 +65,4 @@ Append-only insights. Newest at the bottom.
 - (2026-09-08) When all momentum/technical/news analysts agree on direction and premarket gap is zero, tilt the ensemble ~0.2% further past the mild-drift consensus, since realized down-moves on such days exceeded the timid blend.
 - (2026-09-09) 2026-09-09: FAIL, beat baseline; closest news, worst contrarian.
 - (2026-09-10) When RSI<40 and price is below all SMAs with no premarket gap, a modest down-drift target (~-0.4% from prior close) beats both the contrarian bounce and the aggressive news-driven selloff — test whether capping downside at nearest support improves APE.
+- (2026-09-11) When RSI is 40-45 AND price is >2.5% below SMA20 AND Nasdaq futures are green after a 4-day losing streak, tilt the blend UP and widen the expected move to ~1.5%+ — oversold bounces overshoot the timid contrarian/news estimates.

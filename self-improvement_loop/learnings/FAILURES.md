@@ -200,3 +200,7 @@ The desk got direction right (down) but massively under-shot magnitude: predicte
 - **What went wrong:** right direction, magnitude off; final blend 256.44 missed by 1.60%.
 - **Likely culprit:** analyst `contrarian` was furthest from actual and pulled the blend.
 - **Try next:** reduce weight on `contrarian` under today's conditions and lean on `news`.
+
+## 2026-09-11 — FAIL (APE 1.97%)
+- Predicted 251.72 vs actual 256.78 (prior 251.89); dir hit: False; beat baseline: False; closest analyst: news.
+**What went wrong:** The blend leaned bearish (net -0.07%) into a +1.94% mean-reversion rally, so it lost both direction and magnitude. The trend trio (momentum/macro/technical) dominated at ~64% weight and all extrapolated the multi-day downtrend, ignoring the setup they themselves flagged: RSI 40.5, price 2.9% below SMA20, and green futures after a 4-day slide. **Root cause:** classic downtrend-continuation bias in a stretched-oversold regime — the analysts recognized bounce conditions verbally but priced only ~0.3-0.5% moves, and the meta-weights over-trusted trend followers whose hit rates (technical 17%, macro 12.5%) are actually the worst on the board. **The one change:** in oversold-bounce setups (RSI<45 + >2.5% below SMA20 + green premarket after multi-day losses), cap the combined trend-analyst weight at ~40% and let news/contrarian drive with a widened move band (~1.5%), since those two had the correct direction this time and carry the highest hit rates.
