@@ -3,20 +3,21 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- **Directional misses dominate**: 24 of 37 failures (65%) are wrong-direction, not magnitude. The model is guessing the sign wrong, not just the size — this is the core problem.
-- **Failures cluster on big-move days**: fail APE averages 2.48% vs sub-0.5% on many passes. When AMZN moves hard (0.03–0.13 APE days: 06-22, 07-15, 07-23, 07-31, 08-19), the model is consistently late and on the wrong side.
-- **Barely beating baseline**: many "passes" only tie a naive baseline (06-16, 07-14, 08-27/28 baseline_ape=0). The ensemble adds little on quiet days and hurts on volatile ones.
-- **News-weighted blend leads into the worst misses**: heavy news weight (≥0.30) appears in a large share of directional failures (07-13, 07-24, 08-11, 09-11).
+- **Directional errors dominate.** 24 of 37 fails are wrong-direction, not just magnitude. The model can't call the sign of the move, which is the fatal problem — it's not a calibration issue, it's a signal issue.
+- **Failure rate is 55% (37/67), worse than a coin flip.** Mean fail APE 2.48% is large for daily AMZN moves.
+- **On big-move days the model gets steamrolled.** APEs of 3–5%+ (2026-06-22, 06-25, 07-15, 07-30, 07-31 at 13%!) cluster where baseline is also large — i.e., high-volatility/gap days where every strategy is blind and just tracks a stale prior.
+- **"macro" wins are toxic.** When macro is the winning strategy it repeatedly fails hard (06-12, 07-13, 07-15, 07-30, 08-19). Lowest hit rate (0.134) of any strategy.
+- **News is over-weighted relative to its edge.** Highest weight_hint (0.223) and best hit rate (0.284) — but 0.284 is still terrible, and news "wins" often on days it still fails to beat threshold (07-23 4.2% APE, 08-31, 09-09, 09-11).
 
 ## Unreliable under these conditions
-- **High-volatility / gap days**: every large-APE failure is a regime shift the ensemble doesn't anticipate. All five strategies collapse together (correlated errors).
-- **Macro strategy is the weakest link**: hit_rate 12%, highest MAPE (0.0168). When macro "wins" it usually loses (07-13, 07-15, 08-19, 07-30). Technical (16.7%) and contrarian (18.2%) also below coin-flip.
-- **News is best but still only 29% hit_rate** — nothing here is reliably directional; the whole panel is near-random on sign.
-- **Confidence is mildly miscalibrated at the top end**: only 4 overconfident misses, but note 08-19 (conf 0.62, fail), 09-03 (0.62, fail), 09-09/09-11 (0.72/0.54, fail). High confidence ≥0.6 does NOT guarantee a pass; several 0.62+ predictions miss.
+- **High-volatility / gap days:** all strategies collapse; predictions revert to a lagged level and miss both sign and size.
+- **When macro or contrarian is the selected winner:** combined hit rates ~0.13–0.18; these picks are essentially noise.
+- **Mid-confidence band (0.4–0.55):** the bulk of misses live here (06-25 .45, 07-13 .55, 08-19 .62, 08-20 .54). Confidence is weakly informative — several 0.5+ predictions miss direction, and 4 flagged overconfident misses confirm the top band isn't earned.
+- **Empty-weight days** (07-22, 07-24, 07-30) skew low-confidence and still fail — fallback path is broken.
 
 ## Fixes to try next
-- **Add a volatility/regime filter**: detect gap/high-range setups and widen intervals or abstain rather than forcing a directional call.
-- **Cut or gate macro**: drop its weight toward zero except in confirmed macro-event windows; it's actively diluting the blend.
-- **Recalibrate confidence**: high-conf misses show the score isn't tracking accuracy — refit confidence against realized hit-rate, especially the 0.6+ bucket.
-- **Attack sign, not magnitude**: since 65% of misses are directional, add a dedicated trend/direction classifier and only defer to magnitude blend once direction agrees.
-- **Stop rewarding baseline ties**: tighten the pass threshold so beating a naive carry-forward is required, not optional.
+- **Add a volatility gate:** on high-expected-range days, widen/abstain rather than emit a confident point estimate. Big-move days are where damage concentrates.
+- **Cut macro weight toward zero** and cap contrarian; reallocate to news/momentum, but don't trust the ensemble to fix a 55% sign-miss.
+- **Attack the directional problem directly:** train/score a separate sign classifier; magnitude tuning is wasted while sign is wrong 24/37 times.
+- **Recalibrate confidence** against realized hits — current 0.5–0.7 outputs are not distinguishable from 0.4. Demote until high-confidence bucket actually outperforms.
+- **Fix the empty-weights fallback** so it doesn't silently emit low-quality low-confidence guesses.
