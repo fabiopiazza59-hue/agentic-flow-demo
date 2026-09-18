@@ -3,21 +3,21 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- **Directional errors dominate.** 24 of 37 fails are wrong-direction, not just magnitude. The model can't call the sign of the move, which is the fatal problem — it's not a calibration issue, it's a signal issue.
-- **Failure rate is 55% (37/67), worse than a coin flip.** Mean fail APE 2.48% is large for daily AMZN moves.
-- **On big-move days the model gets steamrolled.** APEs of 3–5%+ (2026-06-22, 06-25, 07-15, 07-30, 07-31 at 13%!) cluster where baseline is also large — i.e., high-volatility/gap days where every strategy is blind and just tracks a stale prior.
-- **"macro" wins are toxic.** When macro is the winning strategy it repeatedly fails hard (06-12, 07-13, 07-15, 07-30, 08-19). Lowest hit rate (0.134) of any strategy.
-- **News is over-weighted relative to its edge.** Highest weight_hint (0.223) and best hit rate (0.284) — but 0.284 is still terrible, and news "wins" often on days it still fails to beat threshold (07-23 4.2% APE, 08-31, 09-09, 09-11).
+- **Direction is the core failure**: 25 of 38 misses are directional, not magnitude. The model gets the size roughly right but bets the wrong way — a sign-prediction problem, not a scaling problem.
+- **Baseline dominance**: on failure days the model loses to a naive baseline far too often. Blending 5 mediocre strategies (all hit rates 13–29%) produces mush that can't beat persistence.
+- **News-led days are a trap**: `news` is the most-frequent winning strategy on losing days (e.g. 06-15, 06-22, 06-25, 06-29, 07-15, 09-11, 09-17). It has the best relative hit rate but still misses direction constantly on big-move days.
+- **Big moves are catastrophic**: 07-31 (13.2% APE) and clusters of 3–5% APE days (06-17, 06-22, 06-25, 07-15, 07-30, 08-19) show the model has no handle on gap/event days.
+- **Confidence is creeping up while accuracy isn't**: late-window predictions carry 0.5–0.72 confidence but still fail (08-19 @0.62, 08-31 @0.72, 09-09 @0.72, 09-17 @0.54). Overconfident misses are rising, not falling.
 
 ## Unreliable under these conditions
-- **High-volatility / gap days:** all strategies collapse; predictions revert to a lagged level and miss both sign and size.
-- **When macro or contrarian is the selected winner:** combined hit rates ~0.13–0.18; these picks are essentially noise.
-- **Mid-confidence band (0.4–0.55):** the bulk of misses live here (06-25 .45, 07-13 .55, 08-19 .62, 08-20 .54). Confidence is weakly informative — several 0.5+ predictions miss direction, and 4 flagged overconfident misses confirm the top band isn't earned.
-- **Empty-weight days** (07-22, 07-24, 07-30) skew low-confidence and still fail — fallback path is broken.
+- **High-volatility / large-move days** (>2.5% baseline move): near-universal directional miss.
+- **`macro` as winning strategy**: 13% hit rate, worst MAPE — actively harmful, especially when macro weight is tiny (07-13, 07-15, 08-19 all failed with macro "winning" at ~7% weight, meaning it won by default among losers).
+- **`technical` and `contrarian`**: 16–18% hit rates; unreliable standalone, no clear regime where they earn their weight.
+- **Confidence ≥0.5 regime**: cluster of misses at elevated confidence (07-13, 08-07, 08-19, 08-20, 09-03, 09-11, 09-17) — calibration is broken on the upper end.
 
 ## Fixes to try next
-- **Add a volatility gate:** on high-expected-range days, widen/abstain rather than emit a confident point estimate. Big-move days are where damage concentrates.
-- **Cut macro weight toward zero** and cap contrarian; reallocate to news/momentum, but don't trust the ensemble to fix a 55% sign-miss.
-- **Attack the directional problem directly:** train/score a separate sign classifier; magnitude tuning is wasted while sign is wrong 24/37 times.
-- **Recalibrate confidence** against realized hits — current 0.5–0.7 outputs are not distinguishable from 0.4. Demote until high-confidence bucket actually outperforms.
-- **Fix the empty-weights fallback** so it doesn't silently emit low-quality low-confidence guesses.
+- Reframe as **direction-first**: separate a sign classifier from a magnitude regressor; most losses are sign errors.
+- **Cut or heavily down-weight macro and contrarian**; they drag MAPE and rarely hit.
+- **Detect high-vol/event days** (earnings, gaps, wide baseline moves) and either widen intervals or defer to persistence.
+- **Recalibrate confidence**: current 0.5–0.72 band has no edge; cap confidence and re-fit against realized hit rate.
+- **Stop treating "winning_strategy" as signal** when it wins by default among losers — require the winner to beat baseline before trusting it.
