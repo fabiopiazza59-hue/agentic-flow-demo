@@ -70,3 +70,4 @@ Append-only insights. Newest at the bottom.
 - (2026-09-15) When all three momentum windows are negative AND accelerating with price below every SMA, cap combined contrarian+macro weight below 0.15 — mild RSI (38-45) is not a reversion trigger without a confirming catalyst.
 - (2026-09-16) When 4+ analysts agree on direction within a <2-point spread, size confidence up regardless of which label 'wins', since low-hit-rate analysts (macro, contrarian) shouldn't drive attribution.
 - (2026-09-17) When RSI<40 AND same-day equity futures are risk-on (SPX/NDX both green), down-side trend-continuation calls should be capped or discounted — mean-reversion bounces from oversold consistently overpower momentum persistence on those days.
+- (2026-09-18) When index futures are risk-on (>+0.4%) and news is bullish, cap the aggregate weight of technical+momentum+macro so the blend can move >0.5% off prior_close instead of clustering near it.
