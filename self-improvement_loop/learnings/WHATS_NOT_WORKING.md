@@ -3,20 +3,20 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- **Directional errors dominate**: 26 of 40 fails (65%) are wrong-direction, not just magnitude. The system is bad at calling *which way*, not merely by how much. Sign prediction is the core defect.
-- **Barely beating baseline**: on most fails APE ≈ baseline_ape (e.g. 07-15, 07-20, 08-20, 09-11). The blended model adds little edge — it's tracking a naive baseline and inheriting its misses.
-- **Fat-tail blowups**: occasional catastrophic days (07-31 APE 13.2%, 06-22 5.1%, 07-23 4.2%, 07-30 3.9%) — likely earnings/gap/macro-shock days the model has no mechanism to flag.
-- **macro** is the single worst strategy (hit_rate 0.127, highest MAPE 0.0169) yet still wins days (06-08, 07-13, 07-15, 08-19) — when macro "wins," it usually loses.
+- **Direction, not magnitude, is the core problem.** 26 of 41 fails are directional misses (63%). The model gets the size roughly right but is on the wrong side of the tape — a sign it's lagging turning points, not mis-scaling.
+- **Failures cluster on high-volatility / large-move days.** Nearly every large-APE fail (2.5–5%+, and the 13% blowup on 2026-07-31) coincides with baseline_ape also being large. On calm days it passes; on big-move days it whiffs, meaning it can't handle the days that actually matter.
+- **We rarely beat the baseline on fails.** Most misses have ape ≥ baseline_ape — we add error rather than signal precisely when conditions are hard.
+- **Macro is a net liability.** hit_rate 0.125, worst MAPE (0.0171). When macro "wins" the selection it frequently fails (07-13, 07-15, 07-30, 08-19). It should not be trusted as a lead strategy.
 
 ## Unreliable under these conditions
-- **High-volatility / large-move days**: every large baseline_ape day is also a fail. The model compresses toward small moves and misses direction on big ones.
-- **macro- and momentum-led days**: macro 12.7% hit, momentum 22.5%, technical 15.5% — all weak. Only **news** (31% hit, lowest MAPE) is marginally reliable.
-- **Confidence is miscalibrated on the upside**: high-confidence fails cluster late — 08-19 (conf 0.62), 08-31 (0.72), 09-03 (0.62), 09-09 (0.72), 09-11 (0.54), 09-17 (0.54). Rising confidence since August is NOT matched by accuracy; recent stretch (09-11→09-22) is 4 fails of 5.
-- Note many misses are still directional_hit=true but fail on magnitude — magnitude sizing is systematically off on volatile days.
+- **Macro-led days:** lowest hit rate, highest error — the least reliable strategy, especially into large moves.
+- **Technical-led and contrarian-led days:** hit rates 0.15 / 0.18, both below coin-flip; contrarian repeatedly gets direction wrong in trending markets (08-11, 08-20, 08-24, 09-22).
+- **Confidence is mildly miscalibrated on the high end.** Only 4 flagged overconfident misses, but note real high-confidence fails: 0.72 (08-31), 0.72 (09-09), 0.62 (08-19, 09-03), 0.62 (09-17-adjacent). Confidence ≥0.6 is NOT delivering reliably better outcomes — calibration is flat, not monotonic.
+- **Empty-weights days** (07-22, 09-17, 09-22, etc.) skew toward fails — degraded/fallback ensemble state is unreliable.
 
 ## Fixes to try next
-- **Cut macro weight to near-zero**; it drags MAPE and hit rate. Lean toward news; stress-test whether news edge is real or lucky.
-- **Add a volatility/event gate**: on high-expected-move days (earnings, macro prints), widen intervals or abstain rather than predict a small move.
-- **Recalibrate confidence** — current high-confidence buckets (0.6–0.72) show no accuracy lift; force confidence to track realized hit-rate, penalize recent overconfidence.
-- **Attack directional error directly**: add a dedicated sign classifier; current magnitude blend guesses direction poorly.
-- **Investigate the recent Sept regime shift** — accuracy degraded while confidence rose; check for drift/stale weights.
+- **Cut macro to a confirmation-only role**; stop letting it be the winning strategy. Redistribute weight toward news (best hit rate 0.32, lowest MAPE).
+- **Add a volatility regime gate:** on high-expected-move days, widen intervals and lower confidence; the current model has no edge there.
+- **Attack the directional bias directly** — add a trend/turning-point filter so contrarian isn't fired mid-trend.
+- **Recalibrate confidence** against realized hit rate; current ≥0.6 bucket is unjustified. Force high confidence only when multiple strategies agree.
+- **Fix the empty-weights fallback path** — those days fail disproportionately.
