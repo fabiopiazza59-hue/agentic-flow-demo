@@ -1,14 +1,20 @@
-"""Daily orchestrator for the AMZN close predictor.
+"""Daily orchestrator for arm A (the analyst ensemble) — and the machinery run_ab reuses.
 
 Modes:
-  daily     guard -> score(T-1) -> reflect -> predict(T) -> report -> commit   (default)
-  score     score the most recent pending prediction against its actual close
-  predict   generate today's prediction only
+  daily     score finished sessions -> research the next session, or refresh its anchor
+            -> report -> commit                                                     (default)
+  score     score every pending prediction whose session has closed
+  predict   research the next session (or refresh the anchor of its pending forecast)
   report    regenerate results/* artifacts from the ledger
   backfill  seed the ledger with recent scored days from history (baseline-only, no API)
 
+Which session: with --date, that one (a past date is a replay, flagged late); otherwise the next
+session whose forecast window is open — from the previous close (+ settling time) until
+PREDICT_CUTOFF_MINUTES before its open. Scheduled runs are therefore idempotent: the first run in
+the window researches, later pre-open runs only refresh the anchor (see loop/session.py).
+
 Flags:
-  --date YYYY-MM-DD   override the target session (default: today, UTC)
+  --date YYYY-MM-DD   work on this session instead of the next one
   --dry-run           no git commit; uses offline stubs if no ANTHROPIC_API_KEY
   --no-commit         run fully but skip the git commit step
   --allow-late        write a prediction even after the session opened (row is flagged)
@@ -20,21 +26,22 @@ import argparse
 import os
 import subprocess
 import sys
-from datetime import date
+from datetime import date, datetime, timezone
 
 from ..agents.analysts import get_client, run_analysts
-from ..agents.meta_judge import synthesize
+from ..agents.meta_judge import adjust, clamp_adjustment
 from ..agents.reflector import diagnose_failures, reflect
 from ..config import PROJECT_ROOT, settings
-from ..data.market_calendar import is_trading_day, last_n_trading_days, previous_trading_day
-from ..data.providers import get_actual_close, get_history, get_quote
-from ..evals import integrity
+from ..data.market_calendar import is_trading_day
+from ..data.providers import get_actual_close, get_history
+from ..evals import integrity, lab
 from ..evals.gates import apply_gates
 from ..evals.metrics import score_row
+from ..evals.probabilistic import forecast_distribution
 from ..evals.scorecard import load_scorecards, save_scorecards, update_scorecards
-from ..features import build_features
-from ..utils import iso_today, now_iso, read_jsonl, to_date, upsert_ledger_row, write_jsonl
+from ..utils import iso_today, now_iso, read_jsonl, upsert_ledger_row, write_jsonl
 from .. import report
+from . import session
 
 # Relative to the project root (self-improvement_loop/).
 COMMIT_PATHS = [
@@ -65,41 +72,47 @@ def _closest_strategy(analyst_predictions: dict, actual: float) -> str | None:
     return best
 
 
-def do_score(rows: list[dict], client) -> tuple[list[dict], dict | None]:
-    """Score the most recent unscored prediction whose session has completed."""
-    pending = [r for r in rows if r.get("status") == "pending"]
+def do_score(rows: list[dict], client, now: datetime | None = None) -> tuple[list[dict], dict | None]:
+    """Score every pending prediction whose session has closed, oldest first.
+
+    A session only counts as closed SCORE_SETTLE_MINUTES after its official close, so a partial
+    intraday bar can never be graded as the close. Returns (rows, last row scored or None).
+    """
+    pending = sorted((r for r in rows if r.get("status") == "pending"), key=lambda r: r["date"])
     if not pending:
         log("no pending predictions to score.")
         return rows, None
-    target = sorted(pending, key=lambda r: r["date"])[-1]
-    actual = get_actual_close(settings.SYMBOL, target["date"])
-    if actual is None:
-        log(f"actual close for {target['date']} not available yet; skipping score.")
-        return rows, None
-
-    fields = score_row(target, actual)
-    target.update(fields)
-    target["winning_strategy"] = _closest_strategy(target.get("analyst_predictions", {}), actual)
-    target["scored_at"] = now_iso()
-
     scorecards = load_scorecards()
-    scorecards = update_scorecards(scorecards, target.get("analyst_predictions", {}), actual)
-    save_scorecards(scorecards)
+    scored: list[dict] = []
+    for target in pending:
+        if not integrity.session_has_closed(target["date"], now, settings.SCORE_SETTLE_MINUTES):
+            log(f"{target['date']} has not closed (and settled) yet; leaving it pending.")
+            continue
+        actual = get_actual_close(settings.SYMBOL, target["date"])
+        if actual is None:
+            log(f"actual close for {target['date']} not available yet; skipping score.")
+            continue
 
-    # reflect -> post-mortem + bounded STRATEGY.md note + (on FAIL) failure analysis
-    reflection = reflect(target, scorecards, client=client)
-    _write_learning(target["date"], reflection)
+        target.update(score_row(target, actual))
+        target["winning_strategy"] = _closest_strategy(target.get("analyst_predictions", {}), actual)
+        target["scored_at"] = now_iso()
+        scorecards = update_scorecards(scorecards, target.get("analyst_predictions", {}), actual)
 
-    rows = upsert_ledger_row(rows, target)
+        # reflect -> post-mortem + bounded STRATEGY.md note + (on FAIL) failure analysis
+        reflection = reflect(target, scorecards, client=client)
+        _write_learning(target["date"], reflection)
+        rows = upsert_ledger_row(rows, target)
+        if target.get("pass") is False:
+            _append_failure_log(target, reflection)
+        log(f"scored {target['date']}: predicted {target['predicted_close']} vs actual {actual} "
+            f"(APE {target['ape']*100:.2f}%, {'PASS' if target['pass'] else 'FAIL'}).")
+        scored.append(target)
 
-    # Concentrated failure log + rolling "what's not working" self-diagnosis.
-    if target.get("pass") is False:
-        _append_failure_log(target, reflection)
-    _refresh_whats_not_working(rows, scorecards, client)
-
-    log(f"scored {target['date']}: predicted {target['predicted_close']} vs actual {actual} "
-        f"(APE {target['ape']*100:.2f}%, {'PASS' if target['pass'] else 'FAIL'}).")
-    return rows, target
+    if scored:
+        save_scorecards(scorecards)
+        # Rolling "what's not working" self-diagnosis, once per run rather than per row.
+        _refresh_whats_not_working(rows, scorecards, client)
+    return rows, (scored[-1] if scored else None)
 
 
 def _write_learning(d: str, reflection: dict) -> None:
@@ -161,33 +174,51 @@ def _refresh_whats_not_working(rows: list[dict], scorecards: dict, client) -> No
 
 # --------------------------------------------------------------------------------- predicting
 
+def _past_clean(rows: list[dict], before_iso: str) -> list[dict]:
+    return sorted((r for r in rows if r.get("status") == "scored" and not r.get("seed")
+                   and r.get("date", "") < before_iso and not integrity.is_late(r)),
+                  key=lambda r: r["date"])
+
+
 def do_predict(rows: list[dict], target_date: date, client,
                features: dict | None = None,
                allow_late: bool = False) -> tuple[list[dict], dict | None]:
-    """Predict today's close. Pass a pre-built `features` snapshot for a fair A/B run.
+    """Research `target_date` for arm A and append a pending row (v2 pipeline).
 
-    Refuses to write a row for *today's* session once that session has opened: a forecast made
-    after the open has seen part of the tape it is forecasting, and 26 of the first 60 rows in
-    this ledger were written that way (two of them after the close). Pass `allow_late` to
-    override deliberately.
+    analysts -> the lab's champion blend (code) -> the judge's σ-sized adjustment (clamped in
+    code) -> guardrail gates -> a calibrated predictive distribution. Every intermediate value is
+    logged so the lab can measure each stage. Pass a pre-built `features` snapshot for a fair
+    A/B run.
 
-    A past-dated `--date` is a replay, not a live forecast, so the guard stays out of its way;
-    such rows are still stamped `late_minutes` and so are still excluded from the pre-open
-    headline by `aggregate(pre_open_only=True)`.
+    Refuses to write a live row once the session's research window has closed (less than
+    PREDICT_CUTOFF_MINUTES before the open): 40 of the first 74 live rows in this ledger were
+    written after the open, two after the close. A past-dated `--date` is a replay, not a live
+    forecast, so the guard stays out of its way; replays and `--allow-late` rows are stamped
+    `late_minutes` and so stay out of the pre-open headline.
     """
-    targets_today = target_date.isoformat() == iso_today()
-    if settings.ENFORCE_PRE_OPEN and targets_today and not allow_late \
-            and not integrity.is_pre_open_now(target_date.isoformat()):
-        log(f"{target_date} has already opened — refusing to write a post-open 'prediction'. "
-            f"Use --allow-late to override (the row is then flagged late_minutes).")
+    target_iso = target_date.isoformat()
+    live = target_iso >= iso_today()
+    if settings.ENFORCE_PRE_OPEN and live and not allow_late and not integrity.is_pre_open_now(
+            target_iso, margin_minutes=settings.PREDICT_CUTOFF_MINUTES):
+        log(f"{target_date} opens in under {settings.PREDICT_CUTOFF_MINUTES} min or has opened — "
+            f"refusing to write a post-open 'prediction'. Use --allow-late to override (the row "
+            f"is then flagged late_minutes).")
         return rows, None
 
     if features is None:
-        history = get_history(settings.SYMBOL, settings.LOOKBACK_DAYS)
-        quote = get_quote(settings.SYMBOL)
-        features = build_features(history, quote)
-    prior_close = features["prev_close"]
+        snap = session.take_snapshot(target_date)
+        if snap is None:
+            log("no data provider has the previous session's close yet — retrying next run.")
+            return rows, None
+        features = snap["features"]
+    prior_close = float(features["prev_close"])
+    anchor = features.get("anchor") or {"price": prior_close, "source": "prior_close",
+                                        "time": None, "live": False}
+    anchor_price = float(anchor.get("price") or prior_close)
+    sigma = float(features.get("sigma_ewma") or features.get("realized_vol_20d")
+                  or settings.DEFAULT_SIGMA)
 
+    state = lab.load_state()
     scorecards = load_scorecards()
     strategy_md = settings.STRATEGY_PATH.read_text(encoding="utf-8") if settings.STRATEGY_PATH.exists() else ""
     recent_learnings = _recent_learnings(settings.LEARNINGS_CONTEXT_N)
@@ -199,32 +230,99 @@ def do_predict(rows: list[dict], target_date: date, client,
         context={"scorecards": scorecards, "whats_not_working": whats_not_working},
     )
 
-    final = synthesize(analyst_predictions, scorecards, strategy_md, recent_learnings,
-                       features, client=client, whats_not_working=whats_not_working)
-    final, gates = apply_gates(final, analyst_predictions, rows, features)
+    blend = lab.aggregate_analysts(state["champion"], analyst_predictions,
+                                   _past_clean(rows, target_iso), anchor_price)
+    if blend is None:
+        blend = round(anchor_price, 2)      # no analyst survived: ship the free baseline
+    if state["judge_enabled"]:
+        adj_raw, judge_note = adjust(blend, state["champion"], sigma, analyst_predictions,
+                                     scorecards, strategy_md, recent_learnings, features,
+                                     client=client, whats_not_working=whats_not_working)
+    else:
+        adj_raw, judge_note = 0.0, "Judge off: the lab measured its adjustments as harmful."
+    adj = clamp_adjustment(adj_raw)
+    pre_gates = round(blend * (1.0 + adj * sigma), 2)
 
+    final = {"predicted_close": pre_gates,
+             "direction": "up" if pre_gates > prior_close else "down",
+             "confidence": 0.5, "rationale": judge_note}
+    if state["gates_enabled"]:
+        final, gates = apply_gates(final, analyst_predictions, rows, features)
+    else:
+        final, gates = {**final, "predicted_close_raw": pre_gates}, []
+
+    dist = forecast_distribution(rows, target_iso, float(final["predicted_close"]), sigma,
+                                 prior_close, is_clean=lambda r: not integrity.is_late(r),
+                                 threshold=settings.PASS_THRESHOLD)
+    created = now_iso()
     row = {
-        "date": target_date.isoformat(),
-        "created_at": now_iso(),
+        "date": target_iso,
+        "created_at": created,
+        "pipeline_version": settings.PIPELINE_VERSION,
         "prior_close": prior_close,
         "predicted_close": final["predicted_close"],
         "predicted_close_raw": final.get("predicted_close_raw"),
+        "predicted_close_pre_gates": pre_gates,
+        "predicted_close_blend": blend,
+        "aggregator": state["champion"],
+        "judge_adjustment_sigma_raw": round(float(adj_raw), 3),
+        "judge_adjustment_sigma": round(adj, 3),
         "predicted_direction": final["direction"],
-        "confidence": final["confidence"],
-        "weights": final.get("weights", {}),
+        "confidence": dist["p_pass"],
+        "p_up": dist["p_up"],
+        "sigma_pct": round(sigma, 6),
+        "quantiles": dist["quantiles"],
+        "calibration": dist["calibration"],
         "analyst_predictions": analyst_predictions,
+        "analyst_anchor": round(anchor_price, 4),
         "rationale": final.get("rationale", ""),
         "gates_applied": gates,
         "quote_source": features.get("quote_source"),
+        **session.anchor_fields(anchor, prior_close, created),
         "status": "pending",
         "actual_close": None,
     }
     integrity.annotate(row)
     rows = upsert_ledger_row(rows, row)
-    log(f"predicted {target_date.isoformat()}: close ≈ {row['predicted_close']} "
-        f"({row['predicted_direction']}, conf {row['confidence']}) from {len(analyst_predictions)} analysts"
-        f"{'; gates: ' + ', '.join(gates) if gates else ''}.")
+    log(f"predicted {target_iso}: close ≈ {row['predicted_close']} ({row['predicted_direction']}, "
+        f"P(up) {row['p_up']}, P(PASS) {row['confidence']}) — {state['champion']} blend {blend} "
+        f"of {len(analyst_predictions)} analysts, judge {adj:+.2f}σ, anchor {row['anchor']} "
+        f"({row['anchor_source']}){'; gates: ' + ', '.join(gates) if gates else ''}.")
     return rows, row
+
+
+def refresh_anchor(rows: list[dict], target: date, anchor: dict) -> tuple[list[dict], bool]:
+    """Re-anchor the pending row for `target` on a fresher pre-open trade (code only)."""
+    target_iso = target.isoformat()
+    existing = next((r for r in rows if r.get("date") == target_iso), None)
+    if existing is None or existing.get("status") != "pending":
+        return rows, False
+    if not integrity.is_pre_open_now(target_iso, margin_minutes=settings.REFRESH_CUTOFF_MINUTES):
+        return rows, False
+    updated = session.reanchor_row(existing, anchor, now_iso())
+    if updated is None:
+        return rows, False
+    integrity.annotate(updated)
+    return upsert_ledger_row(rows, updated), True
+
+
+def forecast_or_refresh(rows: list[dict], target: date, client,
+                        allow_late: bool = False) -> list[dict]:
+    """Research `target` if it has no row yet, else refresh the pending row's anchor."""
+    existing = next((r for r in rows if r.get("date") == target.isoformat()), None)
+    if existing is None:
+        rows, _ = do_predict(rows, target, client, allow_late=allow_late)
+        return rows
+    if existing.get("status") != "pending" or not integrity.is_pre_open_now(
+            target.isoformat(), margin_minutes=settings.REFRESH_CUTOFF_MINUTES):
+        log(f"{target} already has a forecast and is past its refresh window; nothing to do.")
+        return rows
+    snap = session.take_snapshot(target)
+    if snap is None:
+        return rows
+    rows, changed = refresh_anchor(rows, target, snap["anchor"])
+    log(f"{target}: anchor {'refreshed to ' + str(snap['anchor']['price']) if changed else 'unchanged (no fresher pre-open trade)'}.")
+    return rows
 
 
 def _recent_learnings(n: int) -> list[str]:
@@ -305,7 +403,8 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="AMZN daily close predictor")
     parser.add_argument("--mode", default="daily",
                         choices=["daily", "score", "predict", "report", "backfill"])
-    parser.add_argument("--date", default=None, help="target session YYYY-MM-DD (default today UTC)")
+    parser.add_argument("--date", default=None,
+                        help="session YYYY-MM-DD (default: the next session in its forecast window)")
     parser.add_argument("--dry-run", action="store_true", help="no git commit; offline if no key")
     parser.add_argument("--no-commit", action="store_true")
     parser.add_argument("--allow-late", action="store_true",
@@ -313,9 +412,9 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     settings.ensure_dirs()
-    target_date = to_date(args.date) if args.date else to_date(iso_today())
     rows = read_jsonl(settings.LEDGER_PATH)
     client = None if args.dry_run else get_client()
+    now = datetime.now(timezone.utc)
 
     if args.mode == "report":
         report.generate()
@@ -329,23 +428,26 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.mode in ("daily", "score", "predict"):
-        if args.mode == "daily" and not is_trading_day(target_date):
-            log(f"{target_date} is not an NYSE trading day; exiting cleanly.")
-            return 0
-
         if args.mode in ("daily", "score"):
             rows, _ = do_score(rows, client)
             write_jsonl(settings.LEDGER_PATH, rows)
 
         if args.mode in ("daily", "predict"):
-            rows, _ = do_predict(rows, target_date, client, allow_late=args.allow_late)
-            write_jsonl(settings.LEDGER_PATH, rows)
+            target = session.resolve_target(args.date, now)
+            if target is None:
+                log("a session is in progress (or its close is settling) — nothing to forecast.")
+            elif not is_trading_day(target):
+                log(f"{target} is not an NYSE trading day; nothing to forecast.")
+            else:
+                rows = forecast_or_refresh(rows, target, client, allow_late=args.allow_late)
+                write_jsonl(settings.LEDGER_PATH, rows)
 
+        target_label = (args.date or iso_today())
         metrics = report.generate()
         _emit_ci_summary(metrics)
 
         if not args.dry_run and not args.no_commit:
-            committed = git_commit(target_date.isoformat())
+            committed = git_commit(target_label)
             # In CI a failed commit means the day's prediction is lost — fail loudly.
             if not committed and os.getenv("GITHUB_ACTIONS"):
                 return 1

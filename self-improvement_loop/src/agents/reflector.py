@@ -63,9 +63,19 @@ def _context(row: dict, scorecards: dict) -> str:
         f"Scored prediction for {row.get('date')} (symbol {settings.SYMBOL}):\n"
         f"{json.dumps({k: row.get(k) for k in keys}, indent=2)}\n\n"
         f"Per-analyst predictions:\n{json.dumps(row.get('analyst_predictions', {}), indent=2)}\n\n"
-        f"Meta-judge weights used:\n{json.dumps(row.get('weights', {}), indent=2)}\n\n"
+        f"How the final number was built:\n{json.dumps(_pipeline(row), indent=2)}\n\n"
         f"Updated scorecards:\n{json.dumps(scorecards, indent=2)}"
     )
+
+
+def _pipeline(row: dict) -> dict:
+    """The stages that produced the shipped forecast (v2), or the v1 judge's weights."""
+    if row.get("pipeline_version") != "v2":
+        return {"meta_judge_weights": row.get("weights", {})}
+    keys = ["aggregator", "predicted_close_blend", "judge_adjustment_sigma_raw",
+            "judge_adjustment_sigma", "predicted_close_pre_gates", "gates_applied",
+            "predicted_close", "anchor", "anchor_source", "anchor_live", "p_up", "sigma_pct"]
+    return {k: row.get(k) for k in keys}
 
 
 def _offline(row: dict) -> dict:

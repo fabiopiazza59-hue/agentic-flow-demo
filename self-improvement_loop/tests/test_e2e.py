@@ -36,6 +36,15 @@ def _isolate(monkeypatch, tmp_path):
     settings.ensure_dirs()
 
 
+def _offline_market(monkeypatch, history):
+    """Serve `history` as the pre-open snapshot, with no extended-hours trade (anchor = close)."""
+    import src.loop.session as sess
+
+    monkeypatch.setattr(sess, "get_history_through", lambda *a, **k: history)
+    monkeypatch.setattr(sess, "get_anchor", lambda symbol, prev_close, since, now=None: {
+        "price": prev_close, "time": None, "source": "prior_close", "live": False})
+
+
 def test_predict_then_score_offline(monkeypatch, tmp_path):
     _isolate(monkeypatch, tmp_path)
     hist = _synthetic_history()
@@ -44,10 +53,7 @@ def test_predict_then_score_offline(monkeypatch, tmp_path):
     # predict targets `last_date`; its "prior" is the second-to-last session
     hist_for_predict = hist.iloc[:-1]
 
-    monkeypatch.setattr(rd, "get_history", lambda *a, **k: hist_for_predict)
-    monkeypatch.setattr(rd, "get_quote", lambda *a, **k: {
-        "last": float(hist_for_predict.iloc[-1]["close"]), "prev_close": float(hist_for_predict.iloc[-1]["close"]),
-        "source": "stooq", "symbol": "AMZN", "asof": hist_for_predict.index[-1].isoformat()})
+    _offline_market(monkeypatch, hist_for_predict)
 
     # offline (client=None) -> stub analysts + offline meta-judge
     rc = rd.main(["--mode", "predict", "--date", last_date.isoformat(), "--dry-run"])

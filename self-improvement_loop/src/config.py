@@ -25,6 +25,15 @@ class Settings(BaseModel):
     SESSION_OPEN_UTC_HOUR: int = 13       # 09:30 ET regular-session open, in UTC
     SESSION_OPEN_UTC_MINUTE: int = 30
     ENFORCE_PRE_OPEN: bool = True         # refuse to write a prediction row after the open
+    PREDICT_CUTOFF_MINUTES: int = 10      # a research run (LLM calls) must start this early
+    REFRESH_CUTOFF_MINUTES: int = 3       # a code-only anchor refresh may run until this close
+    SCORE_SETTLE_MINUTES: int = 30        # wait this long after the close before scoring
+
+    # --- v2 pipeline (spec/v2-sota-upgrade.md) ---
+    PIPELINE_VERSION: str = "v2"
+    A_JUDGE_MAX_SIGMA: float = 0.5        # the judge may move the analyst blend at most ±0.5σ
+    DEFAULT_SIGMA: float = 0.018          # daily σ fallback when no history is available
+    LAB_ALPHA: float = 0.05               # anytime-valid error rate for lab decisions
 
     # --- models ---
     ANALYST_MODEL: str = "claude-sonnet-4-6"

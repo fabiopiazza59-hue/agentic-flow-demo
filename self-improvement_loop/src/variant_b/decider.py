@@ -3,7 +3,7 @@
 predict-raven's core discipline transplanted: the World Cup forecaster lets evidence move its
 statistical prior by at most ±8pp, and risk limits live in the service layer, not in prompts.
 Here the decider proposes an adjustment in units of the prior's sigma; the code clamps it to
-±B_MAX_ADJ_SIGMA, then clamps the total move from prev close to ±B_MAX_MOVE_SIGMA·σ. With no
+±B_MAX_ADJ_SIGMA, then clamps the total move from the prior center to ±B_MAX_MOVE_SIGMA·σ. With no
 evidence and no client, the prediction IS the prior center (abstain).
 """
 
@@ -18,7 +18,8 @@ from ..utils import extract_json, safe_float
 
 _SYSTEM = (
     "You are the decision agent of an AMZN close-prediction desk that works Bayesian-style: a "
-    "statistical prior for today's close is given, plus today's gathered evidence and the desk's "
+    "statistical prior for the target session's close is given, plus the gathered evidence and "
+    "the desk's "
     "recent failure log. Your job is ONLY to size how far the evidence justifies moving off the "
     "prior, in units of the prior's daily sigma. Positive = above prior center, negative = below. "
     "Weak/contradictory evidence deserves ~0. Your adjustment is hard-capped at "
@@ -40,7 +41,7 @@ def _evidence_agreement(pulse: dict) -> float:
 def _capped(prior: dict, adj_sigma: float) -> tuple[float, list[str]]:
     """Apply both hard caps; return (predicted_close, caps_applied)."""
     caps: list[str] = []
-    sigma, center, prev = prior["sigma_pct"], prior["center"], prior["prev_close"]
+    sigma, center = prior["sigma_pct"], prior["center"]
 
     max_adj = settings.B_MAX_ADJ_SIGMA
     if abs(adj_sigma) > max_adj:
@@ -49,9 +50,11 @@ def _capped(prior: dict, adj_sigma: float) -> tuple[float, list[str]]:
 
     predicted = center * (1.0 + adj_sigma * sigma)
 
-    max_move = settings.B_MAX_MOVE_SIGMA * sigma * prev
-    if abs(predicted - prev) > max_move:
-        predicted = prev + (max_move if predicted > prev else -max_move)
+    # The total-move cap is measured from the prior's center, not the previous close: once the
+    # center is a live pre-open trade, a real overnight gap is information, not a move to cap.
+    max_move = settings.B_MAX_MOVE_SIGMA * sigma * center
+    if abs(predicted - center) > max_move:
+        predicted = center + (max_move if predicted > center else -max_move)
         caps.append("move_capped")
 
     return round(predicted, 2), caps
@@ -72,7 +75,8 @@ def _propose(prior: dict, pulse: dict, client) -> tuple[float, str]:
         return 0.0, "No usable evidence gathered — abstaining to the prior center."
     system = _SYSTEM.replace("±0σ", f"±{settings.B_MAX_ADJ_SIGMA}σ")
     user = (
-        f"Prior for today's {settings.SYMBOL} close (JSON):\n{json.dumps(prior, indent=2)}\n\n"
+        f"Prior for the target session's {settings.SYMBOL} close (JSON):\n"
+        f"{json.dumps(prior, indent=2)}\n\n"
         f"Evidence pulse (JSON):\n{json.dumps(pulse, indent=2)}\n\n"
         f"Recent failures of THIS strategy (learn from them):\n{_failures_tail() or '(none yet)'}"
     )

@@ -51,11 +51,20 @@ def test_adjustment_hard_cap():
     assert predicted == round(200.0 * (1 + settings.B_MAX_ADJ_SIGMA * 0.02), 2)
 
 
-def test_move_cap_from_prev_close():
-    # premarket gap put center 5% above prev; even adj=0 exceeds 1.5σ move -> capped
+def test_live_gap_is_information_not_a_move_to_cap():
+    # A real pre-open trade 5% above the prior close centers the prior there; the cap is
+    # measured from that center, so the gap itself is kept.
     predicted, caps = _capped(_prior(center=210.0, prev=200.0), adj_sigma=0.0)
+    assert caps == []
+    assert predicted == 210.0
+
+
+def test_move_cap_from_prior_center(monkeypatch):
+    # The move cap binds only if the adjustment cap is looser than it.
+    monkeypatch.setattr(settings, "B_MAX_ADJ_SIGMA", 3.0)
+    predicted, caps = _capped(_prior(center=210.0, prev=200.0), adj_sigma=2.5)
     assert "move_capped" in caps
-    assert predicted == round(200.0 + settings.B_MAX_MOVE_SIGMA * 0.02 * 200.0, 2)
+    assert predicted == round(210.0 + settings.B_MAX_MOVE_SIGMA * 0.02 * 210.0, 2)
 
 
 def test_no_caps_within_bounds():

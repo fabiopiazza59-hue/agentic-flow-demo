@@ -186,6 +186,16 @@ cheap), then deployable checks, then model work, with benchmarking throughout. S
 > `src/evals/integrity.py`, `src/evals/paired.py`, `report.gate_effect` / `report.baseline_effect`,
 > and `tests/test_integrity.py`). P0.3, P0.4, P0.5 and P1.1–P1.4 are not — they change forecasting
 > behaviour or add an arm, and are the owner's call.
+>
+> **Update (v2, 2026-09-27 — [`v2-sota-upgrade.md`](v2-sota-upgrade.md)).** Shipped: **P0.3**
+> (the judge is a ±0.5σ adjuster on a code-computed blend); **P0.5** replaced by the lab
+> (`src/evals/lab.py`: aggregation rules promoted only on anytime-valid evidence; judge and gates
+> switched off the same way); **P1.2** replaced by anytime-valid confidence sequences, which need
+> no pre-registered horizon; **P1.3** (anchor timestamps, plus the schedule fix: 40 of 74 live rows
+> turned out to be post-open, all of them since 2026-08-27); **P1.4** partly (`web_results` is
+> recorded, not yet acted on). **P0.4** is superseded: direction is now scored as the Brier score
+> of P(up) from a calibrated distribution rather than by σ-scaling the point forecast, which would
+> have traded MAPE for direction. Still open: P1.1 (null arm) and P2.x.
 
 ### P0 — Harness fixes. Cheap, mechanical, measured.
 

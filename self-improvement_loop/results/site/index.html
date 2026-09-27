@@ -28,7 +28,7 @@
 <body>
   <header>
     <h1>📈 AMZN Daily Close Predictor</h1>
-    <div class="sub">Self-improving agentic loop · PASS = predicted close within ±1% of actual · <span id="updated"></span></div>
+    <div class="sub">Self-improving agentic loop · verdicts use pre-open forecasts only, with anytime-valid 95% confidence sequences · <span id="updated"></span></div>
   </header>
   <div class="verdict" id="verdict">Loading…</div>
   <div class="verdict" id="abVerdict" style="display:none"></div>
@@ -47,21 +47,25 @@
     async function load() {
       const m = await (await fetch("./data.json?cb="+Date.now())).json();
       document.getElementById("updated").textContent = "scored days: " + (m.all_time?.n_all_time ?? 0);
-      const r = m.rolling || {};
-      const a = m.all_time || {};
-      const edge = a.edge;
+      // Verdict: all-time, pre-open forecasts only, anytime-valid 95% confidence sequence on the
+      // paired daily gain over the free baseline (latest pre-open trade, else the prior close).
+      const a = m.all_time_pre_open || m.all_time || {};
+      const va = (m.value_added || {}).vs_free_baseline || {};
+      const pr = m.probabilistic || {};
+      const cs = (va.lo!=null) ? `anytime-valid 95% CS [${pct(va.lo)}, ${pct(va.hi)}]` : "too few days";
       const v = document.getElementById("verdict");
-      if (edge==null) { v.textContent = "⏳ Not enough scored days to judge edge vs baseline yet."; }
-      else if (edge>0) { v.innerHTML = `✅ <span class="good">Edge confirmed</span> — all-time MAPE ${pct(a.mape)} beats random-walk ${pct(a.baseline_mape)} (edge ${pct(edge)}, ${a.n_all_time} days).`; }
-      else { v.innerHTML = `❌ <span class="bad">No edge yet</span> — all-time MAPE ${pct(a.mape)} vs baseline ${pct(a.baseline_mape)} (${a.n_all_time} days).`; }
+      if (!va.n || va.decision==="insufficient") { v.textContent = "⏳ Not enough pre-open scored days to judge the model yet."; }
+      else if (va.decision==="positive") { v.innerHTML = `✅ <span class="good">Edge confirmed</span> — all-time MAPE ${pct(a.mape)} beats the free baseline ${pct(a.anchor_mape)} over ${va.n} pre-open days (${cs}).`; }
+      else { v.innerHTML = `❌ <span class="bad">No edge yet</span> — all-time MAPE ${pct(a.mape)} vs free baseline ${pct(a.anchor_mape)} over ${va.n} pre-open days (${cs}).`; }
 
+      const cov = m.coverage || {};
       const kpis = [
-        ["PASS rate (±1%)", pct(r.pass_rate)],
-        ["Directional acc.", pct(r.directional_accuracy)],
-        ["MAPE", pct(r.mape)],
-        ["Baseline MAPE", pct(r.baseline_mape)],
-        ["Edge", pct(r.edge)],
-        ["Brier", num(r.brier)],
+        ["MAPE (pre-open)", pct(a.mape)],
+        ["Free-baseline MAPE", pct(a.anchor_mape)],
+        ["CRPS skill vs baseline", pct(pr.crps_skill_vs_anchor)],
+        ["80% interval coverage", pct(pr.model?.cover80)],
+        ["Direction skill vs RW", pct(pr.direction_brier_skill)],
+        ["Pre-open coverage", cov.n_sessions ? `${cov.n_pre_open}/${cov.n_sessions}` : "—"],
       ];
       document.getElementById("kpis").innerHTML = kpis.map(([l,val]) =>
         `<div class="kpi"><div class="label">${l}</div><div class="value">${val}</div></div>`).join("");
@@ -70,19 +74,21 @@
         const av = document.getElementById("abVerdict");
         av.style.display = "block";
         av.innerHTML = `🅰️/🅱️ <span style="color:var(--accent)">A/B test</span> — ${m.ab.verdict}`;
-        const rb = m.variant_b?.rolling || {};
+        const rb = m.variant_b?.all_time_pre_open || m.variant_b?.rolling || {};
         const abk = [
-          ["B PASS rate", pct(rb.pass_rate)],
-          ["B Directional acc.", pct(rb.directional_accuracy)],
-          ["B MAPE", pct(rb.mape)],
-          ["B Edge", pct(rb.edge)],
-          ["Paired days", m.ab.n_paired ?? "—"],
+          ["B MAPE (pre-open)", pct(rb.mape)],
+          ["B edge vs baseline", pct(rb.anchor_edge)],
+          ["B directional acc.", pct(rb.directional_accuracy)],
+          ["Clean paired days", m.ab.n_clean ?? "—"],
           ["B wins", `${m.ab.b_wins ?? "—"}/${m.ab.n_decisive ?? "—"}`],
         ];
         document.getElementById("abKpis").innerHTML = abk.map(([l,val]) =>
           `<div class="kpi"><div class="label">${l}</div><div class="value">${val}</div></div>`).join("");
       }
 
+      // Charts are progressive enhancement: if the CDN is blocked, the verdict and KPIs above
+      // must still stand instead of being replaced by a load error.
+      if (!window.Chart) return;
       const s = m.series || [];
       const labels = s.map(d=>d.date);
       const bByDate = Object.fromEntries((m.variant_b?.series || []).map(d=>[d.date, d.predicted_close]));

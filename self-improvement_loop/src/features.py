@@ -1,7 +1,9 @@
 """Technical feature engineering from daily OHLCV history + a live quote.
 
 Produces a compact, model-friendly dict of numeric features plus a short recent-OHLC text table.
-All features are computed from completed sessions; the live quote supplies pre-market gap signal.
+All features are computed from completed sessions. The pre-open anchor (latest after-hours /
+pre-market trade) supplies the gap signal; with no live anchor the gap is reported as unknown
+(None), never as a fabricated 0.0.
 """
 
 from __future__ import annotations
@@ -33,8 +35,13 @@ def _sma(close: pd.Series, n: int) -> float | None:
     return round(float(close.tail(n).mean()), 2)
 
 
-def build_features(history: pd.DataFrame, quote: dict | None = None) -> dict:
-    """Return a dict of technical features. `history` is ascending daily OHLCV."""
+def build_features(history: pd.DataFrame, quote: dict | None = None,
+                   anchor: dict | None = None) -> dict:
+    """Return a dict of technical features. `history` is ascending daily OHLCV.
+
+    `anchor` ({price, time, source, live} from providers.get_anchor) is preferred over the
+    legacy `quote`; a stale quote (the previous close echoed back) is treated as no signal.
+    """
     close = history["close"].astype(float)
     prev_close = float(close.iloc[-1])
     vol20 = close.pct_change().tail(20).std()
@@ -43,7 +50,13 @@ def build_features(history: pd.DataFrame, quote: dict | None = None) -> dict:
     hi_252 = float(close.tail(252).max()) if len(close) >= 5 else prev_close
     lo_252 = float(close.tail(252).min()) if len(close) >= 5 else prev_close
 
-    premarket = quote.get("last") if quote else None
+    if anchor is not None:
+        premarket = anchor.get("price") if anchor.get("live") else None
+        source, asof = anchor.get("source"), anchor.get("time")
+    else:
+        stale = bool(quote and quote.get("stale"))
+        premarket = quote.get("last") if quote and not stale else None
+        source, asof = (quote or {}).get("source"), None
     gap = None
     if premarket and prev_close:
         gap = round(premarket / prev_close - 1.0, 5)
@@ -69,5 +82,6 @@ def build_features(history: pd.DataFrame, quote: dict | None = None) -> dict:
         "low_252": round(lo_252, 2),
         "pct_from_252_high": round(prev_close / hi_252 - 1.0, 5) if hi_252 else None,
         "recent_ohlc": recent_table,
-        "quote_source": (quote or {}).get("source"),
+        "quote_source": source,
+        "premarket_asof": asof if premarket else None,
     }

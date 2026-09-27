@@ -6,7 +6,7 @@ import src.loop.run_ab as ab
 import src.loop.run_daily as rd
 from src.config import settings
 from src.utils import read_jsonl
-from tests.test_e2e import _isolate, _synthetic_history
+from tests.test_e2e import _isolate, _offline_market, _synthetic_history
 
 
 def _isolate_ab(monkeypatch, tmp_path):
@@ -25,12 +25,7 @@ def test_ab_predict_then_score_offline(monkeypatch, tmp_path):
     last_date = hist.index[-1]
     actual_close = float(hist.iloc[-1]["close"])
     hist_for_predict = hist.iloc[:-1]
-    quote = {"last": float(hist_for_predict.iloc[-1]["close"]),
-             "prev_close": float(hist_for_predict.iloc[-1]["close"]),
-             "source": "stooq", "symbol": "AMZN", "asof": hist_for_predict.index[-1].isoformat()}
-
-    monkeypatch.setattr(ab, "get_history", lambda *a, **k: hist_for_predict)
-    monkeypatch.setattr(ab, "get_quote", lambda *a, **k: quote)
+    _offline_market(monkeypatch, hist_for_predict)
 
     rc = ab.main(["--mode", "predict", "--date", last_date.isoformat(), "--dry-run"])
     assert rc == 0

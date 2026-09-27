@@ -11,7 +11,10 @@ from datetime import date
 
 from ..config import settings
 from ..data.providers import get_actual_close
+from ..evals import integrity
 from ..evals.metrics import score_row
+from ..evals.probabilistic import forecast_distribution
+from ..loop.session import anchor_fields
 from ..utils import now_iso, upsert_ledger_row
 from .decider import decide
 from .prior import build_prior
@@ -47,25 +50,28 @@ def _append_failure(row: dict) -> None:
 
 
 def do_score_b(rows_b: list[dict]) -> tuple[list[dict], dict | None]:
-    """Score the most recent pending B prediction whose session has completed."""
-    pending = [r for r in rows_b if r.get("status") == "pending"]
+    """Score every pending B prediction whose session has closed (and settled), oldest first."""
+    pending = sorted((r for r in rows_b if r.get("status") == "pending"), key=lambda r: r["date"])
     if not pending:
         log("no pending predictions to score.")
         return rows_b, None
-    target = sorted(pending, key=lambda r: r["date"])[-1]
-    actual = get_actual_close(settings.SYMBOL, target["date"])
-    if actual is None:
-        log(f"actual close for {target['date']} not available yet; skipping score.")
-        return rows_b, None
-
-    target.update(score_row(target, actual))
-    target["scored_at"] = now_iso()
-    rows_b = upsert_ledger_row(rows_b, target)
-    if target.get("pass") is False:
-        _append_failure(target)
-    log(f"scored {target['date']}: predicted {target['predicted_close']} vs actual {actual} "
-        f"(APE {target['ape'] * 100:.2f}%, {'PASS' if target['pass'] else 'FAIL'}).")
-    return rows_b, target
+    last = None
+    for target in pending:
+        if not integrity.session_has_closed(target["date"], None, settings.SCORE_SETTLE_MINUTES):
+            continue
+        actual = get_actual_close(settings.SYMBOL, target["date"])
+        if actual is None:
+            log(f"actual close for {target['date']} not available yet; skipping score.")
+            continue
+        target.update(score_row(target, actual))
+        target["scored_at"] = now_iso()
+        rows_b = upsert_ledger_row(rows_b, target)
+        if target.get("pass") is False:
+            _append_failure(target)
+        log(f"scored {target['date']}: predicted {target['predicted_close']} vs actual {actual} "
+            f"(APE {target['ape'] * 100:.2f}%, {'PASS' if target['pass'] else 'FAIL'}).")
+        last = target
+    return rows_b, last
 
 
 def do_predict_b(rows_b: list[dict], target_date: date, client, features: dict,
@@ -76,24 +82,40 @@ def do_predict_b(rows_b: list[dict], target_date: date, client, features: dict,
     write_pulse_artifact(target_date.isoformat(), pulse, prior)
     final = decide(prior, pulse, rows_b, client=client)
 
+    prior_close = float(features["prev_close"])
+    sigma = float(features.get("sigma_ewma") or prior["sigma_pct"] or settings.DEFAULT_SIGMA)
+    dist = forecast_distribution(rows_b, target_date.isoformat(), float(final["predicted_close"]),
+                                 sigma, prior_close, is_clean=lambda r: not integrity.is_late(r),
+                                 threshold=settings.PASS_THRESHOLD)
+    anchor = features.get("anchor") or {"price": prior_close, "source": "prior_close",
+                                        "time": None, "live": False}
+    created = now_iso()
     row = {
         "date": target_date.isoformat(),
-        "created_at": now_iso(),
+        "created_at": created,
         "variant": "b",
-        "prior_close": features["prev_close"],
+        "pipeline_version": settings.PIPELINE_VERSION,
+        "prior_close": prior_close,
         "predicted_close": final["predicted_close"],
         "predicted_direction": final["direction"],
-        "confidence": final["confidence"],
+        "confidence": dist["p_pass"],
+        "p_up": dist["p_up"],
+        "sigma_pct": round(sigma, 6),
+        "quantiles": dist["quantiles"],
+        "calibration": dist["calibration"],
         "prior": prior,
         "pulse_summary": pulse.get("summary", ""),
         "n_evidence": len(pulse.get("items", [])),
+        "pulse_web_results": pulse.get("web_results"),
         "adjustment_sigma": final["adjustment_sigma"],
         "caps_applied": final["caps_applied"],
         "rationale": final["rationale"],
         "quote_source": features.get("quote_source"),
+        **anchor_fields(anchor, prior_close, created),
         "status": "pending",
         "actual_close": None,
     }
+    integrity.annotate(row)
     rows_b = upsert_ledger_row(rows_b, row)
     log(f"predicted {target_date.isoformat()}: close ≈ {row['predicted_close']} "
         f"({row['predicted_direction']}, conf {row['confidence']}, adj {row['adjustment_sigma']}σ, "

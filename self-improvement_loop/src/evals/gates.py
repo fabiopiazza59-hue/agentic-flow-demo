@@ -6,9 +6,13 @@ while the model is losing to it, make confidence discriminative — but as promp
 advice they never stuck. These gates enforce them in code, after synthesis:
 
   low_consensus_shrink : analyst directional agreement with the blend < GATE_CONSENSUS_MIN
-                         -> shrink the predicted move toward prior close
-  negative_edge_shrink : rolling edge vs baseline (last GATE_EDGE_WINDOW scored days) < 0
-                         -> shrink the predicted move toward prior close
+                         -> shrink the predicted move toward the anchor
+  negative_edge_shrink : rolling edge vs the free baseline (last GATE_EDGE_WINDOW pre-open
+                         scored days) < 0 -> shrink the predicted move toward the anchor
+
+The anchor is the latest pre-open trade when there is one (v2), else the prior close — i.e. the
+free baseline the forecast is judged against. The lab (evals/lab.py) measures the gates' paired
+effect from the `predicted_close_raw` counterfactual and switches them off if they hurt.
 
 Confidence is always replaced by a calibrated value: rolling pass rate, nudged by analyst
 consensus, so it finally varies with conditions instead of sitting flat at ~0.5.
@@ -56,20 +60,21 @@ def apply_gates(final: dict, analyst_predictions: dict, rows: list[dict],
     # The ungated value is kept so the gate's own effect stays measurable after the fact:
     # without a counterfactual per row, the one real mechanism in this system is unfalsifiable.
     final["predicted_close_raw"] = round(float(final["predicted_close"]), 2)
-    move = float(final["predicted_close"]) - prev_close
+    anchor = float(features.get("premarket_last") or prev_close)
+    move = float(final["predicted_close"]) - anchor
     consensus = directional_consensus(analyst_predictions, final.get("direction"))
-    stats = aggregate(rows, window=settings.GATE_EDGE_WINDOW)
+    stats = aggregate(rows, window=settings.GATE_EDGE_WINDOW, pre_open_only=True)
 
     if len(analyst_predictions) >= 3 and consensus < settings.GATE_CONSENSUS_MIN:
         move *= settings.GATE_SHRINK
         gates.append("low_consensus_shrink")
-    edge = stats.get("edge")
+    edge = stats.get("anchor_edge")
     if stats.get("n", 0) >= settings.GATE_MIN_SCORED and edge is not None and edge < 0:
         move *= settings.GATE_SHRINK
         gates.append("negative_edge_shrink")
 
     if gates:
-        final["predicted_close"] = round(prev_close + move, 2)
+        final["predicted_close"] = round(anchor + move, 2)
         if final["predicted_close"] != prev_close:
             final["direction"] = "up" if final["predicted_close"] > prev_close else "down"
 

@@ -25,25 +25,26 @@ ANALYSTS: dict[str, dict] = {
     "technical": {
         "uses_web": False,
         "system": (
-            "You are a disciplined technical analyst. Predict today's AMZN regular-session CLOSE "
-            "using moving averages, RSI, support/resistance, and the pre-market gap. Weight the most "
-            "recent price action. Be precise and avoid round numbers unless justified."
+            "You are a disciplined technical analyst. Predict the target session's AMZN "
+            "regular-session CLOSE using moving averages, RSI, support/resistance, and the "
+            "pre-open gap. Weight the most recent price action. Be precise and avoid round "
+            "numbers unless justified."
         ),
     },
     "momentum": {
         "uses_web": False,
         "system": (
-            "You are a momentum/trend-following analyst. Predict today's AMZN CLOSE assuming the "
-            "prevailing short-term trend (1d/5d/20d returns) tends to persist intraday. Extrapolate "
-            "carefully from recent returns and the pre-market gap."
+            "You are a momentum/trend-following analyst. Predict the target session's AMZN CLOSE "
+            "assuming the prevailing short-term trend (1d/5d/20d returns) tends to persist. "
+            "Extrapolate carefully from recent returns and the pre-open gap."
         ),
     },
     "contrarian": {
         "uses_web": False,
         "system": (
-            "You are a mean-reversion/contrarian analyst. Predict today's AMZN CLOSE assuming "
-            "overextended moves (high RSI, large distance from SMA20/50, big gaps) tend to revert. "
-            "Fade stretched conditions; respect the trend when conditions are neutral."
+            "You are a mean-reversion/contrarian analyst. Predict the target session's AMZN CLOSE "
+            "assuming overextended moves (high RSI, large distance from SMA20/50, big gaps) tend "
+            "to revert. Fade stretched conditions; respect the trend when conditions are neutral."
         ),
     },
     "news": {
@@ -51,18 +52,20 @@ ANALYSTS: dict[str, dict] = {
         "max_tokens": 4096,  # web_search reasoning is token-heavy; avoid truncating the final JSON
         "system": (
             "You are a catalyst-driven equity analyst. Use AT MOST 2 web searches to find the latest "
-            "AMZN news, earnings timing, analyst actions, and macro events for today, plus index "
-            "futures sentiment. Then predict today's AMZN regular-session CLOSE. Anchor on the prior "
-            "close and the pre-market gap; adjust for catalysts you find. Keep reasoning brief. Your "
-            "FINAL message must be ONLY the JSON object — no prose after it."
+            "AMZN news, earnings timing, analyst actions, and macro events relevant to the target "
+            "session, plus index futures sentiment. Then predict the target session's AMZN "
+            "regular-session CLOSE. Anchor on the latest pre-open price when there is one (else the "
+            "prior close); adjust only for catalysts it does not already reflect. Keep reasoning "
+            "brief. Your FINAL message must be ONLY the JSON object — no prose after it."
         ),
     },
     "macro": {
         "uses_web": False,
         "system": (
-            "You are a macro/cross-asset analyst. Predict today's AMZN CLOSE by reasoning about the "
-            "broad-market regime (S&P 500 / Nasdaq direction, rates, risk sentiment) and AMZN's "
-            "typical beta to tech. Use the pre-market gap as the day's opening risk signal."
+            "You are a macro/cross-asset analyst. Predict the target session's AMZN CLOSE by "
+            "reasoning about the broad-market regime (S&P 500 / Nasdaq direction, rates, risk "
+            "sentiment) and AMZN's typical beta to tech. Use the pre-open gap as the session's "
+            "opening risk signal."
         ),
     },
 }
@@ -76,11 +79,18 @@ _JSON_INSTRUCTION = (
 
 
 def _features_prompt(features: dict, context_block: str = "") -> str:
-    payload = {k: v for k, v in features.items() if k != "recent_ohlc"}
+    payload = {k: v for k, v in features.items() if k not in ("recent_ohlc", "anchor")}
     ctx = f"{context_block}\n\n" if context_block else ""
+    pre_open = features.get("premarket_last")
+    pre_open_line = (f"{pre_open} (as of {features.get('premarket_asof')})" if pre_open else
+                     "none — no after-hours/pre-market trade seen yet; the gap is unknown, not zero")
     return (
         f"Symbol: {settings.SYMBOL}\n"
-        f"Prior close: {features.get('prev_close')}\n"
+        f"Target session: {features.get('target_session') or 'the next regular session'} "
+        f"(predict ITS regular-session close)\n"
+        f"Forecast made at (UTC): {features.get('forecast_made_at') or 'now'}\n"
+        f"Prior close (last completed session): {features.get('prev_close')}\n"
+        f"Latest pre-open price: {pre_open_line}\n"
         f"Technical features (JSON):\n{json.dumps(payload, indent=2)}\n\n"
         f"Recent daily OHLCV:\n{features.get('recent_ohlc')}\n\n"
         f"{ctx}"
@@ -168,6 +178,21 @@ def _extract_from_blocks(resp) -> dict:
     return extract_json("".join(blocks))
 
 
+def count_web_results(resp) -> int:
+    """Search results the model actually received.
+
+    Server-tool failures come back as content blocks, not exceptions, so a search that returned
+    nothing still yields clean JSON; recording the count makes that visible (review P1.4).
+    """
+    n = 0
+    for block in getattr(resp, "content", None) or []:
+        if getattr(block, "type", None) == "web_search_tool_result":
+            content = getattr(block, "content", None)
+            if isinstance(content, list):
+                n += len(content)
+    return n
+
+
 def _run_one(client, name: str, spec: dict, features: dict, context: dict | None = None) -> dict | None:
     prev = float(features.get("prev_close") or 0.0)
     if client is None:
@@ -185,7 +210,10 @@ def _run_one(client, name: str, spec: dict, features: dict, context: dict | None
                 {"type": "web_search_20250305", "name": "web_search", "max_uses": 2}
             ]
         resp = client.messages.create(**kwargs)
-        return _normalize(_extract_from_blocks(resp), prev)
+        pred = _normalize(_extract_from_blocks(resp), prev)
+        if pred is not None and spec.get("uses_web"):
+            pred["web_results"] = count_web_results(resp)
+        return pred
     except Exception:
         return None
 

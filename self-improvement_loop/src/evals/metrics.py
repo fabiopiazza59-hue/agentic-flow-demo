@@ -4,7 +4,10 @@ Eval contract (see spec/spec.md §3):
   PASS              : ape <= PASS_THRESHOLD (±1%)
   direction         : 'up' if close > prior_close else 'down'
   baseline          : random walk -> baseline_pred = prior_close
-  edge              : baseline_mape - mape  (positive => real skill)  [headline verdict]
+  edge              : baseline_mape - mape  (positive => beats the random walk)
+  anchor baseline   : the latest pre-open trade the forecast was anchored to (= prior close when
+                      there was none) — the free information every forecast must beat
+  anchor_edge       : anchor_mape - mape    (positive => value added over free information)
   brier_component   : (confidence - outcome)^2
 """
 
@@ -59,7 +62,7 @@ def score_row(row: dict, actual: float) -> dict:
     conf = float(row.get("confidence", 0.5))
     _ape = ape(predicted, actual)
     passed = _ape <= settings.PASS_THRESHOLD
-    return {
+    out = {
         "actual_close": float(actual),
         "ape": _ape,
         "pass": passed,
@@ -69,6 +72,9 @@ def score_row(row: dict, actual: float) -> dict:
         "brier": brier_component(conf, passed),
         "status": "scored",
     }
+    if row.get("anchor"):
+        out["anchor_ape"] = ape(float(row["anchor"]), actual)
+    return out
 
 
 def _mean(values: list[float]) -> float | None:
@@ -100,6 +106,10 @@ def aggregate(rows: list[dict], window: int | None = None,
     mape = _mean(vals("ape"))
     base_mape = _mean(vals("baseline_ape"))
     edge = (base_mape - mape) if (mape is not None and base_mape is not None) else None
+    anchor_mape = _mean([float(r["anchor_ape"] if r.get("anchor_ape") is not None
+                               else r["baseline_ape"])
+                         for r in windowed if r.get("baseline_ape") is not None])
+    anchor_edge = (anchor_mape - mape) if (mape is not None and anchor_mape is not None) else None
 
     return {
         "n": len(windowed),
@@ -109,6 +119,9 @@ def aggregate(rows: list[dict], window: int | None = None,
         "mape": mape,
         "baseline_mape": base_mape,
         "edge": edge,
+        "anchor_mape": anchor_mape,
+        "anchor_edge": anchor_edge,
+        "n_live_anchor": sum(1 for r in windowed if r.get("anchor_live")),
         "beats_baseline_overall": (edge is not None and edge > 0),
         "brier": _mean(vals("brier")),
     }

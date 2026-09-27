@@ -10,18 +10,19 @@ from __future__ import annotations
 
 import json
 
+from ..agents.analysts import count_web_results
 from ..config import settings
 from ..utils import extract_json
 
 _SYSTEM = (
     "You are an evidence-gathering agent for an AMZN close-prediction desk. Use AT MOST 3 web "
-    "searches to collect today's decision-relevant evidence: AMZN news and catalysts, index "
-    "futures, notable analyst actions, macro events. Report FINDINGS ONLY — do not predict a "
-    "price. Your FINAL message must be ONLY JSON:\n"
+    "searches to collect decision-relevant evidence for the target session: AMZN news and "
+    "catalysts, index futures, notable analyst actions, macro events. Report FINDINGS ONLY — do "
+    "not predict a price. Your FINAL message must be ONLY JSON:\n"
     '{"items": [{"finding": "<one sentence>", "direction": "up"|"down"|"neutral", '
     '"strength": <0..1>}, ...], "summary": "<2-3 sentences>"}\n'
-    "3-8 items; direction is the finding's implied pressure on today's AMZN close; strength is "
-    "how material and well-confirmed it is."
+    "3-8 items; direction is the finding's implied pressure on the target session's AMZN close; "
+    "strength is how material and well-confirmed it is."
 )
 
 
@@ -58,17 +59,23 @@ def gather_pulse(features: dict, client=None) -> dict:
             messages=[{
                 "role": "user",
                 "content": (
-                    f"Symbol: {settings.SYMBOL}. Prior close {features.get('prev_close')}, "
-                    f"pre-market gap {features.get('premarket_gap_pct')}. Gather today's evidence."
+                    f"Symbol: {settings.SYMBOL}. Target session: "
+                    f"{features.get('target_session') or 'the next regular session'} (forecast "
+                    f"made at {features.get('forecast_made_at') or 'now'} UTC). Prior close "
+                    f"{features.get('prev_close')}; latest pre-open price "
+                    f"{features.get('premarket_last') or 'none yet'} (gap "
+                    f"{features.get('premarket_gap_pct')}). Gather evidence relevant to the "
+                    f"target session's close."
                 ),
             }],
             tools=[{"type": "web_search_20250305", "name": "web_search", "max_uses": 3}],
         )
         blocks = [b.text for b in resp.content
                   if getattr(b, "type", None) == "text" and b.text.strip()]
+        n_results = count_web_results(resp)
         for text in reversed(blocks):
             try:
-                return _normalize(extract_json(text))
+                return {**_normalize(extract_json(text)), "web_results": n_results}
             except ValueError:
                 continue
         return _empty("unparseable pulse response")

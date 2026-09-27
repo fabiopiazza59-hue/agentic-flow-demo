@@ -1,31 +1,48 @@
 # 📈 AMZN Daily Close Predictor — Self-Improving Agentic Loop
 
 A daily experiment: every trading day, **before the US market opens**, a Claude-powered ensemble
-predicts Amazon's (AMZN) closing price. The next trading day it checks the real close, grades
-itself **PASS/FAIL (±1%)**, writes a post-mortem, and refines its own strategy. State lives in the
-repo — git history *is* the experiment log.
+predicts Amazon's (AMZN) closing price as a calibrated distribution. After the close it scores
+itself against the free baselines (the prior close, and the latest pre-open trade), writes a
+post-mortem, and lets a measurement lab — not prose — decide which of its own mechanisms to keep.
+State lives in the repo — git history *is* the experiment log.
+
+**v2 (2026-09-27):** see [spec/v2-sota-upgrade.md](spec/v2-sota-upgrade.md) — what the record
+actually showed (most rows were written after the open; the "pre-market quote" was the previous
+close), and the timing model, proper scoring, anytime-valid verdicts and lab that fix it.
 
 > Research experiment, not financial advice. It places no trades and moves no money.
 
-## How it works (one run/day)
-1. **Guard** — skip non-NYSE days.
-2. **Score yesterday** — fetch the real close, compute PASS/FAIL, directional hit, error vs a
-   random-walk baseline; update per-strategy scorecards; write a learning.
-3. **Predict today** — 5 analyst lenses (technical, momentum, contrarian, news-via-web-search,
-   macro) each forecast the close; a meta-judge weights them by their *tracked* accuracy.
-4. **Report** — regenerate `RESULTS.md`, `results/results.csv`, `results/metrics.json`, and the
-   GitHub Pages dashboard.
-5. **Commit** — push state back (only this project's paths).
+## How it works (every scheduled run is idempotent)
+1. **Score** — every pending forecast whose session has closed (+30 min to settle): PASS/FAIL,
+   direction, error vs the random walk *and* vs the anchor; scorecards; a post-mortem.
+2. **Pick the session** — the next session whose forecast window is open (previous close →
+   10 min before its open). During a session there is nothing to forecast.
+3. **Research it (once)** — 5 analyst lenses (technical, momentum, contrarian, news-via-web-search,
+   macro) → the lab's champion blend → the judge's σ-sized adjustment (clamped in code) →
+   guardrail gates → a calibrated predictive distribution. Arm B runs on the same snapshot.
+4. **…or re-anchor it** — if it is already researched and still pre-open, move it onto the latest
+   after-hours / pre-market trade in code (no LLM cost).
+5. **Report + commit** — `RESULTS.md`, `results/*`, the Pages dashboard, `learnings/lab_state.json`.
+
+The evening run after the close does the research hours before the bell, because GitHub starts
+scheduled runs late (3.5–5.5 h in September 2026). Morning runs only re-anchor.
 
 ## The bar for success
-PASS = predicted close within **±1%** of actual. The headline verdict is **edge vs the random-walk
-baseline** (`predicted = yesterday's close`): all-time MAPE (every real scored day) must beat it, or
-the dashboard honestly says "no edge yet." Rolling-20-day metrics are still shown, but a short window
-flips on noise, so it doesn't drive the verdict.
+The headline verdict is **edge vs the free baseline** — the latest pre-open trade the forecast was
+anchored to (the prior close when there was none): all-time MAPE over **pre-open forecasts only**
+must beat it, judged by an **anytime-valid 95% confidence sequence** on the paired daily gains, or
+the dashboard honestly says "no edge yet." The CS stays valid although the page is re-read daily
+(a daily fixed-sample test would "find" an edge 40% of the time under the null within a year).
+CRPS, interval coverage and the Brier score of P(up) are reported alongside; PASS (±1%) and the
+rolling-20 window are shown but mostly measure the day's volatility, so they don't drive it.
 
 ## Self-improvement
-- **Scorecards** (`learnings/scorecards.json`) track each strategy's accuracy → the meta-judge
-  up-weights what works.
+- **The lab** (`src/evals/lab.py`) — six rules for combining the analysts are replayed over every
+  pre-open day with no lookahead; one replaces the equal-weight mean only when its anytime-valid
+  CS (Bonferroni-corrected) proves it better. The same test switches the judge or the gates **off**
+  once they are shown to hurt. Its state (`learnings/lab_state.json`) drives the next forecast.
+- **Scorecards** (`learnings/scorecards.json`) track each strategy's accuracy (context for the
+  judge and the analysts; the lab, not the scorecards, sets the blend).
 - **STRATEGY.md** is an append-only living strategy the reflector adds one tested insight to per day.
 - **learnings/YYYY-MM-DD.md** post-mortems feed back into the next prediction.
 - **learnings/FAILURES.md** — concentrated, append-only log of every missed prediction (>1% error)
@@ -44,9 +61,9 @@ flips on noise, so it doesn't drive the verdict.
 - **Measurable gates** — each row stores `predicted_close_raw`, the pre-gate prediction, so the
   gates' own effect is reported as a paired per-day number instead of being assumed.
 - **Enforced gates** (`src/evals/gates.py`) — the diagnosis's fixes applied in code, not just prompts:
-  the predicted move shrinks toward the prior close when analyst directional agreement is low or the
-  rolling edge vs baseline is negative, and confidence is replaced by a calibrated value (rolling
-  pass rate ± an analyst-agreement nudge). Fired gates are recorded per row (`gates_applied`).
+  the predicted move shrinks toward the anchor when analyst directional agreement is low or the
+  rolling pre-open edge vs the free baseline is negative. Fired gates are recorded per row
+  (`gates_applied`); `confidence` is P(PASS) under the row's calibrated distribution.
 
 ## A/B test — two agent architectures, one daily run
 Since 2026-07-18 every daily run executes **two arms on the same pre-open snapshot** (same
@@ -56,16 +73,16 @@ history, same quote — a fair paired test) and scores both the next day:
   guardrail gates. State: `data/predictions.jsonl`, `learnings/`.
 - **Arm B — raven-style prior + pulse** (inspired by
   [predict-raven](https://github.com/Alchemist-X/predict-raven)): a statistical prior
-  (drift/vol Monte-Carlo, re-centered on the pre-market quote) → one evidence-gathering "pulse"
-  agent (web search, audited to `learnings_b/pulse/`) → a decision agent whose adjustment is
-  **hard-capped in code** at ±0.8σ (and the total move at 1.5σ). No ensemble, no meta-judge;
-  failures feed straight back into the decider via `learnings_b/FAILURES.md`.
-  State: `data/predictions_b.jsonl`, `learnings_b/`.
+  (drift/vol Monte-Carlo, centered on the live pre-open trade when there is one) → one
+  evidence-gathering "pulse" agent (web search, audited to `learnings_b/pulse/`) → a decision
+  agent whose adjustment is **hard-capped in code** at ±0.8σ (and the move from the prior center
+  at 1.5σ). No ensemble, no meta-judge; failures feed straight back into the decider via
+  `learnings_b/FAILURES.md`. State: `data/predictions_b.jsonl`, `learnings_b/`.
 
 `results/ab_compare.json` + an A/B section in `RESULTS.md` and the dashboard track the paired
-comparison (per-day APE deltas, B-wins rate, exact sign test). No verdict is rendered before
-10 paired scored days. Entry point: `python -m src.loop.run_ab` (CI uses this; `run_daily`
-still runs arm A standalone).
+comparison on days where **both** forecasts were written before the open (APE and CRPS deltas,
+anytime-valid CS; the sign test is descriptive). No verdict before 10 clean paired days.
+Entry point: `python -m src.loop.run_ab` (CI uses this; `run_daily` still runs arm A standalone).
 
 ## Layout
 ```
@@ -74,7 +91,7 @@ src/         config, utils, data/, evals/, agents/, features, loop/, report, rep
 src/variant_b/  arm B: prior, pulse, decider, runner
 data/        predictions.jsonl (arm A ledger), predictions_b.jsonl (arm B ledger)
 results/     results.csv, metrics.json, ab_compare.json, site/ (Pages dashboard)
-learnings/   STRATEGY.md, scorecards.json, daily post-mortems (arm A)
+learnings/   STRATEGY.md, scorecards.json, lab_state.json, daily post-mortems (arm A)
 learnings_b/ FAILURES.md, pulse/ audit artifacts (arm B)
 tests/       pytest suite
 ```
@@ -85,15 +102,16 @@ python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env            # add ANTHROPIC_API_KEY (+ FINNHUB_API_KEY recommended)
 
-# offline end-to-end (no API spend, uses stub analysts + keyless yfinance data):
+# offline end-to-end (no API spend, uses stub analysts + keyless yfinance data).
+# Run it on a copy of the project: offline stub forecasts would otherwise enter the real ledger.
 python -m src.loop.run_daily --mode backfill          # seed history
-python -m src.loop.run_daily --mode daily --dry-run   # score + predict + report
+python -m src.loop.run_ab --mode daily --dry-run      # score + research/re-anchor + report
 
 # with keys, a real prediction (no commit):
 python -m src.loop.run_daily --mode daily --no-commit
 ```
-Modes: `daily` (default), `score`, `predict`, `report`, `backfill`. Flags: `--date YYYY-MM-DD`,
-`--dry-run`, `--no-commit`, `--allow-late`.
+Modes: `daily` (default), `score`, `predict`, `report`, `backfill`. Flags: `--date YYYY-MM-DD`
+(a past date is a replay, flagged late), `--dry-run`, `--no-commit`, `--allow-late`.
 
 ```bash
 python -m tools.audit_review        # reproduce the findings in spec/improvements-from-2609.05663.md
@@ -106,15 +124,18 @@ python -m tools.backfill_integrity  # one-time: stamp late_minutes on historical
    With no market-data key the keyless yfinance fallback is used (may be rate-limited on CI IPs).
 2. **Pages** (Settings → Pages → Source: **GitHub Actions**) for the live dashboard URL.
 3. **Default branch** — the workflow `.github/workflows/amzn-predict.yml` must be on the repo's
-   default branch for the schedule to fire. Use the **Run workflow** button (`workflow_dispatch`) to
-   smoke-test from any branch first.
+   default branch for the schedule to fire, and it commits back to the branch it runs on. Use the
+   **Run workflow** button (`workflow_dispatch`) to smoke-test from any branch first.
 
-The job runs `0 13 * * 1-5` UTC — before the 09:30 ET open year-round.
+Schedule (UTC, weekdays): 21:41 and 01:17 (evening research), 09:07, 11:07, 12:37, 13:13 (morning
+re-anchoring). Every slot is safe to run any time: it does only what the clock allows.
 
 ## Dashboard
 Live: GitHub Pages URL (after enabling Pages). Markdown: [RESULTS.md](RESULTS.md).
 
 ## Data sources
 Daily history & past closes: Alpha Vantage `TIME_SERIES_DAILY` (keyed) → yfinance (keyless) →
-Stooq w/ proof-of-work solver (best-effort). Live/pre-market quote: Finnhub → Alpha Vantage →
-yfinance → derived from history. The keyless path keeps validation working with no API key.
+Stooq w/ proof-of-work solver (best-effort); a forecast waits until one of them has the previous
+session's close. Pre-open anchor: Yahoo 1-minute bars with pre/post-market (keyless) → Finnhub
+(keyed, timestamped) → the prior close. Alpha Vantage's free quote is not used as an anchor: before
+the open it returns the previous close.

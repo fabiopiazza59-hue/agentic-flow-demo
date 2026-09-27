@@ -1,12 +1,18 @@
-"""Meta-judge — synthesizes analyst predictions into one final forecast.
+"""Meta-judge (v2) — a bounded adjuster on top of a code-computed blend.
 
-The judge sees every analyst's prediction, the per-strategy accuracy scorecards (weight hints),
-the living STRATEGY.md, and recent post-mortems. It outputs the final prediction plus the weights
-it assigned to each strategy. Up-weighting historically accurate strategies is the loop's core
-self-improvement mechanism.
+v1 let the judge write the final number. Over 60 paired days that cost 0.14% MAPE against a plain
+mean of its own analysts (review F1, spec/improvements-from-2609.05663.md), and its "weights"
+never moved (F4). v2 applies the pattern arm B already uses — evidence may move a prior only
+within a hard-capped band, and the cap lives in code:
 
-Offline (no client) it computes a transparent weighted blend using scorecard weight hints, so the
-full pipeline is testable without an API key.
+  blend      = the lab's champion aggregation rule over the analysts (evals/lab.py; equal mean
+               until a challenger proves better)
+  adjustment = the judge's proposal in units of daily σ, clamped to ±A_JUDGE_MAX_SIGMA in code
+  forecast   = blend · (1 + adjustment · σ)
+
+The judge's job shrinks to "size a deviation", which is the only part it can be scored on: the
+lab measures APE(blend) − APE(blend + adjustment) every day and switches the judge off once that
+is shown to hurt. Offline (no client) the adjustment is 0.
 """
 
 from __future__ import annotations
@@ -17,43 +23,20 @@ from ..config import settings
 from ..utils import extract_json, safe_float
 
 _SYSTEM = (
-    "You are the head of a quantitative research desk. Several analysts have each predicted today's "
-    "AMZN regular-session CLOSE. You also have each strategy's historical accuracy scorecard, a "
-    "living strategy note, and recent post-mortems. Produce ONE final close prediction.\n"
-    "Rules:\n"
-    "- Weight strategies by their demonstrated accuracy (lower MAPE / higher hit_rate = more weight).\n"
-    "- Be skeptical of overconfident outliers; the prior close is a strong anchor.\n"
-    "- Your weights should reflect how much each analyst influenced your final number.\n"
+    "You are the head of a quantitative research desk. Several analysts have each predicted the "
+    "target session's AMZN regular-session CLOSE, and code has already combined them into a base "
+    "forecast using the desk's measured best aggregation rule. Your ONLY job is to decide whether "
+    "anything the blend cannot see justifies moving off it, in units of the daily volatility σ: "
+    "positive = above the base forecast, negative = below. Weak, stale or conflicting evidence "
+    "deserves 0 — most days should be 0. The system clamps your answer to ±{cap}σ.\n"
     "Respond with ONLY JSON:\n"
-    '{"predicted_close": <number>, "direction": "up"|"down", "confidence": <0..1>, '
-    '"weights": {"<strategy>": <0..1>, ...}, "rationale": "<2-4 sentences>"}'
+    '{{"adjustment_sigma": <number>, "rationale": "<2-4 sentences>"}}'
 )
 
 
-def _offline_blend(analyst_predictions: dict, scorecards: dict, prev_close: float) -> dict:
-    """Weighted average using scorecard weight_hints (fallback to equal weights)."""
-    names = list(analyst_predictions.keys())
-    hints = {n: float((scorecards.get(n) or {}).get("weight_hint", 0.2)) for n in names}
-    total = sum(hints.values()) or float(len(names) or 1)
-    weights = {n: round(hints.get(n, 0.0) / total, 4) for n in names}
-    if not names:
-        return {
-            "predicted_close": round(prev_close, 2),
-            "direction": "down",
-            "confidence": 0.3,
-            "weights": {},
-            "rationale": "No analyst predictions available; defaulting to prior close.",
-        }
-    blended = sum(weights[n] * float(analyst_predictions[n]["predicted_close"]) for n in names)
-    blended = round(blended, 2)
-    avg_conf = sum(float(analyst_predictions[n]["confidence"]) for n in names) / len(names)
-    return {
-        "predicted_close": blended,
-        "direction": "up" if blended > prev_close else "down",
-        "confidence": round(avg_conf, 3),
-        "weights": weights,
-        "rationale": "[offline] scorecard-weighted blend of analyst predictions.",
-    }
+def clamp_adjustment(raw: float) -> float:
+    cap = settings.A_JUDGE_MAX_SIGMA
+    return max(-cap, min(cap, float(raw)))
 
 
 def _user_prompt(analyst_predictions: dict, scorecards: dict, strategy_md: str,
@@ -72,43 +55,30 @@ def _user_prompt(analyst_predictions: dict, scorecards: dict, strategy_md: str,
     )
 
 
-def _normalize(raw: dict, analyst_predictions: dict, scorecards: dict, prev_close: float) -> dict:
-    pred = safe_float(raw.get("predicted_close"))
-    if pred is None or pred <= 0:
-        return _offline_blend(analyst_predictions, scorecards, prev_close)
-    direction = raw.get("direction")
-    if direction not in ("up", "down"):
-        direction = "up" if pred > prev_close else "down"
-    conf = safe_float(raw.get("confidence"), 0.5) or 0.5
-    weights = raw.get("weights") if isinstance(raw.get("weights"), dict) else {}
-    weights = {k: round(float(v), 4) for k, v in weights.items() if safe_float(v) is not None}
-    return {
-        "predicted_close": round(pred, 2),
-        "direction": direction,
-        "confidence": round(max(0.0, min(1.0, conf)), 3),
-        "weights": weights,
-        "rationale": str(raw.get("rationale", ""))[:1000],
-    }
-
-
-def synthesize(analyst_predictions: dict, scorecards: dict, strategy_md: str,
-               recent_learnings: list[str], features: dict, client=None,
-               whats_not_working: str = "") -> dict:
-    prev_close = float(features.get("prev_close") or 0.0)
+def adjust(base_close: float, rule: str, sigma: float, analyst_predictions: dict,
+           scorecards: dict, strategy_md: str, recent_learnings: list[str], features: dict,
+           client=None, whats_not_working: str = "") -> tuple[float, str]:
+    """Return (raw adjustment in σ units, rationale). Offline or on failure: (0, note)."""
     if client is None or not analyst_predictions:
-        return _offline_blend(analyst_predictions, scorecards, prev_close)
+        return 0.0, "[offline] no judge call — the champion blend ships unadjusted."
+    user = (
+        f"Target session: {features.get('target_session')}\n"
+        f"Base forecast (code, rule '{rule}'): {base_close}\n"
+        f"Daily σ (EWMA of log returns): {sigma * 100:.2f}%\n"
+        f"Latest pre-open price (anchor): {features.get('premarket_last') or 'none — no extended-hours trade yet'}\n\n"
+        + _user_prompt(analyst_predictions, scorecards, strategy_md, recent_learnings, features,
+                       whats_not_working)
+    )
     try:
         resp = client.messages.create(
             model=settings.JUDGE_MODEL,
             max_tokens=settings.JUDGE_MAX_TOKENS,
-            system=_SYSTEM,
-            messages=[{
-                "role": "user",
-                "content": _user_prompt(analyst_predictions, scorecards, strategy_md,
-                                        recent_learnings, features, whats_not_working),
-            }],
+            system=_SYSTEM.format(cap=settings.A_JUDGE_MAX_SIGMA),
+            messages=[{"role": "user", "content": user}],
         )
         text = "".join(b.text for b in resp.content if getattr(b, "type", None) == "text")
-        return _normalize(extract_json(text), analyst_predictions, scorecards, prev_close)
-    except Exception:
-        return _offline_blend(analyst_predictions, scorecards, prev_close)
+        raw = extract_json(text)
+        adj = safe_float(raw.get("adjustment_sigma"), 0.0) or 0.0
+        return adj, str(raw.get("rationale", ""))[:1000]
+    except Exception:  # noqa: BLE001 - any failure abstains to the blend
+        return 0.0, "Judge call failed — the champion blend ships unadjusted."
