@@ -10,7 +10,7 @@ import pandas as pd
 import pytest
 
 from src.config import settings
-from src.panel import analyst, report, runner
+from src.panel import analyst, evolve, report, runner
 
 NOW = datetime(2026, 9, 27, 21, 45, tzinfo=timezone.utc)     # Sunday evening: target = Mon 28th
 SYMS = ["AAA", "BBB", "CCC", "DDD", "EEE", "FFF", "GGG", "HHH", "III", "JJJ", "KKK", "LLL"]
@@ -21,7 +21,8 @@ def isolated(monkeypatch, tmp_path):
     for key, rel in (("PANEL_LEDGER_PATH", "data/panel.jsonl"),
                      ("PANEL_STATE_PATH", "learnings/panel_state.json"),
                      ("PANEL_METRICS_JSON", "results/panel_metrics.json"),
-                     ("PANEL_RESULTS_MD", "RESULTS_PANEL.md")):
+                     ("PANEL_RESULTS_MD", "RESULTS_PANEL.md"),
+                     ("PROMPT_REGISTRY_PATH", "learnings/prompt_variants.json")):
         monkeypatch.setattr(settings, key, tmp_path / rel, raising=False)
     monkeypatch.setattr(settings, "PANEL_SYMBOLS", tuple(SYMS), raising=False)
     return tmp_path
@@ -177,3 +178,35 @@ def test_generate_writes_artifacts(isolated):
     m = report.generate()
     assert settings.PANEL_RESULTS_MD.exists() and settings.PANEL_METRICS_JSON.exists()
     assert json.loads(settings.PANEL_STATE_PATH.read_text())["n_sessions"] == m["n_sessions"] == 12
+
+
+def test_challenger_prompts_run_in_shadow_and_are_scored(monkeypatch, isolated):
+    hists = _fake_market(monkeypatch, gap=0.0)
+    reg = evolve.load_registry()
+    reg["n_created"] = 1
+    reg["variants"].append({"id": "p1", "k": 1, "parent": "p0", "status": "challenger",
+                            "strategy": "CHALLENGER STRATEGY " * 20, "created": "t"})
+    evolve.save_registry(reg)
+
+    class Client:
+        messages = None
+
+        def __init__(self):
+            self.messages = self
+
+        def create(self, **kw):   # the champion stays at 0; the challenger moves every name
+            sigma = 0.3 if kw["system"].startswith("CHALLENGER") else 0.0
+            tickers = [line.split(" | ")[0] for line in kw["messages"][0]["content"].splitlines()
+                       if " | " in line and not line.startswith("ticker")]
+            payload = {"adjustments": {t: {"sigma": sigma, "reason": "r"} for t in tickers}}
+            return SimpleNamespace(content=[SimpleNamespace(type="text", text=json.dumps(payload))])
+
+    target = pd.Timestamp("2026-09-28").date()
+    rows = runner.research([], target, Client(), NOW)
+    assert all(r["prompt_variant"] == "p0" and r["adj_sigma"] == 0.0 for r in rows)
+    assert all(r["shadow_adj"] == {"p1": 0.3} for r in rows)       # logged, never shipped
+    monkeypatch.setattr(runner.data, "daily_history", lambda symbols, through, **k: {
+        s: pd.DataFrame({"close": [float(hists[s]["close"].iloc[-1]) * 1.01]}, index=[target])
+        for s in symbols})
+    rows = runner.score(rows, datetime(2026, 9, 28, 21, 0, tzinfo=timezone.utc))
+    assert all(r["shadow_ape"]["p1"] < r["llm_ape"] for r in rows)   # the move up was right

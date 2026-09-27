@@ -76,6 +76,12 @@ class Settings(BaseModel):
     PANEL_MAX_ADJ_SIGMA: float = 0.5           # the LLM may move a name off its anchor ±0.5σ
     PANEL_MIN_NAMES: int = 10                  # fewer usable names -> wait for the next run
 
+    # --- prompt evolution on the panel (src/panel/evolve.py) ---
+    EVOLVE_MAX_CHALLENGERS: int = 2            # shadow prompt variants per session
+    EVOLVE_MIN_SESSIONS: int = 5               # champion history needed before proposing
+    EVOLVE_MAX_SESSIONS: int = 60              # retire a challenger still undecided after this
+    EVOLVE_MAX_STRATEGY_CHARS: int = 3000
+
     # --- paths ---
     DATA_DIR: Path = PROJECT_ROOT / "data"
     RESULTS_DIR: Path = PROJECT_ROOT / "results"
@@ -95,6 +101,7 @@ class Settings(BaseModel):
     PANEL_STATE_PATH: Path = PROJECT_ROOT / "learnings" / "panel_state.json"
     PANEL_METRICS_JSON: Path = PROJECT_ROOT / "results" / "panel_metrics.json"
     PANEL_RESULTS_MD: Path = PROJECT_ROOT / "RESULTS_PANEL.md"
+    PROMPT_REGISTRY_PATH: Path = PROJECT_ROOT / "learnings" / "prompt_variants.json"
 
     # --- env-derived helpers (not model fields) ---
     @property

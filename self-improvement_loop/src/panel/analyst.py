@@ -14,19 +14,30 @@ from ..agents.analysts import count_web_results
 from ..config import settings
 from ..utils import extract_json, safe_float
 
-_SYSTEM = (
+# The evolvable part (src/panel/evolve.py may replace it with a proven challenger) ...
+SEED_STRATEGY = (
     "You are an equity analyst covering a panel of US large caps for the target session. Each "
     "name comes with a free baseline: its latest pre-open price (the anchor), which already "
     "reflects everything the market has priced in. For each name, decide whether evidence the "
     "anchor does NOT yet reflect justifies expecting the regular-session close away from it, in "
     "units of that name's daily volatility σ (positive = above the anchor). Most names on most "
     "days deserve 0; a scheduled catalyst during the session (earnings, guidance, a macro print, "
-    "an investor day) is the typical reason not to. Use at most {searches} web searches, on the "
-    "most material catalysts only. The system clamps every answer to ±{cap}σ.\n"
+    "an investor day) is the typical reason not to. Search only for the most material catalysts."
+)
+
+# ... and the fixed contract, which no variant can change: tool budget, cap, output format.
+CONTRACT = (
+    "\n\nRules the system enforces: use at most {searches} web searches; every answer is "
+    "clamped to ±{cap}σ.\n"
     "Your FINAL message must be ONLY JSON:\n"
     '{{"adjustments": {{"<TICKER>": {{"sigma": <number>, "reason": "<one short sentence>"}}}}}}\n'
     "Include every ticker you were given."
 )
+
+
+def system_prompt(strategy: str | None = None) -> str:
+    return (strategy or SEED_STRATEGY) + CONTRACT.format(
+        searches=settings.PANEL_WEB_SEARCHES, cap=settings.PANEL_MAX_ADJ_SIGMA)
 
 
 def clamp(raw: float) -> float:
@@ -46,12 +57,12 @@ def _table(names: dict[str, dict]) -> str:
     return "\n".join(lines)
 
 
-def _call(client, target: str, made_at: str, names: dict[str, dict]) -> tuple[dict, int]:
+def _call(client, target: str, made_at: str, names: dict[str, dict],
+          strategy: str | None = None) -> tuple[dict, int]:
     resp = client.messages.create(
         model=settings.PANEL_MODEL,
         max_tokens=settings.PANEL_MAX_TOKENS,
-        system=_SYSTEM.format(searches=settings.PANEL_WEB_SEARCHES,
-                              cap=settings.PANEL_MAX_ADJ_SIGMA),
+        system=system_prompt(strategy),
         messages=[{"role": "user", "content": (
             f"Target session: {target} (forecast made at {made_at} UTC).\n\n{_table(names)}")}],
         tools=[{"type": "web_search_20250305", "name": "web_search",
@@ -67,7 +78,7 @@ def _call(client, target: str, made_at: str, names: dict[str, dict]) -> tuple[di
 
 
 def adjustments(names: dict[str, dict], target: str, made_at: str,
-                client=None) -> dict[str, dict]:
+                client=None, strategy: str | None = None) -> dict[str, dict]:
     """{ticker: {"raw": float, "sigma": clamped float, "reason": str, "web_results": int}}."""
     out = {s: {"raw": 0.0, "sigma": 0.0, "reason": "[offline] anchor only", "web_results": 0}
            for s in names}
@@ -78,7 +89,7 @@ def adjustments(names: dict[str, dict], target: str, made_at: str,
     for i in range(0, len(tickers), size):
         batch = {s: names[s] for s in tickers[i:i + size]}
         try:
-            parsed, n_web = _call(client, target, made_at, batch)
+            parsed, n_web = _call(client, target, made_at, batch, strategy)
         except Exception:  # noqa: BLE001 - a failed batch abstains to the anchors
             parsed, n_web = {}, 0
             for s in batch:
@@ -96,4 +107,4 @@ def adjustments(names: dict[str, dict], target: str, made_at: str,
 
 def prompt_preview(names: dict[str, dict]) -> str:
     """The table the model sees (for tests and audits)."""
-    return json.dumps({"system": _SYSTEM[:80], "table": _table(names)})
+    return json.dumps({"system": system_prompt()[:80], "table": _table(names)})

@@ -72,5 +72,15 @@
     "llm_enabled": true,
     "why": "insufficient",
     "n_sessions": 0
-  }
+  },
+  "evolution": [
+    {
+      "id": "p0",
+      "status": "champion",
+      "parent": null,
+      "why": null,
+      "rationale": "seed: the hand-written panel prompt",
+      "stats": {}
+    }
+  ]
 }

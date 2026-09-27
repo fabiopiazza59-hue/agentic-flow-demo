@@ -54,3 +54,33 @@ inferential unit, so correlated names are never counted as independent evidence.
 * Keyless Yahoo data can be rate-limited from CI IPs; the run then retries twice and otherwise
   skips the session rather than forecasting on stale data.
 * No replays: past sessions cannot be re-forecast honestly (the anchors and news are gone).
+
+## Prompt evolution (`src/panel/evolve.py`)
+
+The panel's analyst prompt now evolves, under the same rule as every other mechanism: nothing
+changes what ships until it is proven better.
+
+* **What can evolve:** only the *strategy* text (what to look for, when to move a name, when to
+  stay at 0). The *contract* — tool budget, the ±0.5σ clamp, the JSON format — is appended in
+  code to every variant, so no prompt can break parsing or widen the cap.
+* **Shadow runs:** each session the champion ships and up to `EVOLVE_MAX_CHALLENGERS` (2)
+  challengers run on the same snapshot; rows log `prompt_variant` and `shadow_adj`, scoring adds
+  `shadow_ape`. Cost: 3 extra batched calls per challenger per session.
+* **Promotion:** per session, average (champion APE − challenger APE) over the names; a
+  challenger is promoted when the anytime-valid CS on that series excludes zero. The k-th
+  challenger ever created is tested at α/(k(k+1)) — the budgets sum to α, so the probability of
+  *ever* promoting a prompt that is not better stays below α however long the loop runs.
+  Shown worse → retired; still undecided after `EVOLVE_MAX_SESSIONS` (60) → retired.
+* **Proposals:** when a slot is free and the champion has ≥ 5 clean sessions, the reflector model
+  (`REFLECTOR_MODEL`, one call) reads the champion's strategy, numbers-only failure cases (where
+  it hurt most vs the anchor, the largest moves it faced) and every variant tried so far with its
+  result, and writes one new strategy (reflective mutation, in the spirit of GEPA). The analysts'
+  free-text reasons are never passed on: they were shaped by web pages and could carry injected
+  instructions into future prompts. Proposals outside 200–3,000 characters or identical to an
+  earlier variant are discarded.
+* **Audit:** every prompt that ever ran, its parent, rationale, statistics and fate are in
+  `learnings/prompt_variants.json` (committed each run); RESULTS_PANEL.md shows the table.
+
+Expected pace: a challenger needs roughly the same number of sessions as the edge test above —
+about 2–4 weeks if it is materially better, longer (then retired at 60) if not. The first
+proposal comes after the champion's fifth clean session.

@@ -16,6 +16,14 @@ _30 US large caps a session. Every name's free baseline is its latest pre-open t
 
 MAPE — LLM —, free baseline —, prior close —; LLM 80% interval coverage —; names moved per session None. LLM is **on**.
 
+## Prompt evolution — shadow challengers, promoted only on proof
+
+_Challenger prompts run on the same snapshot without shipping. One replaces the champion only when an anytime-valid CS on the session-averaged APE gain excludes zero; the k-th challenger ever created is tested at α/(k(k+1)), so the chance of ever promoting a prompt that is not better stays below α. The fixed output contract and the ±σ clamp live in code; every prompt is in `learnings/prompt_variants.json`._
+
+| Variant | Status | Parent | Sessions | Gain vs champion | CS (α_k) | Note |
+|---|---|---|---|---|---|---|
+| p0 | champion | — | — | — | — | seed: the hand-written panel prompt |
+
 ## Per name (pre-open forecasts)
 
 | Name | Sessions | LLM MAPE | Free-baseline MAPE | Days moved |
