@@ -63,6 +63,19 @@ class Settings(BaseModel):
     B_FAILURES_TAIL_CHARS: int = 3000     # tail of B's failure log fed to the decider
     AB_MIN_PAIRED_DAYS: int = 10          # below this, the A/B report renders no verdict
 
+    # --- panel: many names per session, for statistical power (src/panel/, spec/panel.md) ---
+    PANEL_SYMBOLS: tuple[str, ...] = (
+        "AAPL", "MSFT", "NVDA", "GOOGL", "META", "AMZN", "TSLA", "AVGO", "ORCL", "CRM",
+        "ADBE", "AMD", "NFLX", "JPM", "BAC", "V", "MA", "UNH", "JNJ", "LLY",
+        "XOM", "CVX", "WMT", "COST", "PG", "KO", "PEP", "HD", "DIS", "CAT",
+    )
+    PANEL_MODEL: str = "claude-sonnet-5"       # same model as arm B's evidence pulse
+    PANEL_MAX_TOKENS: int = 8000
+    PANEL_BATCH_SIZE: int = 10                 # names per LLM call
+    PANEL_WEB_SEARCHES: int = 3                # per call
+    PANEL_MAX_ADJ_SIGMA: float = 0.5           # the LLM may move a name off its anchor ±0.5σ
+    PANEL_MIN_NAMES: int = 10                  # fewer usable names -> wait for the next run
+
     # --- paths ---
     DATA_DIR: Path = PROJECT_ROOT / "data"
     RESULTS_DIR: Path = PROJECT_ROOT / "results"
@@ -78,6 +91,10 @@ class Settings(BaseModel):
     LEDGER_B_PATH: Path = PROJECT_ROOT / "data" / "predictions_b.jsonl"
     LEARNINGS_B_DIR: Path = PROJECT_ROOT / "learnings_b"
     AB_COMPARE_JSON: Path = PROJECT_ROOT / "results" / "ab_compare.json"
+    PANEL_LEDGER_PATH: Path = PROJECT_ROOT / "data" / "panel.jsonl"
+    PANEL_STATE_PATH: Path = PROJECT_ROOT / "learnings" / "panel_state.json"
+    PANEL_METRICS_JSON: Path = PROJECT_ROOT / "results" / "panel_metrics.json"
+    PANEL_RESULTS_MD: Path = PROJECT_ROOT / "RESULTS_PANEL.md"
 
     # --- env-derived helpers (not model fields) ---
     @property

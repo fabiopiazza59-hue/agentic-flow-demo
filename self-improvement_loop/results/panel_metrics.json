@@ -1,0 +1,76 @@
+{
+  "n_sessions": 0,
+  "n_forecasts": 0,
+  "n_late_rows": 0,
+  "cs": {
+    "ape_gain_vs_anchor": {
+      "n": 0,
+      "mean": null,
+      "lo": null,
+      "hi": null,
+      "alpha": 0.05,
+      "t_star": 120,
+      "decision": "insufficient"
+    },
+    "ape_gain_vs_rw": {
+      "n": 0,
+      "mean": null,
+      "lo": null,
+      "hi": null,
+      "alpha": 0.05,
+      "t_star": 120,
+      "decision": "insufficient"
+    },
+    "crps_gain_vs_anchor": {
+      "n": 0,
+      "mean": null,
+      "lo": null,
+      "hi": null,
+      "alpha": 0.05,
+      "t_star": 120,
+      "decision": "insufficient"
+    },
+    "direction_gain_vs_anchor": {
+      "n": 0,
+      "mean": null,
+      "lo": null,
+      "hi": null,
+      "alpha": 0.05,
+      "t_star": 120,
+      "decision": "insufficient"
+    },
+    "rank_ic": {
+      "n": 0,
+      "mean": null,
+      "lo": null,
+      "hi": null,
+      "alpha": 0.05,
+      "t_star": 120,
+      "decision": "insufficient"
+    },
+    "anchor_gain_vs_rw": {
+      "n": 0,
+      "mean": null,
+      "lo": null,
+      "hi": null,
+      "alpha": 0.05,
+      "t_star": 120,
+      "decision": "insufficient"
+    }
+  },
+  "days": [],
+  "per_name": {},
+  "mean": {
+    "llm_mape": null,
+    "anchor_mape": null,
+    "rw_mape": null,
+    "llm_cover80": null,
+    "n_moved": null
+  },
+  "pending": null,
+  "state": {
+    "llm_enabled": true,
+    "why": "insufficient",
+    "n_sessions": 0
+  }
+}

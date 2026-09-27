@@ -81,7 +81,7 @@ def anchor_fields(anchor: dict, prior_close: float, when_iso: str) -> dict:
 
 
 _PRICE_KEYS = ("predicted_close", "predicted_close_raw", "predicted_close_blend",
-               "predicted_close_pre_gates")
+               "predicted_close_pre_gates", "predicted_close_llm")
 _PRIOR_KEYS = ("center", "p10", "p50", "p90")
 
 

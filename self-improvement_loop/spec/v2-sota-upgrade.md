@@ -137,7 +137,7 @@ inert (F4) or harmful (F1). The lab makes it a mechanism:
 
 | # | Change | Why | Cost |
 |---|---|---|---|
-| R1 | **Scale N: a panel of 20–50 liquid names**, each with the same pipeline and baselines; evaluate cross-sectionally (rank IC, CRPS skill per name). | The binding constraint is statistical power (§0). 50 names turn a 1.4-year wait for a 0.05% edge into weeks (less if names co-move — a market-neutral target helps). | ~N× analyst calls; mitigated by cheaper models (R4) and dropping null analysts (R6). |
+| R1 ✅ *shipped — [`panel.md`](panel.md)* | **Scale N: a panel of 20–50 liquid names**, each with the same pipeline and baselines; evaluate cross-sectionally (rank IC, CRPS skill per name). | The binding constraint is statistical power (§0). 50 names turn a 1.4-year wait for a 0.05% edge into weeks (less if names co-move — a market-neutral target helps). | ~N× analyst calls; mitigated by cheaper models (R4) and dropping null analysts (R6). |
 | R2 | **Punctual trigger**: call `workflow_dispatch` at a fixed pre-open time from an external scheduler (a fine-grained token with `actions:write`). | Fixes the information set (same anchor time daily) instead of "whenever GitHub starts the run". | Free; needs a secret the owner creates. |
 | R3 | **Null arm A′**: arm A again on the same snapshot with a different sample. | The A-vs-A′ spread is the noise floor any A/B effect must exceed (review P1.1). | +1 arm-A run per day. |
 | R4 | **Model league on logged snapshots**: replay stored analyst outputs through cheaper judges; run cheaper analysts as a shadow arm. | Spend savings on N (R1), which is what the statistics lack. | Small, one-off. |
