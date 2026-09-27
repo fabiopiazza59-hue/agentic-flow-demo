@@ -19,8 +19,9 @@ repo — git history *is* the experiment log.
 
 ## The bar for success
 PASS = predicted close within **±1%** of actual. The headline verdict is **edge vs the random-walk
-baseline** (`predicted = yesterday's close`): rolling-20-day MAPE must beat it, or the dashboard
-honestly says "no edge yet."
+baseline** (`predicted = yesterday's close`): all-time MAPE (every real scored day) must beat it, or
+the dashboard honestly says "no edge yet." Rolling-20-day metrics are still shown, but a short window
+flips on noise, so it doesn't drive the verdict.
 
 ## Self-improvement
 - **Scorecards** (`learnings/scorecards.json`) track each strategy's accuracy → the meta-judge

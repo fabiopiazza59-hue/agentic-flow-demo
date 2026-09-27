@@ -3,7 +3,7 @@
 _Auto-generated each trading day. PASS = predicted close within ±1% of actual._
 
 ## Verdict
-✅ **Edge confirmed** — rolling MAPE 1.08% beats the random-walk baseline 1.18% by 0.10%.
+❌ **No edge yet** — all-time MAPE 1.53% does not beat the random-walk baseline 1.53% over 73 scored days. Keep learning.
 
 **Today's open prediction (2026-09-25):** close ≈ **249.05** (down, confidence 42.00%) vs prior close 249.38.
 

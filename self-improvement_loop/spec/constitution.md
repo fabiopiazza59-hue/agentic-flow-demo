@@ -29,7 +29,8 @@ orders and moves no money. Its only output is a prediction and an honest scoreca
   commits results — unattended — for 20+ consecutive trading days.
 - **Eval primary:** rolling-20-day PASS rate (PASS = `|pred − actual| / actual ≤ 1.0%`) is tracked
   and trending up.
-- **Skill bar:** rolling-20-day MAPE beats the random-walk baseline. This is the headline verdict.
+- **Skill bar:** all-time MAPE (all real scored days) beats the random-walk baseline. This is the
+  headline verdict; rolling-20-day MAPE is tracked but too noisy to decide it.
 - **Self-improvement evidence:** per-strategy weights shift measurably toward higher-accuracy
   strategies over time, and STRATEGY.md accrues concrete, tested insights.
 - **Transparency:** `RESULTS.md` + a live GitHub Pages dashboard reflect the latest run.

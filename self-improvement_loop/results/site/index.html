@@ -48,11 +48,12 @@
       const m = await (await fetch("./data.json?cb="+Date.now())).json();
       document.getElementById("updated").textContent = "scored days: " + (m.all_time?.n_all_time ?? 0);
       const r = m.rolling || {};
-      const edge = r.edge;
+      const a = m.all_time || {};
+      const edge = a.edge;
       const v = document.getElementById("verdict");
       if (edge==null) { v.textContent = "⏳ Not enough scored days to judge edge vs baseline yet."; }
-      else if (edge>0) { v.innerHTML = `✅ <span class="good">Edge confirmed</span> — rolling MAPE ${pct(r.mape)} beats random-walk ${pct(r.baseline_mape)} (edge ${pct(edge)}).`; }
-      else { v.innerHTML = `❌ <span class="bad">No edge yet</span> — rolling MAPE ${pct(r.mape)} vs baseline ${pct(r.baseline_mape)}.`; }
+      else if (edge>0) { v.innerHTML = `✅ <span class="good">Edge confirmed</span> — all-time MAPE ${pct(a.mape)} beats random-walk ${pct(a.baseline_mape)} (edge ${pct(edge)}, ${a.n_all_time} days).`; }
+      else { v.innerHTML = `❌ <span class="bad">No edge yet</span> — all-time MAPE ${pct(a.mape)} vs baseline ${pct(a.baseline_mape)} (${a.n_all_time} days).`; }
 
       const kpis = [
         ["PASS rate (±1%)", pct(r.pass_rate)],

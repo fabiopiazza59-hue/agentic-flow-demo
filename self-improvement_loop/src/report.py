@@ -75,15 +75,18 @@ def build_metrics(rows: list[dict], scorecards: dict) -> dict:
 def render_results_md(metrics: dict, rows: list[dict]) -> str:
     r = metrics["rolling"]
     a = metrics["all_time"]
-    edge = r.get("edge")
+    # Headline verdict uses all-time data: a short rolling window flips on noise.
+    edge = a.get("edge")
+    n_days = a.get("n_all_time", 0)
     if edge is None:
         verdict = "⏳ **Not enough scored days yet** to judge edge vs the random-walk baseline."
     elif edge > 0:
-        verdict = (f"✅ **Edge confirmed** — rolling MAPE {_pct(r['mape'])} beats the random-walk "
-                   f"baseline {_pct(r['baseline_mape'])} by {_pct(edge)}.")
+        verdict = (f"✅ **Edge confirmed** — all-time MAPE {_pct(a['mape'])} beats the random-walk "
+                   f"baseline {_pct(a['baseline_mape'])} by {_pct(edge)} over {n_days} scored days.")
     else:
-        verdict = (f"❌ **No edge yet** — rolling MAPE {_pct(r['mape'])} does not beat the "
-                   f"random-walk baseline {_pct(r['baseline_mape'])}. Keep learning.")
+        verdict = (f"❌ **No edge yet** — all-time MAPE {_pct(a['mape'])} does not beat the "
+                   f"random-walk baseline {_pct(a['baseline_mape'])} over {n_days} scored days. "
+                   f"Keep learning.")
 
     pending = metrics.get("pending")
     pending_line = ""
