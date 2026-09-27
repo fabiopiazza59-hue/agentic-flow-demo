@@ -3,19 +3,21 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- **Direction is the core failure**, not magnitude: 26 of 41 misses are directional (63%). The model gets the size roughly right but the sign wrong — it's chasing/lagging rather than anticipating turns.
-- **Fails don't beat the baseline.** On almost every miss, ape ≈ or > baseline_ape (e.g. 06-22, 06-25, 06-29, 07-15, 08-19, 09-17). When wrong, we add no value over naive persistence — the ensemble degenerates to "yesterday's price plus noise."
-- **Macro is the worst engine**: 12% hit rate, highest MAPE (0.0169), yet it "wins" on several large-error days (07-13, 07-15, 08-19, 08-25). Its weight_hint (0.18) is still too high for that record.
-- **Technical is a low-hit, well-calibrated-magnitude strategy** (15% hit) but keeps getting ~0.21 weight — over-trusted.
-- **News is the only strategy carrying the system** (31% hit, lowest MAPE) and correctly weighted highest — but it's not enough to offset the rest.
+- **Directional errors dominate**: 26 of 41 fails (63%) are wrong-direction, not just magnitude. The model can't call turns, it drifts with the last move.
+- Fail rate is 55% (41/74) — worse than a coin flip on direction. Mean fail APE 2.41% is a real miss, not noise.
+- Errors cluster on **high-volatility days**: the largest APEs (7-31, 13.2%; 6-22, 5.1%; 6-17, 3.7%; 8-19/8-20, ~2.5%) are almost all fails, and the model rarely beats baseline when moves are big.
+- **Macro is the worst strategy** (12% hit, 0.017 MAPE) yet keeps getting picked as winner on fail days (7-13, 7-15, 8-19, 8-25). It's actively harming when it wins.
+- **Technical** is also weak (15% hit) but carries a high weight_hint (0.21) — over-weighted relative to its performance.
 
 ## Unreliable under these conditions
-- **High-volatility / gap days.** The big-APE clusters (06-22 ~5%, 07-31 ~13%, 07-30 ~3.9%, 08-19 ~2.9%) are all directional misses under large moves. The model systematically under-reacts to regime breaks.
-- **Late-confidence overconfidence.** From late Aug onward confidence rose to 0.54–0.72, but misses persisted at high confidence (08-19 conf 0.62, 09-03 conf 0.62, 09-11 conf 0.54, 08-31 conf 0.72). The 4 flagged overconfident misses understate this — calibration drifted worse as confidence climbed.
-- **Macro-led and contrarian-led days** are coin-flip-to-bad; contrarian misses direction repeatedly (06-26, 08-20, 08-24, 09-03, 09-22).
+- **Big-move / gap days** (APE >2.5%): near-universal directional miss regardless of strategy — likely earnings/macro-event days the model has no signal for.
+- **Macro-led and contrarian-led predictions on volatile days**: contrarian fades moves that keep running (8-11, 8-20, 9-22, 9-03).
+- **Confidence is mildly miscalibrated on the high end**: 8-31 (conf 0.72), 9-09 (0.72), 8-19 (0.62), 9-03 (0.62) all failed. High confidence is not tracking accuracy — several 0.6+ calls miss.
+- Low-confidence calls (0.1–0.3) are noisy but sometimes pass — confidence carries little information overall.
 
 ## Fixes to try next
-- **Cut macro weight to near-zero** or gate it to explicit macro-event days only; redistribute to news.
-- **Add a directional-agreement gate**: when strategies disagree on sign, shrink toward baseline and lower confidence instead of committing.
-- **Recalibrate confidence** against realized hit rate — current high-confidence band (0.6+) is not earning its confidence; cap or penalize confidence on high-volatility days.
-- **Regime detector for gap/vol days**: widen expected move and de-weight lagging technical/momentum signals during breaks.
+- **Cut macro weight toward zero** or gate it to confirmed macro-event days only; stop letting it "win" arbitration.
+- **Down-weight technical** to match its 15% hit rate; let news (31% hit, best MAPE) lead.
+- **Add a volatility/event filter**: on expected big-move days, widen intervals and drop confidence rather than committing to a direction.
+- **Recalibrate confidence** against realized hit rate — current 0.6+ band is overconfident; shrink toward base rate.
+- **Fix the directional bias** first — a persistence/mean-reversion regime detector would help since 63% of losses are sign errors.

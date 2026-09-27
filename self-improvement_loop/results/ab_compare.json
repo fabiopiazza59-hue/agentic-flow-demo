@@ -3,7 +3,7 @@
     "a": "A \u2014 ensemble + gates",
     "b": "B \u2014 raven prior + pulse"
   },
-  "n_paired": 48,
+  "n_paired": 49,
   "n_clean": 26,
   "b_wins": 14,
   "n_decisive": 26,
@@ -31,31 +31,31 @@
   "arm_a": {
     "rolling": {
       "n": 20,
-      "n_all_time": 73,
+      "n_all_time": 74,
       "pass_rate": 0.5,
       "directional_accuracy": 0.7,
-      "mape": 0.010789361195731446,
-      "baseline_mape": 0.011807866631970358,
-      "edge": 0.0010185054362389125,
-      "anchor_mape": 0.011807866631970358,
-      "anchor_edge": 0.0010185054362389125,
+      "mape": 0.010798407633243733,
+      "baseline_mape": 0.011865943293163131,
+      "edge": 0.0010675356599193983,
+      "anchor_mape": 0.011865943293163131,
+      "anchor_edge": 0.0010675356599193983,
       "n_live_anchor": 0,
       "beats_baseline_overall": true,
-      "brier": 0.27956
+      "brier": 0.2899
     },
     "all_time": {
-      "n": 73,
-      "n_all_time": 73,
-      "pass_rate": 0.4383561643835616,
-      "directional_accuracy": 0.5342465753424658,
-      "mape": 0.015316849628485592,
-      "baseline_mape": 0.015290364741857732,
-      "edge": -2.6484886627859902e-05,
-      "anchor_mape": 0.015290364741857732,
-      "anchor_edge": -2.6484886627859902e-05,
+      "n": 74,
+      "n_all_time": 74,
+      "pass_rate": 0.44594594594594594,
+      "directional_accuracy": 0.527027027027027,
+      "mape": 0.015143422983869075,
+      "baseline_mape": 0.015099434586209054,
+      "edge": -4.3988397660021245e-05,
+      "anchor_mape": 0.015099434586209054,
+      "anchor_edge": -4.3988397660021245e-05,
       "n_live_anchor": 0,
       "beats_baseline_overall": false,
-      "brier": 0.2590342465753424
+      "brier": 0.2600797297297297
     },
     "all_time_pre_open": {
       "n": 34,
@@ -75,31 +75,31 @@
   "arm_b": {
     "rolling": {
       "n": 20,
-      "n_all_time": 48,
+      "n_all_time": 49,
       "pass_rate": 0.45,
-      "directional_accuracy": 0.7,
-      "mape": 0.010518809383081877,
-      "baseline_mape": 0.011807866631970358,
-      "edge": 0.0012890572488884807,
-      "anchor_mape": 0.011807866631970358,
-      "anchor_edge": 0.0012890572488884807,
+      "directional_accuracy": 0.75,
+      "mape": 0.01045355787217544,
+      "baseline_mape": 0.011865943293163131,
+      "edge": 0.0014123854209876913,
+      "anchor_mape": 0.011865943293163131,
+      "anchor_edge": 0.0014123854209876913,
       "n_live_anchor": 0,
       "beats_baseline_overall": true,
-      "brier": 0.25930855
+      "brier": 0.27679855000000003
     },
     "all_time": {
-      "n": 48,
-      "n_all_time": 48,
-      "pass_rate": 0.4791666666666667,
-      "directional_accuracy": 0.6458333333333334,
-      "mape": 0.014226722597292324,
-      "baseline_mape": 0.015084153122483812,
-      "edge": 0.0008574305251914886,
-      "anchor_mape": 0.015084153122483812,
-      "anchor_edge": 0.0008574305251914886,
+      "n": 49,
+      "n_all_time": 49,
+      "pass_rate": 0.4897959183673469,
+      "directional_accuracy": 0.6530612244897959,
+      "mape": 0.013984608244643483,
+      "baseline_mape": 0.014800018022511807,
+      "edge": 0.0008154097778683232,
+      "anchor_mape": 0.014800018022511807,
+      "anchor_edge": 0.0008154097778683232,
       "n_live_anchor": 0,
       "beats_baseline_overall": true,
-      "brier": 0.27646983333333336
+      "brier": 0.28179267346938774
     },
     "all_time_pre_open": {
       "n": 26,
@@ -739,6 +739,19 @@
       "predicted_a": 249.36,
       "predicted_b": 246.86,
       "actual": 249.38,
+      "clean": false
+    },
+    {
+      "date": "2026-09-25",
+      "ape_a": 0.002483277926863364,
+      "ape_b": 0.0023631193174991124,
+      "delta": 0.00012,
+      "b_wins": true,
+      "dir_hit_a": false,
+      "dir_hit_b": true,
+      "predicted_a": 249.05,
+      "predicted_b": 250.26,
+      "actual": 249.67,
       "clean": false
     }
   ]
