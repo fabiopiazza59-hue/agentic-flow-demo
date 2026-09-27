@@ -67,7 +67,12 @@
     "llm_cover80": null,
     "n_moved": null
   },
-  "pending": null,
+  "pending": {
+    "date": "2026-09-28",
+    "n": 30,
+    "n_moved": 0,
+    "n_live": 30
+  },
   "state": {
     "llm_enabled": true,
     "why": "insufficient",

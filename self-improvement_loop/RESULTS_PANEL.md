@@ -5,6 +5,8 @@ _30 US large caps a session. Every name's free baseline is its latest pre-open t
 ## Verdict
 ⏳ **Not enough clean sessions yet** to judge the LLM against the free baseline (0 sessions, 0 name-forecasts; mean daily APE gain —, CS n=0 sessions (too few)).
 
+**Pending (2026-09-28):** 30 names, 30 anchored on a live pre-open trade, the LLM moved 0 off their anchor.
+
 | Daily metric (mean over names) | Mean | 95% CS | Verdict |
 |---|---|---|---|
 | APE gain: LLM vs free baseline | — | n=0 sessions (too few) | ⏳ too few sessions |
