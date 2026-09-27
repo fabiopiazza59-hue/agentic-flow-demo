@@ -71,6 +71,12 @@ jobs:
         run: |
           before=$(git rev-parse HEAD)
           python -m src.loop.run_ab --mode "${{ github.event.inputs.mode || 'daily' }}"
+          # The multi-name panel is a separate experiment: its failure must not fail the AMZN run.
+          case "${{ github.event.inputs.mode || 'daily' }}" in
+            daily|score|predict|report)
+              python -m src.loop.run_panel --mode "${{ github.event.inputs.mode || 'daily' }}" \
+                || echo "::warning::panel run failed; the AMZN A/B run is unaffected" ;;
+          esac
           if [ "$(git rev-parse HEAD)" != "$before" ]; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
           else

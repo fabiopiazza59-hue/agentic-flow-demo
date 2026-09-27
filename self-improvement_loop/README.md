@@ -84,12 +84,23 @@ comparison on days where **both** forecasts were written before the open (APE an
 anytime-valid CS; the sign test is descriptive). No verdict before 10 clean paired days.
 Entry point: `python -m src.loop.run_ab` (CI uses this; `run_daily` still runs arm A standalone).
 
+## Panel — 30 names a session, for statistical power
+One AMZN forecast a day would need years to confirm a realistic edge. The panel
+(`src/panel/`, run by `python -m src.loop.run_panel` in the same workflow) forecasts 30 US large
+caps each session: every name is anchored on its latest pre-open trade and the LLM may move it
+at most ±0.5σ (three batched LLM calls a day). Verdicts average each metric over the names of a
+session and run the same anytime-valid CS over sessions — APE and CRPS gain vs the anchor, rank
+IC, direction. Measured on real data, this cuts the daily noise 6× (a 0.02% gain: ~1 month to
+confirm instead of ~2.5 years). If the LLM is shown to hurt, it is switched off and kept running
+in shadow. Results: [RESULTS_PANEL.md](RESULTS_PANEL.md); design: [spec/panel.md](spec/panel.md).
+
 ## Layout
 ```
 spec/        constitution, spec, plan, tasks (built spec-first)
 src/         config, utils, data/, evals/, agents/, features, loop/, report, report_ab
 src/variant_b/  arm B: prior, pulse, decider, runner
-data/        predictions.jsonl (arm A ledger), predictions_b.jsonl (arm B ledger)
+src/panel/   the 30-name panel: data, analyst, runner, report
+data/        predictions.jsonl (arm A), predictions_b.jsonl (arm B), panel.jsonl (panel)
 results/     results.csv, metrics.json, ab_compare.json, site/ (Pages dashboard)
 learnings/   STRATEGY.md, scorecards.json, lab_state.json, daily post-mortems (arm A)
 learnings_b/ FAILURES.md, pulse/ audit artifacts (arm B)

@@ -371,13 +371,15 @@ def do_backfill(rows: list[dict], n: int = 25) -> list[dict]:
 
 # ------------------------------------------------------------------------------------- commit
 
-def git_commit(target_date: str) -> bool:
+def git_commit(target_date: str, paths: list[str] | None = None,
+               message: str | None = None) -> bool:
     try:
         root = subprocess.run(
             ["git", "-C", str(PROJECT_ROOT), "rev-parse", "--show-toplevel"],
             capture_output=True, text=True, check=True,
         ).stdout.strip()
-        paths = [str(PROJECT_ROOT / p) for p in COMMIT_PATHS if (PROJECT_ROOT / p).exists()]
+        paths = [str(PROJECT_ROOT / p) for p in (paths or COMMIT_PATHS)
+                 if (PROJECT_ROOT / p).exists()]
         subprocess.run(["git", "-C", root, "add", *paths], check=True)
         status = subprocess.run(["git", "-C", root, "status", "--porcelain", *paths],
                                 capture_output=True, text=True)
@@ -385,7 +387,7 @@ def git_commit(target_date: str) -> bool:
             log("nothing to commit.")
             return True
         subprocess.run(
-            ["git", "-C", root, "commit", "-m", f"chore: daily AMZN run {target_date}"],
+            ["git", "-C", root, "commit", "-m", message or f"chore: daily AMZN run {target_date}"],
             check=True,
         )
         subprocess.run(["git", "-C", root, "pull", "--rebase"], check=False)
