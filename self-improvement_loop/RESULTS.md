@@ -3,21 +3,26 @@
 _Auto-generated each trading day. PASS = predicted close within ±1% of actual._
 
 ## Verdict
-❌ **No edge yet** — all-time MAPE 1.53% does not beat the random-walk baseline 1.53% over 73 scored days. Keep learning.
+❌ **No edge yet** — all-time MAPE 1.66% is nominally ahead of the random-walk baseline 1.67% by 0.01%, but the difference is not distinguishable from noise (paired over 34 pre-open days: mean 0.01%, 90% CI [-0.07%, 0.10%], beat baseline on 14/34 decisive days, sign test p=0.3915).
 
 **Today's open prediction (2026-09-25):** close ≈ **249.05** (down, confidence 42.00%) vs prior close 249.38.
 
-## Rolling metrics (last 20 scored days)
+## Metrics
 
-| Metric | Rolling | All-time |
-|---|---|---|
-| Scored days | 20 | 73 |
-| PASS rate (±1%) | 50.00% | 43.84% |
-| Directional accuracy | 70.00% | 53.42% |
-| MAPE | 1.08% | 1.53% |
-| Baseline MAPE (random walk) | 1.18% | 1.53% |
-| Edge (baseline − model) | 0.10% | -0.00% |
-| Brier (confidence calib.) | 0.28 | 0.26 |
+| Metric | All-time (pre-open) — verdict basis | Last 20 (all rows) | All-time (all rows) |
+|---|---|---|---|
+| Scored days | 34 | 20 | 73 |
+| PASS rate (±1%) | 41.18% | 50.00% | 43.84% |
+| Directional accuracy | 50.00% | 70.00% | 53.42% |
+| MAPE | 1.66% | 1.08% | 1.53% |
+| Baseline MAPE (random walk) | 1.67% | 1.18% | 1.53% |
+| Edge (baseline − model) | 0.01% | 0.10% | -0.00% |
+| Brier (confidence calib.) | 0.22 | 0.28 | 0.26 |
+
+### Integrity & mechanism
+
+- **39 scored row(s) were created after their session opened** and are excluded from the pre-open column. They saw part of the tape they forecast, so they cannot carry the verdict. New post-open rows are refused (`--allow-late` to override).
+- **Gate effect**: not measurable yet — accrues from the first run that records an ungated counterfactual (`predicted_close_raw`) on each row.
 
 ## Per-strategy scorecards
 

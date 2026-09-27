@@ -24,6 +24,50 @@
     "beats_baseline_overall": false,
     "brier": 0.2590342465753424
   },
+  "rolling_pre_open": {
+    "n": 20,
+    "n_all_time": 34,
+    "pass_rate": 0.45,
+    "directional_accuracy": 0.5,
+    "mape": 0.01956302194637227,
+    "baseline_mape": 0.019723424263215678,
+    "edge": 0.0001604023168434096,
+    "beats_baseline_overall": true,
+    "brier": 0.20958000000000002
+  },
+  "all_time_pre_open": {
+    "n": 34,
+    "n_all_time": 34,
+    "pass_rate": 0.4117647058823529,
+    "directional_accuracy": 0.5,
+    "mape": 0.016598510799731476,
+    "baseline_mape": 0.016731481551730255,
+    "edge": 0.00013297075199877884,
+    "beats_baseline_overall": true,
+    "brier": 0.2219911764705882
+  },
+  "n_late_rows": 39,
+  "gate_effect": {
+    "n": 0,
+    "mean": null,
+    "ci_low": null,
+    "ci_high": null,
+    "wins": 0,
+    "n_decisive": 0,
+    "sign_test_p": null,
+    "significant": false,
+    "n_gates_fired": 0
+  },
+  "baseline_effect": {
+    "n": 34,
+    "mean": 0.00013297,
+    "ci_low": -0.0007184,
+    "ci_high": 0.00098397,
+    "wins": 14,
+    "n_decisive": 34,
+    "sign_test_p": 0.3915,
+    "significant": false
+  },
   "scorecards": {
     "technical": {
       "n": 73,
@@ -1027,7 +1071,8 @@
     "gates_applied": [],
     "quote_source": "alphavantage",
     "status": "pending",
-    "actual_close": null
+    "actual_close": null,
+    "late_minutes": 145
   },
   "updated_count": 101,
   "variant_b": {
@@ -1416,7 +1461,8 @@
       "rationale": "Fresh Wells Fargo upgrade, bullish JPM AWS commentary, and higher Nasdaq futures tilt modestly positive, partially offset by surging yields and recent profit-taking. No decisive single catalyst justifies a large move, and the failure log shows directional overreach hurts, so a modest upward nudge is prudent. [prior 249.38 \u00b1 1.76%\u03c3 (premarket_quote); adj +0.20\u03c3; caps: none]",
       "quote_source": "alphavantage",
       "status": "pending",
-      "actual_close": null
+      "actual_close": null,
+      "late_minutes": 146
     }
   },
   "ab": {

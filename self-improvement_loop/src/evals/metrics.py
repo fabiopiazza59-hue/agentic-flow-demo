@@ -11,6 +11,7 @@ Eval contract (see spec/spec.md §3):
 from __future__ import annotations
 
 from ..config import settings
+from . import integrity
 
 
 def ape(predicted: float, actual: float) -> float:
@@ -74,15 +75,19 @@ def _mean(values: list[float]) -> float | None:
     return sum(values) / len(values) if values else None
 
 
-def aggregate(rows: list[dict], window: int | None = None) -> dict:
+def aggregate(rows: list[dict], window: int | None = None,
+              pre_open_only: bool = False) -> dict:
     """Aggregate model metrics over scored, non-seed rows.
 
     Backfill seed rows (`seed=True`) are excluded so headline metrics reflect only real ensemble
-    predictions. If window is set, use the most recent N qualifying rows.
+    predictions. With `pre_open_only`, rows created at or after their own session's open are
+    excluded too — those saw part of the tape they were forecasting (see evals/integrity.py).
+    If window is set, use the most recent N qualifying rows.
     """
     scored = [
         r for r in rows
         if r.get("status") == "scored" and r.get("actual_close") is not None and not r.get("seed")
+        and not (pre_open_only and integrity.is_late(r))
     ]
     scored.sort(key=lambda r: r.get("date", ""))
     windowed = scored[-window:] if window else scored

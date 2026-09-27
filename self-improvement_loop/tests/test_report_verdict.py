@@ -23,4 +23,4 @@ def test_verdict_uses_all_time_not_rolling():
 def test_verdict_confirms_edge_on_all_time():
     rows = [_row(i, 0.005, 0.01) for i in range(30)]
     md = report.render_results_md(report.build_metrics(rows, {}), rows)
-    assert "Edge confirmed" in md and "over 30 scored days" in md
+    assert "Edge confirmed" in md and "paired over 30 pre-open days" in md
