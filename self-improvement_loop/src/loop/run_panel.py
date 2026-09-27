@@ -9,6 +9,7 @@ Modes:
 Same timing model as the AMZN arms (loop/session.py): the first run inside a session's forecast
 window researches it, later pre-open runs only re-anchor, runs during a session score and report.
 Live only: a past --date is refused, because the panel's anchors cannot be replayed honestly.
+Prompt evolution (panel/evolve.py) steps once per researched session, before the research.
 """
 
 from __future__ import annotations
@@ -21,13 +22,13 @@ from datetime import datetime, timezone
 from ..agents.analysts import get_client
 from ..config import settings
 from ..data.market_calendar import is_trading_day
-from ..panel import report, runner
+from ..panel import evolve, report, runner
 from ..utils import iso_today
 from . import session
 from .run_daily import git_commit
 
 COMMIT_PATHS = ["data/panel.jsonl", "results/panel_metrics.json", "RESULTS_PANEL.md",
-                "learnings/panel_state.json"]
+                "learnings/panel_state.json", "learnings/prompt_variants.json"]
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -56,6 +57,9 @@ def main(argv: list[str] | None = None) -> int:
             rows = runner.refresh(rows, target, now)
         else:
             client = None if args.dry_run else get_client()
+            # Prompt evolution: judge the shadow prompts on everything scored so far, promote or
+            # retire them, maybe propose one — then research with the resulting registry.
+            evolve.step(rows, client)
             rows = runner.research(rows, target, client, now)
         runner.save_rows(rows)
 

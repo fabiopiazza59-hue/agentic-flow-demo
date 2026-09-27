@@ -94,6 +94,13 @@ IC, direction. Measured on real data, this cuts the daily noise 6× (a 0.02% gai
 confirm instead of ~2.5 years). If the LLM is shown to hurt, it is switched off and kept running
 in shadow. Results: [RESULTS_PANEL.md](RESULTS_PANEL.md); design: [spec/panel.md](spec/panel.md).
 
+**Prompt evolution** (`src/panel/evolve.py`): the panel rewrites its own analyst strategy. The
+reflector model proposes a variant from numbers-only failure cases; up to two challengers run in
+shadow on the same snapshot; one replaces the champion only when an anytime-valid CS proves it
+better, with the error budget split across every challenger ever tried (α/(k(k+1))) so endless
+proposals cannot manufacture a false win. The output contract and the ±σ cap stay in code; every
+prompt that ever ran is in `learnings/prompt_variants.json`.
+
 ## Layout
 ```
 spec/        constitution, spec, plan, tasks (built spec-first)

@@ -1,0 +1,14 @@
+{
+  "n_created": 0,
+  "variants": [
+    {
+      "id": "p0",
+      "k": 0,
+      "parent": null,
+      "status": "champion",
+      "created": null,
+      "strategy": "You are an equity analyst covering a panel of US large caps for the target session. Each name comes with a free baseline: its latest pre-open price (the anchor), which already reflects everything the market has priced in. For each name, decide whether evidence the anchor does NOT yet reflect justifies expecting the regular-session close away from it, in units of that name's daily volatility σ (positive = above the anchor). Most names on most days deserve 0; a scheduled catalyst during the session (earnings, guidance, a macro print, an investor day) is the typical reason not to. Search only for the most material catalysts.",
+      "rationale": "seed: the hand-written panel prompt"
+    }
+  ]
+}

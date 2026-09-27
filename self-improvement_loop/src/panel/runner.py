@@ -25,7 +25,7 @@ from ..evals import probabilistic as pb
 from ..evals.metrics import ape, score_row
 from ..loop.session import reanchor_row
 from ..utils import now_iso, read_jsonl, write_jsonl
-from . import analyst, data
+from . import analyst, data, evolve
 
 VERSION = "panel-v1"
 
@@ -125,7 +125,12 @@ def research(rows: list[dict], target: date, client, now: datetime | None = None
         names[s] = f
 
     made_at = now.isoformat(timespec="minutes")
-    adj = analyst.adjustments(names, iso, made_at, client)
+    reg = evolve.load_registry()
+    champ = evolve.champion(reg)
+    adj = analyst.adjustments(names, iso, made_at, client, strategy=champ["strategy"])
+    # Challenger prompts run in shadow on the same snapshot; nothing they say ships.
+    shadows = {v["id"]: analyst.adjustments(names, iso, made_at, client, strategy=v["strategy"])
+               for v in evolve.challengers(reg)} if client is not None else {}
     state = load_state()
     created = now_iso()
     new_rows = []
@@ -142,6 +147,8 @@ def research(rows: list[dict], target: date, client, now: datetime | None = None
             "sigma_pct": round(f["sigma"], 6),
             "adj_sigma_raw": a["raw"], "adj_sigma": a["sigma"], "reason": a["reason"],
             "web_results": a["web_results"], "llm_enabled": state["llm_enabled"],
+            "prompt_variant": champ["id"],
+            "shadow_adj": {vid: sh[s]["sigma"] for vid, sh in shadows.items()},
             "predicted_close_llm": llm, "predicted_close": shipped,
             "predicted_direction": "up" if shipped > f["prev_close"] else "down",
             **_distribution(rows, iso, shipped, f["sigma"], f["prev_close"]),
@@ -151,8 +158,10 @@ def research(rows: list[dict], target: date, client, now: datetime | None = None
         new_rows.append(row)
     moved = sum(1 for r in new_rows if r["adj_sigma"] != 0)
     live = sum(1 for r in new_rows if r["anchor_live"])
-    log(f"researched {iso}: {len(new_rows)} names, {live} live anchors, LLM moved {moved} "
-        f"off their anchor{'' if state['llm_enabled'] else ' (shadow only: LLM switched off)'}.")
+    log(f"researched {iso}: {len(new_rows)} names, {live} live anchors, prompt {champ['id']} "
+        f"moved {moved} off their anchor"
+        f"{'' if state['llm_enabled'] else ' (shadow only: LLM switched off)'}"
+        f"{'; shadow prompts: ' + ', '.join(shadows) if shadows else ''}.")
     return [r for r in rows if r.get("date") != iso] + new_rows
 
 
@@ -198,6 +207,8 @@ def score(rows: list[dict], now: datetime | None = None) -> list[dict]:
             actual = float(h["close"].iloc[-1])
             r.update(score_row(r, actual))
             r["llm_ape"] = ape(float(r["predicted_close_llm"]), actual)
+            if r.get("shadow_adj"):
+                r["shadow_ape"] = evolve.shadow_ape(r, actual)
             r["scored_at"] = now_iso()
             n += 1
         log(f"scored {n} of {len(pend)} names for {d}.")

@@ -23,6 +23,7 @@ from ..config import settings
 from ..evals import integrity
 from ..evals import probabilistic as pb
 from ..evals.sequential import confidence_sequence
+from . import evolve
 from .runner import _pooled_residuals, load_rows, save_state
 
 CENTERS = {"llm": "predicted_close_llm", "anchor": "anchor", "random_walk": "prior_close"}
@@ -196,6 +197,7 @@ def render(m: dict) -> str:
         f"names moved per session {mean['n_moved'] if mean['n_moved'] is None else round(mean['n_moved'], 1)}. "
         f"LLM is **{'on' if m['state']['llm_enabled'] else 'off (shadow)'}**.{late_note}",
         "",
+        *_render_evolution(m.get("evolution") or []),
         "## Per name (pre-open forecasts)",
         "",
         "| Name | Sessions | LLM MAPE | Free-baseline MAPE | Days moved |",
@@ -209,9 +211,44 @@ def render(m: dict) -> str:
     return "\n".join(lines)
 
 
+def evolution_summary(rows: list[dict]) -> list[dict]:
+    """Every prompt variant with its live shadow statistics (read-only; `evolve.step` decides)."""
+    out = []
+    for v in evolve.load_registry()["variants"]:
+        stats = v.get("stats") or {}
+        if v["status"] == "challenger":
+            cs = confidence_sequence(evolve.challenger_series(rows, v["id"]),
+                                     alpha=evolve.alpha_for(v["k"]))
+            stats = {k: cs[k] for k in ("n", "mean", "lo", "hi", "decision", "alpha")}
+        out.append({"id": v["id"], "status": v["status"], "parent": v.get("parent"),
+                    "why": v.get("why"), "rationale": v.get("rationale"), "stats": stats})
+    return out
+
+
+def _render_evolution(variants: list[dict]) -> list[str]:
+    lines = ["## Prompt evolution — shadow challengers, promoted only on proof", "",
+             "_Challenger prompts run on the same snapshot without shipping. One replaces the "
+             "champion only when an anytime-valid CS on the session-averaged APE gain excludes "
+             "zero; the k-th challenger ever created is tested at α/(k(k+1)), so the chance of "
+             "ever promoting a prompt that is not better stays below α. The fixed output contract "
+             "and the ±σ clamp live in code; every prompt is in `learnings/prompt_variants.json`._",
+             "", "| Variant | Status | Parent | Sessions | Gain vs champion | CS (α_k) | Note |",
+             "|---|---|---|---|---|---|---|"]
+    for v in variants:
+        st_ = v.get("stats") or {}
+        cs = (f"[{st_['lo'] * 100:+.3f}%, {st_['hi'] * 100:+.3f}%] (α={st_['alpha']:.4f})"
+              if st_.get("lo") is not None else "—")
+        gain = f"{st_['mean'] * 100:+.3f}%" if st_.get("mean") is not None else "—"
+        note = v.get("why") or (v.get("rationale") or "")[:120]
+        lines.append(f"| {v['id']} | {v['status']} | {v.get('parent') or '—'} | "
+                     f"{st_.get('n', '—')} | {gain} | {cs} | {note} |")
+    return lines + [""]
+
+
 def generate() -> dict:
     rows = load_rows()
     m = build(rows)
+    m["evolution"] = evolution_summary(rows)
     save_state(m["state"])
     settings.PANEL_METRICS_JSON.parent.mkdir(parents=True, exist_ok=True)
     settings.PANEL_METRICS_JSON.write_text(json.dumps(m, indent=2, default=str), encoding="utf-8")
