@@ -7,6 +7,10 @@ A complete demonstration of **agentic AI architecture** using LangGraph, Phoenix
 | Folder | Description |
 |--------|-------------|
 | [`simple-MVP/`](./simple-MVP/) | **Working MVP** - Scalp Trading Assistant with full agentic workflow |
+| [`pydantic-modal-harness/`](./pydantic-modal-harness/) | **Async harness** - Pydantic AI orchestrator that suspends on long-running Modal jobs (CPU/GPU/Sandbox) and resumes on callback |
+| [`self-improvement_loop/`](./self-improvement_loop/) | **Self-improving forecaster** - daily AMZN close A/B test (LLM ensemble vs. statistical prior + bounded LLM), scored against free baselines with anytime-valid verdicts; runs on GitHub Actions |
+| [`trader-project/`](./trader-project/) | **Seamaster** - spec-driven six-stage trade advisor funnel (market scan → triage → risk checks → action table) |
+| [`agentic-example/`](./agentic-example/) | Earlier snapshot of this root demo, carried over from the `spec-driven-project` branch |
 | [`project-brief.md`](./project-brief.md) | **Full Project Brief** - FinAdvisor AI platform design (1,400+ lines) |
 
 ## Quick Start
@@ -94,6 +98,8 @@ User Query
 ## Documentation
 
 - [Simple MVP README](./simple-MVP/README.md) - Setup and usage
+- [Pydantic AI + Modal Harness](./pydantic-modal-harness/README.md) - Async orchestration with deferred tools, webhook + poll delivery
+- [Self-improvement loop](./self-improvement_loop/README.md) - Daily forecaster, [live results](./self-improvement_loop/RESULTS.md), [v2 design](./self-improvement_loop/spec/v2-sota-upgrade.md)
 - [Knowledge Base](./simple-MVP/KNOWLEDGE_BASE.md) - Technical reference
 - [Scaling Guide](./simple-MVP/docs/SCALING_GUIDE.md) - How to add agents
 - [Project Brief](./project-brief.md) - Full FinAdvisor design
