@@ -1,0 +1,11 @@
+{
+  "champion": "mean",
+  "judge_enabled": true,
+  "gates_enabled": true,
+  "n_days": 34,
+  "why": {
+    "champion": "reference",
+    "judge_effect": "insufficient",
+    "gates_effect": "insufficient"
+  }
+}

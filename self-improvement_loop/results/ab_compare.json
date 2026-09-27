@@ -4,11 +4,30 @@
     "b": "B \u2014 raven prior + pulse"
   },
   "n_paired": 48,
-  "b_wins": 27,
-  "n_decisive": 48,
-  "mean_delta_a_minus_b": 0.000517,
-  "sign_test_p": 0.4709,
-  "verdict": "Arm B leads on paired MAPE (mean daily delta 0.05% in B's favor); B wins 27/48 decisive days (sign test p=0.4709, not significant).",
+  "n_clean": 26,
+  "b_wins": 14,
+  "n_decisive": 26,
+  "mean_delta_a_minus_b": 0.000812,
+  "sign_test_p": 0.845,
+  "cs": {
+    "n": 26,
+    "mean": 0.00081162,
+    "lo": -0.00245428,
+    "hi": 0.00407751,
+    "alpha": 0.05,
+    "t_star": 120,
+    "decision": "undecided"
+  },
+  "crps_cs": {
+    "n": 26,
+    "mean": 0.00052828,
+    "lo": -0.00146496,
+    "hi": 0.00252151,
+    "alpha": 0.05,
+    "t_star": 120,
+    "decision": "undecided"
+  },
+  "verdict": "Arm B leads on paired MAPE (mean daily delta 0.08% in B's favor over 26 pre-open days); B wins 14/26 decisive days (sign test p=0.845, descriptive); anytime-valid 95% CS [-0.245%, +0.408%] includes zero \u2014 not distinguishable from noise.",
   "arm_a": {
     "rolling": {
       "n": 20,
@@ -18,6 +37,9 @@
       "mape": 0.010789361195731446,
       "baseline_mape": 0.011807866631970358,
       "edge": 0.0010185054362389125,
+      "anchor_mape": 0.011807866631970358,
+      "anchor_edge": 0.0010185054362389125,
+      "n_live_anchor": 0,
       "beats_baseline_overall": true,
       "brier": 0.27956
     },
@@ -29,8 +51,25 @@
       "mape": 0.015316849628485592,
       "baseline_mape": 0.015290364741857732,
       "edge": -2.6484886627859902e-05,
+      "anchor_mape": 0.015290364741857732,
+      "anchor_edge": -2.6484886627859902e-05,
+      "n_live_anchor": 0,
       "beats_baseline_overall": false,
       "brier": 0.2590342465753424
+    },
+    "all_time_pre_open": {
+      "n": 34,
+      "n_all_time": 34,
+      "pass_rate": 0.4117647058823529,
+      "directional_accuracy": 0.5,
+      "mape": 0.016598510799731476,
+      "baseline_mape": 0.016731481551730255,
+      "edge": 0.00013297075199877884,
+      "anchor_mape": 0.016731481551730255,
+      "anchor_edge": 0.00013297075199877884,
+      "n_live_anchor": 0,
+      "beats_baseline_overall": true,
+      "brier": 0.2219911764705882
     }
   },
   "arm_b": {
@@ -42,6 +81,9 @@
       "mape": 0.010518809383081877,
       "baseline_mape": 0.011807866631970358,
       "edge": 0.0012890572488884807,
+      "anchor_mape": 0.011807866631970358,
+      "anchor_edge": 0.0012890572488884807,
+      "n_live_anchor": 0,
       "beats_baseline_overall": true,
       "brier": 0.25930855
     },
@@ -53,8 +95,25 @@
       "mape": 0.014226722597292324,
       "baseline_mape": 0.015084153122483812,
       "edge": 0.0008574305251914886,
+      "anchor_mape": 0.015084153122483812,
+      "anchor_edge": 0.0008574305251914886,
+      "n_live_anchor": 0,
       "beats_baseline_overall": true,
       "brier": 0.27646983333333336
+    },
+    "all_time_pre_open": {
+      "n": 26,
+      "n_all_time": 26,
+      "pass_rate": 0.46153846153846156,
+      "directional_accuracy": 0.6153846153846154,
+      "mape": 0.017918979139290782,
+      "baseline_mape": 0.018586784985956575,
+      "edge": 0.0006678058466657935,
+      "anchor_mape": 0.018586784985956575,
+      "anchor_edge": 0.0006678058466657935,
+      "n_live_anchor": 0,
+      "beats_baseline_overall": true,
+      "brier": 0.2768669230769231
     }
   },
   "pairs": [
@@ -68,7 +127,8 @@
       "dir_hit_b": false,
       "predicted_a": 246.9,
       "predicted_b": 247.23,
-      "actual": 249.99
+      "actual": 249.99,
+      "clean": true
     },
     {
       "date": "2026-07-21",
@@ -80,7 +140,8 @@
       "dir_hit_b": false,
       "predicted_a": 251.15,
       "predicted_b": 250.72,
-      "actual": 247.55
+      "actual": 247.55,
+      "clean": true
     },
     {
       "date": "2026-07-22",
@@ -92,7 +153,8 @@
       "dir_hit_b": true,
       "predicted_a": 247.59,
       "predicted_b": 246.56,
-      "actual": 244.85
+      "actual": 244.85,
+      "clean": true
     },
     {
       "date": "2026-07-23",
@@ -104,7 +166,8 @@
       "dir_hit_b": true,
       "predicted_a": 243.5,
       "predicted_b": 244.06,
-      "actual": 233.66
+      "actual": 233.66,
+      "clean": true
     },
     {
       "date": "2026-07-24",
@@ -116,7 +179,8 @@
       "dir_hit_b": true,
       "predicted_a": 234.9,
       "predicted_b": 232.97,
-      "actual": 232.11
+      "actual": 232.11,
+      "clean": true
     },
     {
       "date": "2026-07-27",
@@ -128,7 +192,8 @@
       "dir_hit_b": true,
       "predicted_a": 232.09,
       "predicted_b": 231.69,
-      "actual": 231.39
+      "actual": 231.39,
+      "clean": false
     },
     {
       "date": "2026-07-28",
@@ -140,7 +205,8 @@
       "dir_hit_b": true,
       "predicted_a": 230.05,
       "predicted_b": 230.38,
-      "actual": 230.86
+      "actual": 230.86,
+      "clean": true
     },
     {
       "date": "2026-07-29",
@@ -152,7 +218,8 @@
       "dir_hit_b": false,
       "predicted_a": 230.55,
       "predicted_b": 231.04,
-      "actual": 226.65
+      "actual": 226.65,
+      "clean": true
     },
     {
       "date": "2026-07-30",
@@ -164,7 +231,8 @@
       "dir_hit_b": true,
       "predicted_a": 226.35,
       "predicted_b": 227.01,
-      "actual": 235.5
+      "actual": 235.5,
+      "clean": true
     },
     {
       "date": "2026-07-31",
@@ -176,7 +244,8 @@
       "dir_hit_b": true,
       "predicted_a": 235.7,
       "predicted_b": 238.92,
-      "actual": 271.5799865722656
+      "actual": 271.5799865722656,
+      "clean": true
     },
     {
       "date": "2026-08-03",
@@ -188,7 +257,8 @@
       "dir_hit_b": false,
       "predicted_a": 284.56,
       "predicted_b": 285.53,
-      "actual": 284.02
+      "actual": 284.02,
+      "clean": false
     },
     {
       "date": "2026-08-04",
@@ -200,7 +270,8 @@
       "dir_hit_b": true,
       "predicted_a": 283.69,
       "predicted_b": 281.86,
-      "actual": 277.42
+      "actual": 277.42,
+      "clean": true
     },
     {
       "date": "2026-08-05",
@@ -212,7 +283,8 @@
       "dir_hit_b": true,
       "predicted_a": 276.3,
       "predicted_b": 275.28,
-      "actual": 272.65
+      "actual": 272.65,
+      "clean": true
     },
     {
       "date": "2026-08-06",
@@ -224,7 +296,8 @@
       "dir_hit_b": true,
       "predicted_a": 270.35,
       "predicted_b": 272.65,
-      "actual": 272.260009765625
+      "actual": 272.260009765625,
+      "clean": true
     },
     {
       "date": "2026-08-07",
@@ -236,7 +309,8 @@
       "dir_hit_b": true,
       "predicted_a": 271.81,
       "predicted_b": 273.32,
-      "actual": 274.48
+      "actual": 274.48,
+      "clean": true
     },
     {
       "date": "2026-08-10",
@@ -248,7 +322,8 @@
       "dir_hit_b": true,
       "predicted_a": 274.29,
       "predicted_b": 275.01,
-      "actual": 278.09
+      "actual": 278.09,
+      "clean": true
     },
     {
       "date": "2026-08-11",
@@ -260,7 +335,8 @@
       "dir_hit_b": false,
       "predicted_a": 278.15,
       "predicted_b": 278.63,
-      "actual": 272.27
+      "actual": 272.27,
+      "clean": true
     },
     {
       "date": "2026-08-12",
@@ -272,7 +348,8 @@
       "dir_hit_b": true,
       "predicted_a": 272.01,
       "predicted_b": 272.27,
-      "actual": 267.28
+      "actual": 267.28,
+      "clean": true
     },
     {
       "date": "2026-08-13",
@@ -284,7 +361,8 @@
       "dir_hit_b": false,
       "predicted_a": 266.56,
       "predicted_b": 268.32,
-      "actual": 265.13
+      "actual": 265.13,
+      "clean": true
     },
     {
       "date": "2026-08-14",
@@ -296,7 +374,8 @@
       "dir_hit_b": true,
       "predicted_a": 264.05,
       "predicted_b": 264.1,
-      "actual": 262.65
+      "actual": 262.65,
+      "clean": true
     },
     {
       "date": "2026-08-17",
@@ -308,7 +387,8 @@
       "dir_hit_b": true,
       "predicted_a": 262.9,
       "predicted_b": 261.63,
-      "actual": 261.31
+      "actual": 261.31,
+      "clean": true
     },
     {
       "date": "2026-08-18",
@@ -320,7 +400,8 @@
       "dir_hit_b": true,
       "predicted_a": 259.85,
       "predicted_b": 258.27,
-      "actual": 259.45
+      "actual": 259.45,
+      "clean": true
     },
     {
       "date": "2026-08-19",
@@ -332,7 +413,8 @@
       "dir_hit_b": false,
       "predicted_a": 258.15,
       "predicted_b": 257.94,
-      "actual": 265.84
+      "actual": 265.84,
+      "clean": true
     },
     {
       "date": "2026-08-20",
@@ -344,7 +426,8 @@
       "dir_hit_b": false,
       "predicted_a": 265.91,
       "predicted_b": 268.94,
-      "actual": 260.11
+      "actual": 260.11,
+      "clean": true
     },
     {
       "date": "2026-08-21",
@@ -356,7 +439,8 @@
       "dir_hit_b": true,
       "predicted_a": 260.35,
       "predicted_b": 260.11,
-      "actual": 258.63
+      "actual": 258.63,
+      "clean": true
     },
     {
       "date": "2026-08-24",
@@ -368,7 +452,8 @@
       "dir_hit_b": false,
       "predicted_a": 258.49,
       "predicted_b": 257.17,
-      "actual": 262.07
+      "actual": 262.07,
+      "clean": true
     },
     {
       "date": "2026-08-25",
@@ -380,7 +465,8 @@
       "dir_hit_b": false,
       "predicted_a": 262.95,
       "predicted_b": 263.25,
-      "actual": 261.06
+      "actual": 261.06,
+      "clean": true
     },
     {
       "date": "2026-08-26",
@@ -392,7 +478,8 @@
       "dir_hit_b": false,
       "predicted_a": 260.35,
       "predicted_b": 261.55,
-      "actual": 260.28
+      "actual": 260.28,
+      "clean": true
     },
     {
       "date": "2026-08-27",
@@ -404,7 +491,8 @@
       "dir_hit_b": false,
       "predicted_a": 256.85,
       "predicted_b": 257.2,
-      "actual": 256.26
+      "actual": 256.26,
+      "clean": false
     },
     {
       "date": "2026-08-28",
@@ -416,7 +504,8 @@
       "dir_hit_b": false,
       "predicted_a": 265.99,
       "predicted_b": 268.76,
-      "actual": 266.43
+      "actual": 266.43,
+      "clean": false
     },
     {
       "date": "2026-08-31",
@@ -428,7 +517,8 @@
       "dir_hit_b": true,
       "predicted_a": 265.87,
       "predicted_b": 264.1,
-      "actual": 259.77
+      "actual": 259.77,
+      "clean": false
     },
     {
       "date": "2026-09-01",
@@ -440,7 +530,8 @@
       "dir_hit_b": true,
       "predicted_a": 258.91,
       "predicted_b": 257.8,
-      "actual": 254.92
+      "actual": 254.92,
+      "clean": false
     },
     {
       "date": "2026-09-02",
@@ -452,7 +543,8 @@
       "dir_hit_b": false,
       "predicted_a": 253.69,
       "predicted_b": 254.28,
-      "actual": 254.98
+      "actual": 254.98,
+      "clean": false
     },
     {
       "date": "2026-09-03",
@@ -464,7 +556,8 @@
       "dir_hit_b": true,
       "predicted_a": 254.7,
       "predicted_b": 255.4,
-      "actual": 258.9
+      "actual": 258.9,
+      "clean": false
     },
     {
       "date": "2026-09-04",
@@ -476,7 +569,8 @@
       "dir_hit_b": true,
       "predicted_a": 258.82,
       "predicted_b": 258.03,
-      "actual": 258.51
+      "actual": 258.51,
+      "clean": false
     },
     {
       "date": "2026-09-08",
@@ -488,7 +582,8 @@
       "dir_hit_b": true,
       "predicted_a": 258.28,
       "predicted_b": 258.51,
-      "actual": 256.97
+      "actual": 256.97,
+      "clean": false
     },
     {
       "date": "2026-09-09",
@@ -500,7 +595,8 @@
       "dir_hit_b": true,
       "predicted_a": 256.44,
       "predicted_b": 255.09,
-      "actual": 252.4
+      "actual": 252.4,
+      "clean": false
     },
     {
       "date": "2026-09-10",
@@ -512,7 +608,8 @@
       "dir_hit_b": true,
       "predicted_a": 251.35,
       "predicted_b": 251.79,
-      "actual": 251.89
+      "actual": 251.89,
+      "clean": false
     },
     {
       "date": "2026-09-11",
@@ -524,7 +621,8 @@
       "dir_hit_b": true,
       "predicted_a": 251.72,
       "predicted_b": 252.29,
-      "actual": 256.78
+      "actual": 256.78,
+      "clean": false
     },
     {
       "date": "2026-09-14",
@@ -536,7 +634,8 @@
       "dir_hit_b": true,
       "predicted_a": 255.6,
       "predicted_b": 255.09,
-      "actual": 253.54
+      "actual": 253.54,
+      "clean": false
     },
     {
       "date": "2026-09-15",
@@ -548,7 +647,8 @@
       "dir_hit_b": true,
       "predicted_a": 252.45,
       "predicted_b": 252.49,
-      "actual": 248.42
+      "actual": 248.42,
+      "clean": false
     },
     {
       "date": "2026-09-16",
@@ -560,7 +660,8 @@
       "dir_hit_b": true,
       "predicted_a": 247.05,
       "predicted_b": 247.57,
-      "actual": 245.96
+      "actual": 245.96,
+      "clean": false
     },
     {
       "date": "2026-09-17",
@@ -572,7 +673,8 @@
       "dir_hit_b": false,
       "predicted_a": 245.1,
       "predicted_b": 245.12,
-      "actual": 251.19
+      "actual": 251.19,
+      "clean": false
     },
     {
       "date": "2026-09-18",
@@ -584,7 +686,8 @@
       "dir_hit_b": true,
       "predicted_a": 251.27,
       "predicted_b": 251.82,
-      "actual": 253.71
+      "actual": 253.71,
+      "clean": false
     },
     {
       "date": "2026-09-21",
@@ -596,7 +699,8 @@
       "dir_hit_b": true,
       "predicted_a": 255.15,
       "predicted_b": 255.17,
-      "actual": 258.45
+      "actual": 258.45,
+      "clean": false
     },
     {
       "date": "2026-09-22",
@@ -608,7 +712,8 @@
       "dir_hit_b": false,
       "predicted_a": 259.42,
       "predicted_b": 259.11,
-      "actual": 254.98
+      "actual": 254.98,
+      "clean": false
     },
     {
       "date": "2026-09-23",
@@ -620,7 +725,8 @@
       "dir_hit_b": true,
       "predicted_a": 252.85,
       "predicted_b": 253.68,
-      "actual": 249.27
+      "actual": 249.27,
+      "clean": false
     },
     {
       "date": "2026-09-24",
@@ -632,7 +738,8 @@
       "dir_hit_b": false,
       "predicted_a": 249.36,
       "predicted_b": 246.86,
-      "actual": 249.38
+      "actual": 249.38,
+      "clean": false
     }
   ]
 }
