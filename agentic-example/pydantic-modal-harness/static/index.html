@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pydantic AI + Modal Harness</title>
+<style>
+  :root { --bg:#0b1020; --panel:#141a2e; --panel2:#1b2340; --text:#e6e9f2; --muted:#8b93ad; --accent:#60a5fa; --green:#4ade80; --amber:#fbbf24; --red:#f87171; --pink:#f472b6; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; background:linear-gradient(160deg,#0b1020 0%,#151b33 100%); color:var(--text); min-height:100vh; }
+  .wrap { max-width:1100px; margin:0 auto; padding:32px 20px 60px; }
+  h1 { margin:0 0 6px; font-size:26px; }
+  .sub { color:var(--muted); margin-bottom:22px; font-size:14px; }
+  .sub code { color:var(--accent); }
+  .row { display:flex; gap:10px; }
+  input[type=text] { flex:1; padding:14px 16px; border-radius:10px; border:1px solid #2a3356; background:var(--panel); color:var(--text); font-size:15px; }
+  button { padding:14px 22px; border-radius:10px; border:0; background:var(--accent); color:#04122b; font-weight:600; cursor:pointer; font-size:15px; }
+  button:disabled { opacity:.5; cursor:not-allowed; }
+  .chips { display:flex; flex-wrap:wrap; gap:8px; margin:12px 0 24px; }
+  .chip { background:var(--panel2); border:1px solid #2a3356; color:var(--muted); padding:7px 12px; border-radius:999px; font-size:13px; cursor:pointer; }
+  .chip:hover { color:var(--text); border-color:var(--accent); }
+  .grid { display:grid; grid-template-columns:1.1fr .9fr; gap:18px; }
+  @media (max-width:860px) { .grid { grid-template-columns:1fr; } }
+  .card { background:var(--panel); border:1px solid #232c4d; border-radius:14px; padding:18px; }
+  .card h2 { margin:0 0 12px; font-size:14px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); display:flex; justify-content:space-between; align-items:center; }
+  .badge { font-size:12px; padding:4px 10px; border-radius:999px; background:#2a3356; color:var(--text); text-transform:none; letter-spacing:0; }
+  .badge.running, .badge.resuming { background:#1d3a6b; color:var(--accent); }
+  .badge.waiting_for_jobs { background:#4a3a0f; color:var(--amber); }
+  .badge.completed { background:#123d25; color:var(--green); }
+  .badge.failed, .badge.cancelled { background:#4a1717; color:var(--red); }
+  .timeline { list-style:none; margin:0; padding:0; max-height:520px; overflow:auto; }
+  .timeline li { display:grid; grid-template-columns:22px 1fr; gap:10px; padding:9px 0; border-bottom:1px solid #1f2745; font-size:13px; }
+  .dot { width:10px; height:10px; border-radius:50%; margin-top:5px; background:var(--muted); }
+  .dot.run { background:var(--accent); } .dot.job { background:var(--amber); } .dot.done { background:var(--green); } .dot.bad { background:var(--red); }
+  .ev-name { font-weight:600; }
+  .ev-meta { color:var(--muted); font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12px; margin-top:3px; word-break:break-word; }
+  .answer { white-space:pre-wrap; line-height:1.55; font-size:14px; min-height:120px; }
+  .answer h3 { margin:14px 0 6px; }
+  .jobs { display:flex; flex-direction:column; gap:8px; margin-top:14px; }
+  .job { background:var(--panel2); border-radius:10px; padding:10px 12px; font-size:12.5px; display:flex; justify-content:space-between; gap:10px; }
+  .job .k { font-weight:600; } .job .m { color:var(--muted); font-family:ui-monospace,Menlo,monospace; }
+  .foot { margin-top:22px; color:var(--muted); font-size:12.5px; }
+  .foot a { color:var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Pydantic AI + Modal Harness</h1>
+  <div class="sub">
+    A Pydantic AI agent routes fast questions to local tools and heavy ones to Modal (CPU / GPU / Sandbox).
+    Heavy calls <b>suspend</b> the run, Modal <b>calls back</b> (webhook, with polling as fallback), and the run <b>resumes</b> automatically.
+    Backend: <code id="backend">…</code> · Model: <code id="model">…</code>
+  </div>
+
+  <div class="row">
+    <input id="query" type="text" placeholder="Ask something… e.g. Price an Asian call on NVDA: spot 140, strike 150, vol 45%, 1 year">
+    <button id="go">Run</button>
+  </div>
+  <div class="chips">
+    <span class="chip">Price an Asian call on NVDA: spot 140, strike 150, vol 45%, 1 year, on the GPU</span>
+    <span class="chip">Run a Monte Carlo: $100k initial, $12k per year, 30 years, 1,000,000 paths. Chance of reaching $1M?</span>
+    <span class="chip">What's AAPL trading at, and what is 15% of 50,000?</span>
+    <span class="chip">Explain the Sharpe ratio</span>
+    <span class="chip">Using the sandbox, compute the 30-day rolling volatility of a synthetic GBM price series with 5000 steps</span>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>Answer <span id="status" class="badge">idle</span></h2>
+      <div id="answer" class="answer">Submit a query to start a run. Long-running tools will show as a suspended run that resumes when Modal reports back.</div>
+      <div id="jobs" class="jobs"></div>
+    </div>
+    <div class="card">
+      <h2>Event stream <span id="runid" class="badge">no run</span></h2>
+      <ul id="timeline" class="timeline"></ul>
+    </div>
+  </div>
+
+  <div class="foot">
+    API docs: <a href="/docs" target="_blank">/docs</a> · Events are Server-Sent Events from <code>/runs/{id}/events</code> · Delivery path shown on each job (webhook / poll / local).
+  </div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let source = null;
+
+fetch('/health').then(r => r.json()).then(h => {
+  $('backend').textContent = h.backend + (h.modal_app ? ' · ' + h.modal_app : '');
+  $('model').textContent = h.model;
+}).catch(() => {});
+
+document.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => { $('query').value = c.textContent; }));
+$('query').addEventListener('keydown', e => { if (e.key === 'Enter') startRun(); });
+$('go').addEventListener('click', startRun);
+
+function setStatus(s) { const b = $('status'); b.textContent = s; b.className = 'badge ' + s; }
+
+function addEvent(name, data) {
+  const li = document.createElement('li');
+  const cls = name.startsWith('run.completed') ? 'done' : (name.includes('failed') || name.includes('cancelled')) ? 'bad' : name.startsWith('job') ? 'job' : 'run';
+  const meta = Object.entries(data).filter(([k]) => !['seq','type','ts','output','query','model'].includes(k))
+    .map(([k,v]) => `${k}=${typeof v === 'object' ? JSON.stringify(v) : v}`).join('  ');
+  li.innerHTML = `<span class="dot ${cls}"></span><div><div class="ev-name">${data.seq ?? ''} · ${name}</div><div class="ev-meta">${escapeHtml(meta).slice(0, 400)}</div></div>`;
+  $('timeline').appendChild(li);
+  $('timeline').scrollTop = $('timeline').scrollHeight;
+}
+
+function escapeHtml(s) { return s.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+
+function renderMarkdown(text) {
+  let html = escapeHtml(text || '');
+  html = html.replace(/```[\w]*\n([\s\S]*?)```/g, '<pre style="background:#0b1020;padding:10px;border-radius:8px;overflow:auto">$1</pre>');
+  html = html.replace(/^### (.*)$/gm, '<h3>$1</h3>').replace(/^## (.*)$/gm, '<h3>$1</h3>').replace(/^# (.*)$/gm, '<h3>$1</h3>');
+  html = html.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/`([^`]+)`/g, '<code>$1</code>');
+  html = html.replace(/^- (.*)$/gm, '• $1');
+  return html;
+}
+
+async function refreshJobs(runId) {
+  const r = await fetch('/runs/' + runId); if (!r.ok) return null;
+  const run = await r.json();
+  $('jobs').innerHTML = run.jobs.map(j => `<div class="job"><span class="k">${j.kind}</span><span class="m">${j.status} · ${j.backend}${j.delivered_via ? ' · via ' + j.delivered_via : ''}${j.result && j.result.device ? ' · ' + j.result.device : ''}${j.result && j.result.elapsed_ms ? ' · ' + j.result.elapsed_ms + ' ms' : ''}</span></div>`).join('');
+  return run;
+}
+
+async function startRun() {
+  const query = $('query').value.trim(); if (!query) return;
+  if (source) { source.close(); source = null; }
+  $('timeline').innerHTML = ''; $('jobs').innerHTML = ''; $('answer').textContent = 'Submitting…';
+  $('go').disabled = true; setStatus('queued');
+  try {
+    const resp = await fetch('/runs', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ query }) });
+    const run = await resp.json();
+    $('runid').textContent = run.run_id;
+    source = new EventSource(run.events_url);
+    const handle = (name) => (e) => {
+      const data = JSON.parse(e.data || '{}'); addEvent(name, data);
+      if (name === 'run.started' || name === 'run.resumed') setStatus('running');
+      if (name === 'run.suspended') { setStatus('waiting_for_jobs'); $('answer').textContent = 'Run suspended: waiting for ' + (data.pending || []).length + ' job(s) on ' + ((data.pending||[])[0]||{}).backend + '…'; }
+      if (name.startsWith('job.')) refreshJobs(run.run_id);
+      if (name === 'run.completed') { setStatus('completed'); $('answer').innerHTML = renderMarkdown(data.output); }
+      if (name === 'run.failed') { setStatus('failed'); $('answer').textContent = 'Run failed: ' + data.error; }
+      if (name === 'run.cancelled') { setStatus('cancelled'); $('answer').textContent = 'Run cancelled.'; }
+    };
+    ['run.created','run.started','run.suspended','run.resumed','run.completed','run.failed','run.cancelled','run.callback_sent','run.callback_failed',
+     'job.created','job.dispatched','job.completed','job.failed','job.cancelled'].forEach(n => source.addEventListener(n, handle(n)));
+    source.addEventListener('end', () => { source.close(); source = null; $('go').disabled = false; refreshJobs(run.run_id); });
+    source.onerror = () => { $('go').disabled = false; };
+  } catch (err) {
+    setStatus('failed'); $('answer').textContent = 'Request failed: ' + err; $('go').disabled = false;
+  }
+}
+</script>
+</body>
+</html>

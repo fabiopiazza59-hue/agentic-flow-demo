@@ -1,0 +1,1463 @@
+{
+  "symbol": "AMZN",
+  "pass_threshold": 0.01,
+  "rolling_window": 20,
+  "rolling": {
+    "n": 20,
+    "n_all_time": 73,
+    "pass_rate": 0.5,
+    "directional_accuracy": 0.7,
+    "mape": 0.010789361195731446,
+    "baseline_mape": 0.011807866631970358,
+    "edge": 0.0010185054362389125,
+    "anchor_mape": 0.011807866631970358,
+    "anchor_edge": 0.0010185054362389125,
+    "n_live_anchor": 0,
+    "beats_baseline_overall": true,
+    "brier": 0.27956
+  },
+  "all_time": {
+    "n": 73,
+    "n_all_time": 73,
+    "pass_rate": 0.4383561643835616,
+    "directional_accuracy": 0.5342465753424658,
+    "mape": 0.015316849628485592,
+    "baseline_mape": 0.015290364741857732,
+    "edge": -2.6484886627859902e-05,
+    "anchor_mape": 0.015290364741857732,
+    "anchor_edge": -2.6484886627859902e-05,
+    "n_live_anchor": 0,
+    "beats_baseline_overall": false,
+    "brier": 0.2590342465753424
+  },
+  "rolling_pre_open": {
+    "n": 20,
+    "n_all_time": 34,
+    "pass_rate": 0.45,
+    "directional_accuracy": 0.5,
+    "mape": 0.01956302194637227,
+    "baseline_mape": 0.019723424263215678,
+    "edge": 0.0001604023168434096,
+    "anchor_mape": 0.019723424263215678,
+    "anchor_edge": 0.0001604023168434096,
+    "n_live_anchor": 0,
+    "beats_baseline_overall": true,
+    "brier": 0.20958000000000002
+  },
+  "all_time_pre_open": {
+    "n": 34,
+    "n_all_time": 34,
+    "pass_rate": 0.4117647058823529,
+    "directional_accuracy": 0.5,
+    "mape": 0.016598510799731476,
+    "baseline_mape": 0.016731481551730255,
+    "edge": 0.00013297075199877884,
+    "anchor_mape": 0.016731481551730255,
+    "anchor_edge": 0.00013297075199877884,
+    "n_live_anchor": 0,
+    "beats_baseline_overall": true,
+    "brier": 0.2219911764705882
+  },
+  "n_late_rows": 39,
+  "coverage": {
+    "n_sessions": 20,
+    "n_pre_open": 0,
+    "since": "2026-08-28"
+  },
+  "gate_effect": {
+    "n": 0,
+    "mean": null,
+    "ci_low": null,
+    "ci_high": null,
+    "wins": 0,
+    "n_decisive": 0,
+    "sign_test_p": null,
+    "significant": false,
+    "n_gates_fired": 0
+  },
+  "baseline_effect": {
+    "n": 34,
+    "mean": 0.00013297,
+    "ci_low": -0.0007184,
+    "ci_high": 0.00098397,
+    "wins": 14,
+    "n_decisive": 34,
+    "sign_test_p": 0.3915,
+    "significant": false
+  },
+  "probabilistic": {
+    "n": 34,
+    "model": {
+      "crps": 0.013886937694427181,
+      "cover50": 0.6176470588235294,
+      "cover80": 0.8823529411764706,
+      "cover90": 0.8823529411764706,
+      "brier_up": 0.238349884264602
+    },
+    "random_walk": {
+      "crps": 0.013982123233545697,
+      "cover50": 0.6176470588235294,
+      "cover80": 0.8823529411764706,
+      "cover90": 0.8823529411764706,
+      "brier_up": 0.25
+    },
+    "anchor": {
+      "crps": 0.013982123233545697,
+      "cover50": 0.6176470588235294,
+      "cover80": 0.8823529411764706,
+      "cover90": 0.8823529411764706,
+      "brier_up": 0.25
+    },
+    "crps_skill_vs_random_walk": 0.0068076598617117234,
+    "crps_skill_vs_anchor": 0.0068076598617117234,
+    "direction_brier_skill": 0.046600462941592036
+  },
+  "value_added": {
+    "vs_free_baseline": {
+      "n": 34,
+      "mean": 0.00013297,
+      "lo": -0.00155075,
+      "hi": 0.0018167,
+      "alpha": 0.05,
+      "t_star": 120,
+      "decision": "undecided"
+    },
+    "vs_random_walk": {
+      "n": 34,
+      "mean": 0.00013297,
+      "lo": -0.00155075,
+      "hi": 0.0018167,
+      "alpha": 0.05,
+      "t_star": 120,
+      "decision": "undecided"
+    },
+    "crps_vs_random_walk": {
+      "n": 34,
+      "mean": 9.519e-05,
+      "lo": -0.00081279,
+      "hi": 0.00100316,
+      "alpha": 0.05,
+      "t_star": 120,
+      "decision": "undecided"
+    },
+    "crps_vs_free_baseline": {
+      "n": 34,
+      "mean": 9.519e-05,
+      "lo": -0.00081279,
+      "hi": 0.00100316,
+      "alpha": 0.05,
+      "t_star": 120,
+      "decision": "undecided"
+    },
+    "direction_vs_random_walk": {
+      "n": 34,
+      "mean": 0.01165012,
+      "lo": -0.02671123,
+      "hi": 0.05001146,
+      "alpha": 0.05,
+      "t_star": 120,
+      "decision": "undecided"
+    }
+  },
+  "lab": {
+    "n_days": 34,
+    "reference": "mean",
+    "reference_mape": 0.014855269419269875,
+    "champion": "mean",
+    "alpha": 0.05,
+    "alpha_per_challenger": 0.01,
+    "challengers": {
+      "median": {
+        "n": 34,
+        "mean": -0.00019977,
+        "lo": -0.00240093,
+        "hi": 0.00200139,
+        "alpha": 0.01,
+        "t_star": 120,
+        "decision": "undecided",
+        "mape": 0.015055037542065221
+      },
+      "trimmed_mean": {
+        "n": 34,
+        "mean": -0.00044693,
+        "lo": -0.00216445,
+        "hi": 0.00127059,
+        "alpha": 0.01,
+        "t_star": 120,
+        "decision": "undecided",
+        "mape": 0.015302200222052366
+      },
+      "inverse_mse": {
+        "n": 34,
+        "mean": -0.00042138,
+        "lo": -0.00117115,
+        "hi": 0.00032839,
+        "alpha": 0.01,
+        "t_star": 120,
+        "decision": "undecided",
+        "mape": 0.0152766479889502
+      },
+      "best_recent": {
+        "n": 34,
+        "mean": -0.00313766,
+        "lo": -0.00727677,
+        "hi": 0.00100146,
+        "alpha": 0.01,
+        "t_star": 120,
+        "decision": "undecided",
+        "mape": 0.017992925261389393
+      },
+      "shrink_half": {
+        "n": 34,
+        "mean": -0.00084116,
+        "lo": -0.00255278,
+        "hi": 0.00087046,
+        "alpha": 0.01,
+        "t_star": 120,
+        "decision": "undecided",
+        "mape": 0.01569642760303565
+      }
+    },
+    "legacy_shipped_vs_mean": {
+      "n": 34,
+      "mean": -0.00174324,
+      "lo": -0.00407465,
+      "hi": 0.00058817,
+      "alpha": 0.05,
+      "t_star": 120,
+      "decision": "undecided"
+    },
+    "judge_effect": {
+      "n": 0,
+      "mean": null,
+      "lo": null,
+      "hi": null,
+      "alpha": 0.05,
+      "t_star": 120,
+      "decision": "insufficient"
+    },
+    "gates_effect": {
+      "n": 0,
+      "mean": null,
+      "lo": null,
+      "hi": null,
+      "alpha": 0.05,
+      "t_star": 120,
+      "decision": "insufficient"
+    },
+    "state": {
+      "champion": "mean",
+      "judge_enabled": true,
+      "gates_enabled": true
+    }
+  },
+  "scorecards": {
+    "technical": {
+      "n": 73,
+      "wins": 11,
+      "sum_ape": 1.0652100578303312,
+      "hit_rate": 0.1506849315068493,
+      "mape": 0.014591918600415496,
+      "weight_hint": 0.2092
+    },
+    "momentum": {
+      "n": 73,
+      "wins": 16,
+      "sum_ape": 1.179377110419296,
+      "hit_rate": 0.2191780821917808,
+      "mape": 0.01615585082766159,
+      "weight_hint": 0.1889
+    },
+    "contrarian": {
+      "n": 73,
+      "wins": 14,
+      "sum_ape": 1.1532103758444852,
+      "hit_rate": 0.1917808219178082,
+      "mape": 0.015797402408828563,
+      "weight_hint": 0.1932
+    },
+    "news": {
+      "n": 73,
+      "wins": 23,
+      "sum_ape": 0.9761477802037499,
+      "hit_rate": 0.3150684931506849,
+      "mape": 0.01337188740005137,
+      "weight_hint": 0.2283
+    },
+    "macro": {
+      "n": 73,
+      "wins": 9,
+      "sum_ape": 1.2353482579742783,
+      "hit_rate": 0.1232876712328767,
+      "mape": 0.016922578876359975,
+      "weight_hint": 0.1804
+    }
+  },
+  "series": [
+    {
+      "date": "2026-05-01",
+      "predicted_close": 265.05999755859375,
+      "actual_close": 268.260009765625,
+      "prior_close": 265.05999755859375,
+      "anchor": null,
+      "ape": 0.011928770933196699,
+      "baseline_ape": 0.011928770933196699,
+      "pass": false,
+      "pre_open": true
+    },
+    {
+      "date": "2026-05-04",
+      "predicted_close": 268.260009765625,
+      "actual_close": 272.04998779296875,
+      "prior_close": 268.260009765625,
+      "anchor": null,
+      "ape": 0.013931182493667083,
+      "baseline_ape": 0.013931182493667083,
+      "pass": false,
+      "pre_open": true
+    },
+    {
+      "date": "2026-05-05",
+      "predicted_close": 272.04998779296875,
+      "actual_close": 273.54998779296875,
+      "prior_close": 272.04998779296875,
+      "anchor": null,
+      "ape": 0.005483458479023027,
+      "baseline_ape": 0.005483458479023027,
+      "pass": true,
+      "pre_open": true
+    },
+    {
+      "date": "2026-05-06",
+      "predicted_close": 273.54998779296875,
+      "actual_close": 274.989990234375,
+      "prior_close": 273.54998779296875,
+      "anchor": null,
+      "ape": 0.005236563120639157,
+      "baseline_ape": 0.005236563120639157,
+      "pass": true,
+      "pre_open": true
+    },
+    {
+      "date": "2026-05-07",
+      "predicted_close": 274.989990234375,
+      "actual_close": 271.1700134277344,
+      "prior_close": 274.989990234375,
+      "anchor": null,
+      "ape": 0.014087017802426122,
+      "baseline_ape": 0.014087017802426122,
+      "pass": false,
+      "pre_open": true
+    },
+    {
+      "date": "2026-05-08",
+      "predicted_close": 271.1700134277344,
+      "actual_close": 272.67999267578125,
+      "prior_close": 271.1700134277344,
+      "anchor": null,
+      "ape": 0.005537550566983668,
+      "baseline_ape": 0.005537550566983668,
+      "pass": true,
+      "pre_open": true
+    },
+    {
+      "date": "2026-05-11",
+      "predicted_close": 272.67999267578125,
+      "actual_close": 268.989990234375,
+      "prior_close": 272.67999267578125,
+      "anchor": null,
+      "ape": 0.013717991655344111,
+      "baseline_ape": 0.013717991655344111,
+      "pass": false,
+      "pre_open": true
+    },
+    {
+      "date": "2026-05-12",
+      "predicted_close": 268.989990234375,
+      "actual_close": 265.82000732421875,
+      "prior_close": 268.989990234375,
+      "anchor": null,
+      "ape": 0.011925298407993213,
+      "baseline_ape": 0.011925298407993213,
+      "pass": false,
+      "pre_open": true
+    },
+    {
+      "date": "2026-05-13",
+      "predicted_close": 265.82000732421875,
+      "actual_close": 270.1300048828125,
+      "prior_close": 265.82000732421875,
+      "anchor": null,
+      "ape": 0.0159552714644325,
+      "baseline_ape": 0.0159552714644325,
+      "pass": false,
+      "pre_open": true
+    },
+    {
+      "date": "2026-05-14",
+      "predicted_close": 270.1300048828125,
+      "actual_close": 267.2200012207031,
+      "prior_close": 270.1300048828125,
+      "anchor": null,
+      "ape": 0.010889917105067058,
+      "baseline_ape": 0.010889917105067058,
+      "pass": false,
+      "pre_open": true
+    },
+    {
+      "date": "2026-05-15",
+      "predicted_close": 267.2200012207031,
+      "actual_close": 264.1400146484375,
+      "prior_close": 267.2200012207031,
+      "anchor": null,
+      "ape": 0.011660431594830475,
+      "baseline_ape": 0.011660431594830475,
+      "pass": false,
+      "pre_open": true
+    },
+    {
+      "date": "2026-05-18",
+      "predicted_close": 264.1400146484375,
+      "actual_close": 264.8599853515625,
+      "prior_close": 264.1400146484375,
+      "anchor": null,
+      "ape": 0.00271830681470946,
+      "baseline_ape": 0.00271830681470946,
+      "pass": true,
+      "pre_open": true
+    },
+    {
+      "date": "2026-05-19",
+      "predicted_close": 264.8599853515625,
+      "actual_close": 259.3399963378906,
+      "prior_close": 264.8599853515625,
+      "anchor": null,
+      "ape": 0.02128475781452528,
+      "baseline_ape": 0.02128475781452528,
+      "pass": false,
+      "pre_open": true
+    },
+    {
+      "date": "2026-05-20",
+      "predicted_close": 259.3399963378906,
+      "actual_close": 265.010009765625,
+      "prior_close": 259.3399963378906,
+      "anchor": null,
+      "ape": 0.021395468921151083,
+      "baseline_ape": 0.021395468921151083,
+      "pass": false,
+      "pre_open": true
+    },
+    {
+      "date": "2026-05-21",
+      "predicted_close": 265.010009765625,
+      "actual_close": 268.4599914550781,
+      "prior_close": 265.010009765625,
+      "anchor": null,
+      "ape": 0.01285100871364073,
+      "baseline_ape": 0.01285100871364073,
+      "pass": false,
+      "pre_open": true
+    },
+    {
+      "date": "2026-05-22",
+      "predicted_close": 268.4599914550781,
+      "actual_close": 266.32000732421875,
+      "prior_close": 268.4599914550781,
+      "anchor": null,
+      "ape": 0.008035386272178013,
+      "baseline_ape": 0.008035386272178013,
+      "pass": true,
+      "pre_open": true
+    },
+    {
+      "date": "2026-05-26",
+      "predicted_close": 266.32000732421875,
+      "actual_close": 265.2900085449219,
+      "prior_close": 266.32000732421875,
+      "anchor": null,
+      "ape": 0.0038825389050506365,
+      "baseline_ape": 0.0038825389050506365,
+      "pass": true,
+      "pre_open": true
+    },
+    {
+      "date": "2026-05-27",
+      "predicted_close": 265.2900085449219,
+      "actual_close": 271.8500061035156,
+      "prior_close": 265.2900085449219,
+      "anchor": null,
+      "ape": 0.024130945048041752,
+      "baseline_ape": 0.024130945048041752,
+      "pass": false,
+      "pre_open": true
+    },
+    {
+      "date": "2026-05-28",
+      "predicted_close": 271.8500061035156,
+      "actual_close": 274.0,
+      "prior_close": 271.8500061035156,
+      "anchor": null,
+      "ape": 0.007846693052862683,
+      "baseline_ape": 0.007846693052862683,
+      "pass": true,
+      "pre_open": true
+    },
+    {
+      "date": "2026-05-29",
+      "predicted_close": 274.0,
+      "actual_close": 270.6400146484375,
+      "prior_close": 274.0,
+      "anchor": null,
+      "ape": 0.012414961460621907,
+      "baseline_ape": 0.012414961460621907,
+      "pass": false,
+      "pre_open": true
+    },
+    {
+      "date": "2026-06-01",
+      "predicted_close": 270.6400146484375,
+      "actual_close": 261.260009765625,
+      "prior_close": 270.6400146484375,
+      "anchor": null,
+      "ape": 0.03590294929265008,
+      "baseline_ape": 0.03590294929265008,
+      "pass": false,
+      "pre_open": true
+    },
+    {
+      "date": "2026-06-02",
+      "predicted_close": 261.260009765625,
+      "actual_close": 256.5199890136719,
+      "prior_close": 261.260009765625,
+      "anchor": null,
+      "ape": 0.018478173066273185,
+      "baseline_ape": 0.018478173066273185,
+      "pass": false,
+      "pre_open": true
+    },
+    {
+      "date": "2026-06-03",
+      "predicted_close": 256.5199890136719,
+      "actual_close": 250.02000427246094,
+      "prior_close": 256.5199890136719,
+      "anchor": null,
+      "ape": 0.02599785869184906,
+      "baseline_ape": 0.02599785869184906,
+      "pass": false,
+      "pre_open": true
+    },
+    {
+      "date": "2026-06-04",
+      "predicted_close": 250.02000427246094,
+      "actual_close": 253.7899932861328,
+      "prior_close": 250.02000427246094,
+      "anchor": null,
+      "ape": 0.014854758317525314,
+      "baseline_ape": 0.014854758317525314,
+      "pass": false,
+      "pre_open": true
+    },
+    {
+      "date": "2026-06-05",
+      "predicted_close": 253.7899932861328,
+      "actual_close": 246.02999877929688,
+      "prior_close": 253.7899932861328,
+      "anchor": null,
+      "ape": 0.03154084682899625,
+      "baseline_ape": 0.03154084682899625,
+      "pass": false,
+      "pre_open": true
+    },
+    {
+      "date": "2026-06-08",
+      "predicted_close": 245.05,
+      "actual_close": 245.22,
+      "prior_close": 246.03,
+      "anchor": null,
+      "ape": 0.0006932550362938892,
+      "baseline_ape": 0.003303156349400548,
+      "pass": true,
+      "pre_open": true
+    },
+    {
+      "date": "2026-06-09",
+      "predicted_close": 245.22000122070312,
+      "actual_close": 244.19000244140625,
+      "prior_close": 245.22000122070312,
+      "anchor": null,
+      "ape": 0.0042180219050696995,
+      "baseline_ape": 0.0042180219050696995,
+      "pass": true,
+      "pre_open": true
+    },
+    {
+      "date": "2026-06-10",
+      "predicted_close": 244.19000244140625,
+      "actual_close": 238.0,
+      "prior_close": 244.19000244140625,
+      "anchor": null,
+      "ape": 0.026008413619353993,
+      "baseline_ape": 0.026008413619353993,
+      "pass": false,
+      "pre_open": true
+    },
+    {
+      "date": "2026-06-11",
+      "predicted_close": 238.0,
+      "actual_close": 241.50999450683594,
+      "prior_close": 238.0,
+      "anchor": null,
+      "ape": 0.014533537272456801,
+      "baseline_ape": 0.014533537272456801,
+      "pass": false,
+      "pre_open": true
+    },
+    {
+      "date": "2026-06-12",
+      "predicted_close": 243.35,
+      "actual_close": 238.55,
+      "prior_close": 241.51,
+      "anchor": null,
+      "ape": 0.020121567805491437,
+      "baseline_ape": 0.012408300146719679,
+      "pass": false,
+      "pre_open": false
+    },
+    {
+      "date": "2026-06-15",
+      "predicted_close": 237.65,
+      "actual_close": 246.02,
+      "prior_close": 238.55,
+      "anchor": null,
+      "ape": 0.03402162425819041,
+      "baseline_ape": 0.03036338509064303,
+      "pass": false,
+      "pre_open": false
+    },
+    {
+      "date": "2026-06-16",
+      "predicted_close": 246.42,
+      "actual_close": 246.0,
+      "prior_close": 246.02,
+      "anchor": null,
+      "ape": 0.001707317073170681,
+      "baseline_ape": 8.130081300817167e-05,
+      "pass": true,
+      "pre_open": false
+    },
+    {
+      "date": "2026-06-17",
+      "predicted_close": 246.35,
+      "actual_close": 237.5,
+      "prior_close": 246.0,
+      "anchor": null,
+      "ape": 0.03726315789473682,
+      "baseline_ape": 0.035789473684210524,
+      "pass": false,
+      "pre_open": false
+    },
+    {
+      "date": "2026-06-18",
+      "predicted_close": 237.9,
+      "actual_close": 244.39,
+      "prior_close": 237.5,
+      "anchor": null,
+      "ape": 0.026555914726461724,
+      "baseline_ape": 0.028192642906829195,
+      "pass": false,
+      "pre_open": false
+    },
+    {
+      "date": "2026-06-22",
+      "predicted_close": 244.62,
+      "actual_close": 232.79,
+      "prior_close": 244.39,
+      "anchor": null,
+      "ape": 0.050818334120881534,
+      "baseline_ape": 0.04983031917178571,
+      "pass": false,
+      "pre_open": false
+    },
+    {
+      "date": "2026-06-23",
+      "predicted_close": 232.95,
+      "actual_close": 234.11,
+      "prior_close": 232.79,
+      "anchor": null,
+      "ape": 0.004954935713980714,
+      "baseline_ape": 0.0056383751228056105,
+      "pass": true,
+      "pre_open": false
+    },
+    {
+      "date": "2026-06-24",
+      "predicted_close": 234.74,
+      "actual_close": 234.27,
+      "prior_close": 234.11,
+      "anchor": null,
+      "ape": 0.002006232125325474,
+      "baseline_ape": 0.0006829726384086592,
+      "pass": true,
+      "pre_open": false
+    },
+    {
+      "date": "2026-06-25",
+      "predicted_close": 235.1,
+      "actual_close": 227.01,
+      "prior_close": 234.27,
+      "anchor": null,
+      "ape": 0.03563719659926877,
+      "baseline_ape": 0.031980970001321614,
+      "pass": false,
+      "pre_open": false
+    },
+    {
+      "date": "2026-06-26",
+      "predicted_close": 225.3,
+      "actual_close": 232.69,
+      "prior_close": 227.01,
+      "anchor": null,
+      "ape": 0.03175899265116673,
+      "baseline_ape": 0.02441015943959778,
+      "pass": false,
+      "pre_open": false
+    },
+    {
+      "date": "2026-06-29",
+      "predicted_close": 232.3,
+      "actual_close": 240.14,
+      "prior_close": 232.69,
+      "anchor": null,
+      "ape": 0.03264762222037135,
+      "baseline_ape": 0.03102356958440905,
+      "pass": false,
+      "pre_open": false
+    },
+    {
+      "date": "2026-06-30",
+      "predicted_close": 240.85,
+      "actual_close": 238.34,
+      "prior_close": 240.14,
+      "anchor": null,
+      "ape": 0.010531173953176097,
+      "baseline_ape": 0.0075522363010824154,
+      "pass": false,
+      "pre_open": true
+    },
+    {
+      "date": "2026-07-01",
+      "predicted_close": 238.15,
+      "actual_close": 241.7,
+      "prior_close": 238.34,
+      "anchor": null,
+      "ape": 0.014687629292511307,
+      "baseline_ape": 0.013901530823334653,
+      "pass": false,
+      "pre_open": false
+    },
+    {
+      "date": "2026-07-02",
+      "predicted_close": 241.85,
+      "actual_close": 242.67,
+      "prior_close": 241.7,
+      "anchor": null,
+      "ape": 0.0033790744632628393,
+      "baseline_ape": 0.003997197840688997,
+      "pass": true,
+      "pre_open": true
+    },
+    {
+      "date": "2026-07-06",
+      "predicted_close": 243.42,
+      "actual_close": 244.16,
+      "prior_close": 242.67,
+      "anchor": null,
+      "ape": 0.0030307994757536416,
+      "baseline_ape": 0.006102555701179592,
+      "pass": true,
+      "pre_open": false
+    },
+    {
+      "date": "2026-07-07",
+      "predicted_close": 244.78,
+      "actual_close": 245.98,
+      "prior_close": 244.16,
+      "anchor": null,
+      "ape": 0.004878445402065163,
+      "baseline_ape": 0.007398975526465539,
+      "pass": true,
+      "pre_open": false
+    },
+    {
+      "date": "2026-07-08",
+      "predicted_close": 246.15,
+      "actual_close": 243.62,
+      "prior_close": 245.98,
+      "anchor": null,
+      "ape": 0.010385025859945822,
+      "baseline_ape": 0.009687217798210267,
+      "pass": false,
+      "pre_open": true
+    },
+    {
+      "date": "2026-07-09",
+      "predicted_close": 243.87,
+      "actual_close": 247.04,
+      "prior_close": 243.62,
+      "anchor": null,
+      "ape": 0.012831930051813422,
+      "baseline_ape": 0.013843911917098396,
+      "pass": false,
+      "pre_open": false
+    },
+    {
+      "date": "2026-07-10",
+      "predicted_close": 246.85,
+      "actual_close": 245.34,
+      "prior_close": 247.04,
+      "anchor": null,
+      "ape": 0.006154724056411473,
+      "baseline_ape": 0.006929159533708277,
+      "pass": true,
+      "pre_open": false
+    },
+    {
+      "date": "2026-07-13",
+      "predicted_close": 243.85,
+      "actual_close": 247.31,
+      "prior_close": 245.34,
+      "anchor": null,
+      "ape": 0.013990538190934487,
+      "baseline_ape": 0.007965711050907763,
+      "pass": false,
+      "pre_open": false
+    },
+    {
+      "date": "2026-07-14",
+      "predicted_close": 247.72,
+      "actual_close": 247.49,
+      "prior_close": 247.31,
+      "anchor": null,
+      "ape": 0.0009293304779990697,
+      "baseline_ape": 0.0007273021132167232,
+      "pass": true,
+      "pre_open": true
+    },
+    {
+      "date": "2026-07-15",
+      "predicted_close": 247.35,
+      "actual_close": 254.96,
+      "prior_close": 247.49,
+      "anchor": null,
+      "ape": 0.029847819265767232,
+      "baseline_ape": 0.029298713523689984,
+      "pass": false,
+      "pre_open": true
+    },
+    {
+      "date": "2026-07-16",
+      "predicted_close": 253.9,
+      "actual_close": 249.89,
+      "prior_close": 254.96,
+      "anchor": null,
+      "ape": 0.016047060706711032,
+      "baseline_ape": 0.02028892712793638,
+      "pass": false,
+      "pre_open": true
+    },
+    {
+      "date": "2026-07-17",
+      "predicted_close": 248.6,
+      "actual_close": 247.23,
+      "prior_close": 249.89,
+      "anchor": null,
+      "ape": 0.0055413986975690836,
+      "baseline_ape": 0.010759212069732625,
+      "pass": true,
+      "pre_open": true
+    },
+    {
+      "date": "2026-07-20",
+      "predicted_close": 246.9,
+      "actual_close": 249.99,
+      "prior_close": 247.23,
+      "anchor": null,
+      "ape": 0.012360494419776805,
+      "baseline_ape": 0.011040441617664784,
+      "pass": false,
+      "pre_open": true
+    },
+    {
+      "date": "2026-07-21",
+      "predicted_close": 251.15,
+      "actual_close": 247.55,
+      "prior_close": 249.99,
+      "anchor": null,
+      "ape": 0.01454251666330032,
+      "baseline_ape": 0.009856594627348001,
+      "pass": false,
+      "pre_open": true
+    },
+    {
+      "date": "2026-07-22",
+      "predicted_close": 247.59,
+      "actual_close": 244.85,
+      "prior_close": 247.55,
+      "anchor": null,
+      "ape": 0.01119052481110888,
+      "baseline_ape": 0.011027159485399294,
+      "pass": false,
+      "pre_open": true
+    },
+    {
+      "date": "2026-07-23",
+      "predicted_close": 243.5,
+      "actual_close": 233.66,
+      "prior_close": 244.85,
+      "anchor": null,
+      "ape": 0.04211247111187197,
+      "baseline_ape": 0.047890096721732424,
+      "pass": false,
+      "pre_open": true
+    },
+    {
+      "date": "2026-07-24",
+      "predicted_close": 234.9,
+      "actual_close": 232.11,
+      "prior_close": 233.66,
+      "anchor": null,
+      "ape": 0.012020162853819275,
+      "baseline_ape": 0.006677868252121765,
+      "pass": false,
+      "pre_open": true
+    },
+    {
+      "date": "2026-07-27",
+      "predicted_close": 232.09,
+      "actual_close": 231.39,
+      "prior_close": 232.11,
+      "anchor": null,
+      "ape": 0.0030251955572843125,
+      "baseline_ape": 0.0031116297160639064,
+      "pass": true,
+      "pre_open": false
+    },
+    {
+      "date": "2026-07-28",
+      "predicted_close": 230.05,
+      "actual_close": 230.86,
+      "prior_close": 231.39,
+      "anchor": null,
+      "ape": 0.0035086199428224995,
+      "baseline_ape": 0.0022957636662911405,
+      "pass": true,
+      "pre_open": true
+    },
+    {
+      "date": "2026-07-29",
+      "predicted_close": 230.55,
+      "actual_close": 226.65,
+      "prior_close": 230.86,
+      "anchor": null,
+      "ape": 0.01720714758438123,
+      "baseline_ape": 0.018574895212883333,
+      "pass": false,
+      "pre_open": true
+    },
+    {
+      "date": "2026-07-30",
+      "predicted_close": 226.35,
+      "actual_close": 235.5,
+      "prior_close": 226.65,
+      "anchor": null,
+      "ape": 0.0388535031847134,
+      "baseline_ape": 0.03757961783439488,
+      "pass": false,
+      "pre_open": true
+    },
+    {
+      "date": "2026-07-31",
+      "predicted_close": 235.7,
+      "actual_close": 271.5799865722656,
+      "prior_close": 235.5,
+      "anchor": null,
+      "ape": 0.1321157240823348,
+      "baseline_ape": 0.13285215537288858,
+      "pass": false,
+      "pre_open": true
+    },
+    {
+      "date": "2026-08-03",
+      "predicted_close": 284.56,
+      "actual_close": 284.02,
+      "prior_close": 284.45,
+      "anchor": null,
+      "ape": 0.0019012745581297814,
+      "baseline_ape": 0.0015139778888810889,
+      "pass": true,
+      "pre_open": false
+    },
+    {
+      "date": "2026-08-04",
+      "predicted_close": 283.69,
+      "actual_close": 277.42,
+      "prior_close": 284.02,
+      "anchor": null,
+      "ape": 0.022601110229976143,
+      "baseline_ape": 0.023790642347343256,
+      "pass": false,
+      "pre_open": true
+    },
+    {
+      "date": "2026-08-05",
+      "predicted_close": 276.3,
+      "actual_close": 272.65,
+      "prior_close": 277.42,
+      "anchor": null,
+      "ape": 0.01338712635246666,
+      "baseline_ape": 0.017494956904456405,
+      "pass": false,
+      "pre_open": true
+    },
+    {
+      "date": "2026-08-06",
+      "predicted_close": 270.35,
+      "actual_close": 272.260009765625,
+      "prior_close": 272.65,
+      "anchor": null,
+      "ape": 0.00701538858853788,
+      "baseline_ape": 0.0014324183515261764,
+      "pass": true,
+      "pre_open": true
+    },
+    {
+      "date": "2026-08-07",
+      "predicted_close": 271.81,
+      "actual_close": 274.48,
+      "prior_close": 272.26,
+      "anchor": null,
+      "ape": 0.009727484698338734,
+      "baseline_ape": 0.008088020985135627,
+      "pass": true,
+      "pre_open": true
+    },
+    {
+      "date": "2026-08-10",
+      "predicted_close": 274.29,
+      "actual_close": 278.09,
+      "prior_close": 274.48,
+      "anchor": null,
+      "ape": 0.013664640943579255,
+      "baseline_ape": 0.012981408896400292,
+      "pass": false,
+      "pre_open": true
+    },
+    {
+      "date": "2026-08-11",
+      "predicted_close": 278.15,
+      "actual_close": 272.27,
+      "prior_close": 278.09,
+      "anchor": null,
+      "ape": 0.02159620964483783,
+      "baseline_ape": 0.021375840158666008,
+      "pass": false,
+      "pre_open": true
+    },
+    {
+      "date": "2026-08-12",
+      "predicted_close": 272.01,
+      "actual_close": 267.28,
+      "prior_close": 272.27,
+      "anchor": null,
+      "ape": 0.017696797366058135,
+      "baseline_ape": 0.018669560011972498,
+      "pass": false,
+      "pre_open": true
+    },
+    {
+      "date": "2026-08-13",
+      "predicted_close": 266.56,
+      "actual_close": 265.13,
+      "prior_close": 267.28,
+      "anchor": null,
+      "ape": 0.005393580507675506,
+      "baseline_ape": 0.008109229434616895,
+      "pass": true,
+      "pre_open": true
+    },
+    {
+      "date": "2026-08-14",
+      "predicted_close": 264.05,
+      "actual_close": 262.65,
+      "prior_close": 265.13,
+      "anchor": null,
+      "ape": 0.005330287454787871,
+      "baseline_ape": 0.009442223491338353,
+      "pass": true,
+      "pre_open": true
+    },
+    {
+      "date": "2026-08-17",
+      "predicted_close": 262.9,
+      "actual_close": 261.31,
+      "prior_close": 262.65,
+      "anchor": null,
+      "ape": 0.006084726952661494,
+      "baseline_ape": 0.005128008878343634,
+      "pass": true,
+      "pre_open": true
+    },
+    {
+      "date": "2026-08-18",
+      "predicted_close": 259.85,
+      "actual_close": 259.45,
+      "prior_close": 261.31,
+      "anchor": null,
+      "ape": 0.001541722875313294,
+      "baseline_ape": 0.007169011370206258,
+      "pass": true,
+      "pre_open": true
+    },
+    {
+      "date": "2026-08-19",
+      "predicted_close": 258.15,
+      "actual_close": 265.84,
+      "prior_close": 259.45,
+      "anchor": null,
+      "ape": 0.028927174240144442,
+      "baseline_ape": 0.024037014745711658,
+      "pass": false,
+      "pre_open": true
+    },
+    {
+      "date": "2026-08-20",
+      "predicted_close": 265.91,
+      "actual_close": 260.11,
+      "prior_close": 265.84,
+      "anchor": null,
+      "ape": 0.02229825842912618,
+      "baseline_ape": 0.022029141517050328,
+      "pass": false,
+      "pre_open": true
+    },
+    {
+      "date": "2026-08-21",
+      "predicted_close": 260.35,
+      "actual_close": 258.63,
+      "prior_close": 260.11,
+      "anchor": null,
+      "ape": 0.006650427251285726,
+      "baseline_ape": 0.005722460658083046,
+      "pass": true,
+      "pre_open": true
+    },
+    {
+      "date": "2026-08-24",
+      "predicted_close": 258.49,
+      "actual_close": 262.07,
+      "prior_close": 258.63,
+      "anchor": null,
+      "ape": 0.013660472392872073,
+      "baseline_ape": 0.013126263975273774,
+      "pass": false,
+      "pre_open": true
+    },
+    {
+      "date": "2026-08-25",
+      "predicted_close": 262.95,
+      "actual_close": 261.06,
+      "prior_close": 262.07,
+      "anchor": null,
+      "ape": 0.007239715008044076,
+      "baseline_ape": 0.0038688424117060863,
+      "pass": true,
+      "pre_open": true
+    },
+    {
+      "date": "2026-08-26",
+      "predicted_close": 260.35,
+      "actual_close": 260.28,
+      "prior_close": 261.06,
+      "anchor": null,
+      "ape": 0.00026894114031062713,
+      "baseline_ape": 0.0029967727063163886,
+      "pass": true,
+      "pre_open": true
+    },
+    {
+      "date": "2026-08-27",
+      "predicted_close": 256.85,
+      "actual_close": 256.26,
+      "prior_close": 256.26,
+      "anchor": null,
+      "ape": 0.002302349176617622,
+      "baseline_ape": 0.0,
+      "pass": true,
+      "pre_open": false
+    },
+    {
+      "date": "2026-08-28",
+      "predicted_close": 265.99,
+      "actual_close": 266.43,
+      "prior_close": 266.43,
+      "anchor": null,
+      "ape": 0.0016514656757872525,
+      "baseline_ape": 0.0,
+      "pass": true,
+      "pre_open": false
+    },
+    {
+      "date": "2026-08-31",
+      "predicted_close": 265.87,
+      "actual_close": 259.77,
+      "prior_close": 266.43,
+      "anchor": null,
+      "ape": 0.02348231127535906,
+      "baseline_ape": 0.025638064441621533,
+      "pass": false,
+      "pre_open": false
+    },
+    {
+      "date": "2026-09-01",
+      "predicted_close": 258.91,
+      "actual_close": 254.92,
+      "prior_close": 259.77,
+      "anchor": null,
+      "ape": 0.015651969245253562,
+      "baseline_ape": 0.01902557665149849,
+      "pass": false,
+      "pre_open": false
+    },
+    {
+      "date": "2026-09-02",
+      "predicted_close": 253.69,
+      "actual_close": 254.98,
+      "prior_close": 254.92,
+      "anchor": null,
+      "ape": 0.005059220331006323,
+      "baseline_ape": 0.00023531257353518815,
+      "pass": true,
+      "pre_open": false
+    },
+    {
+      "date": "2026-09-03",
+      "predicted_close": 254.7,
+      "actual_close": 258.9,
+      "prior_close": 254.98,
+      "anchor": null,
+      "ape": 0.016222479721900305,
+      "baseline_ape": 0.01514098107377361,
+      "pass": false,
+      "pre_open": false
+    },
+    {
+      "date": "2026-09-04",
+      "predicted_close": 258.82,
+      "actual_close": 258.51,
+      "prior_close": 258.9,
+      "anchor": null,
+      "ape": 0.0011991799156705824,
+      "baseline_ape": 0.0015086457003597013,
+      "pass": true,
+      "pre_open": false
+    },
+    {
+      "date": "2026-09-08",
+      "predicted_close": 258.28,
+      "actual_close": 256.97,
+      "prior_close": 258.51,
+      "anchor": null,
+      "ape": 0.005097871346849614,
+      "baseline_ape": 0.005992917461182097,
+      "pass": true,
+      "pre_open": false
+    },
+    {
+      "date": "2026-09-09",
+      "predicted_close": 256.44,
+      "actual_close": 252.4,
+      "prior_close": 256.97,
+      "anchor": null,
+      "ape": 0.0160063391442155,
+      "baseline_ape": 0.018106180665610226,
+      "pass": false,
+      "pre_open": false
+    },
+    {
+      "date": "2026-09-10",
+      "predicted_close": 251.35,
+      "actual_close": 251.89,
+      "prior_close": 252.4,
+      "anchor": null,
+      "ape": 0.0021437929254833144,
+      "baseline_ape": 0.0020246933185121257,
+      "pass": true,
+      "pre_open": false
+    },
+    {
+      "date": "2026-09-11",
+      "predicted_close": 251.72,
+      "actual_close": 256.78,
+      "prior_close": 251.89,
+      "anchor": null,
+      "ape": 0.019705584547083006,
+      "baseline_ape": 0.01904353921644983,
+      "pass": false,
+      "pre_open": false
+    },
+    {
+      "date": "2026-09-14",
+      "predicted_close": 255.6,
+      "actual_close": 253.54,
+      "prior_close": 256.78,
+      "anchor": null,
+      "ape": 0.008124950698114706,
+      "baseline_ape": 0.012779048670821096,
+      "pass": true,
+      "pre_open": false
+    },
+    {
+      "date": "2026-09-15",
+      "predicted_close": 252.45,
+      "actual_close": 248.42,
+      "prior_close": 253.54,
+      "anchor": null,
+      "ape": 0.016222526366637152,
+      "baseline_ape": 0.02061025682312215,
+      "pass": false,
+      "pre_open": false
+    },
+    {
+      "date": "2026-09-16",
+      "predicted_close": 247.05,
+      "actual_close": 245.96,
+      "prior_close": 248.42,
+      "anchor": null,
+      "ape": 0.00443161489673119,
+      "baseline_ape": 0.010001626280695964,
+      "pass": true,
+      "pre_open": false
+    },
+    {
+      "date": "2026-09-17",
+      "predicted_close": 245.1,
+      "actual_close": 251.19,
+      "prior_close": 245.96,
+      "anchor": null,
+      "ape": 0.024244595724352096,
+      "baseline_ape": 0.020820892551455035,
+      "pass": false,
+      "pre_open": false
+    },
+    {
+      "date": "2026-09-18",
+      "predicted_close": 251.27,
+      "actual_close": 253.71,
+      "prior_close": 251.19,
+      "anchor": null,
+      "ape": 0.009617279571163918,
+      "baseline_ape": 0.009932600212841473,
+      "pass": true,
+      "pre_open": false
+    },
+    {
+      "date": "2026-09-21",
+      "predicted_close": 255.15,
+      "actual_close": 258.45,
+      "prior_close": 253.71,
+      "anchor": null,
+      "ape": 0.012768427161926806,
+      "baseline_ape": 0.018340104468949434,
+      "pass": false,
+      "pre_open": false
+    },
+    {
+      "date": "2026-09-22",
+      "predicted_close": 259.42,
+      "actual_close": 254.98,
+      "prior_close": 258.45,
+      "anchor": null,
+      "ape": 0.017413130441603367,
+      "baseline_ape": 0.013608910502784528,
+      "pass": false,
+      "pre_open": false
+    },
+    {
+      "date": "2026-09-23",
+      "predicted_close": 252.85,
+      "actual_close": 249.27,
+      "prior_close": 254.98,
+      "anchor": null,
+      "ape": 0.01436193685561834,
+      "baseline_ape": 0.022906888113290728,
+      "pass": false,
+      "pre_open": false
+    },
+    {
+      "date": "2026-09-24",
+      "predicted_close": 249.36,
+      "actual_close": 249.38,
+      "prior_close": 249.27,
+      "anchor": null,
+      "ape": 8.019889325520013e-05,
+      "baseline_ape": 0.0004410939129039427,
+      "pass": true,
+      "pre_open": false
+    }
+  ],
+  "pending": {
+    "date": "2026-09-25",
+    "created_at": "2026-09-25T15:55:38.165647+00:00",
+    "prior_close": 249.38,
+    "predicted_close": 249.05,
+    "predicted_direction": "down",
+    "confidence": 0.42,
+    "weights": {
+      "news": 0.34,
+      "contrarian": 0.24,
+      "technical": 0.16,
+      "momentum": 0.16,
+      "macro": 0.1
+    },
+    "analyst_predictions": {
+      "momentum": {
+        "predicted_close": 247.5,
+        "direction": "down",
+        "confidence": 0.55,
+        "rationale": "The 5d and 20d momentum are both negative (-0.72% and -4.19%), RSI at 39.3 is in weak territory, price is below all key SMAs (5/20/50), and yesterday's session closed near the low after a multi-day downtrend \u2014 trend-following signals point to continued selling pressure with no pre-market gap to interrupt the momentum."
+      },
+      "technical": {
+        "predicted_close": 247.85,
+        "direction": "down",
+        "confidence": 0.58,
+        "rationale": "RSI at 39.3 is weak and trending toward oversold, price sits ~2% below both SMA20 and SMA50 with no pre-market catalyst to reverse the recent downtrend (-4.2% over 20d), and yesterday's close already showed sellers retesting the 245-249 support zone; the path of least resistance is a modest continuation lower toward the 247-248 range where the prior session's intraday lows provided temporary support."
+      },
+      "contrarian": {
+        "predicted_close": 251.2,
+        "direction": "up",
+        "confidence": 0.55,
+        "rationale": "RSI at 39.3 is oversold territory and price sits ~2% below both SMA20 and SMA50, creating mean-reversion conditions that favor a bounce; the recent 5-day return of -0.72% and the prior session's consolidation near 249 suggest selling pressure is exhausting, and with no premarket gap to fade, a modest upward reversion toward the 251-252 zone is the contrarian call."
+      },
+      "macro": {
+        "predicted_close": 247.5,
+        "direction": "down",
+        "confidence": 0.55,
+        "rationale": "AMZN sits below all major SMAs (5/20/50), RSI at 39.3 signals continued bearish momentum, the recent 5-day return is negative, and the 20-day trend shows -4.2% drift with no pre-market catalyst to reverse the downtrend. With no gap and persistent selling pressure after yesterday's modest bounce, the path of least resistance is modestly lower toward the 245-248 zone."
+      },
+      "news": {
+        "predicted_close": 247.8,
+        "direction": "down",
+        "confidence": 0.54,
+        "rationale": "Intraday price faded sharply from $251.50 to ~$248.21 on below-average volume, with AMZN repeatedly slipping on positive news (seller tool, Indiana facility) and yesterday's $3B India capex overhang still weighing; Nasdaq futures are mildly green on easing oil but the 66% Oct rate-hike probability and RSI of 39 with no meaningful bounce catalyst argue for a continued drift lower into the close."
+      }
+    },
+    "rationale": "Four analysts cluster bearish on identical RSI/SMA/momentum inputs (247.5-247.85) \u2014 correlated single-signal risk that has repeatedly overshot the downside on choppy oversold days. With zero premarket gap, RSI ~39, and no fresh catalyst, the strategy notes and recent PASS days (09-24 bullseye near prior_close) argue for pinning close to the anchor and boosting the contrarian dissenter. News (best scorecard) leans mildly down but on soft evidence, so I shade only slightly below prior close and keep confidence low given the directional-agreement gate. [gates: none; consensus 0.80; rolling edge 0.22%]",
+    "gates_applied": [],
+    "quote_source": "alphavantage",
+    "status": "pending",
+    "actual_close": null,
+    "late_minutes": 145
+  },
+  "updated_count": 101
+}

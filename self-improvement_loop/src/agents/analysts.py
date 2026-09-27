@@ -1,0 +1,254 @@
+"""Strategy analysts — the creative core of the ensemble.
+
+Five distinct lenses each produce an independent prediction of today's AMZN close as strict JSON:
+  - technical   : moving averages, RSI, support/resistance
+  - momentum    : trend continuation from recent returns
+  - contrarian  : mean-reversion / fade-the-move
+  - news        : catalysts via the Anthropic server-side web_search tool (earnings, macro, sentiment)
+  - macro       : index/sector correlation, rates, broad-market regime
+
+Each analyst returns: {predicted_close, direction, confidence, rationale}.
+A failing analyst is dropped (None) so the meta-judge proceeds with the survivors.
+When no ANTHROPIC_API_KEY is set (dry-run/tests), a deterministic feature-driven stub is used.
+"""
+
+from __future__ import annotations
+
+import json
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+from ..config import settings
+from ..utils import extract_json, safe_float
+
+# strategy name -> (description, persona/system framing, uses_web_search)
+ANALYSTS: dict[str, dict] = {
+    "technical": {
+        "uses_web": False,
+        "system": (
+            "You are a disciplined technical analyst. Predict the target session's AMZN "
+            "regular-session CLOSE using moving averages, RSI, support/resistance, and the "
+            "pre-open gap. Weight the most recent price action. Be precise and avoid round "
+            "numbers unless justified."
+        ),
+    },
+    "momentum": {
+        "uses_web": False,
+        "system": (
+            "You are a momentum/trend-following analyst. Predict the target session's AMZN CLOSE "
+            "assuming the prevailing short-term trend (1d/5d/20d returns) tends to persist. "
+            "Extrapolate carefully from recent returns and the pre-open gap."
+        ),
+    },
+    "contrarian": {
+        "uses_web": False,
+        "system": (
+            "You are a mean-reversion/contrarian analyst. Predict the target session's AMZN CLOSE "
+            "assuming overextended moves (high RSI, large distance from SMA20/50, big gaps) tend "
+            "to revert. Fade stretched conditions; respect the trend when conditions are neutral."
+        ),
+    },
+    "news": {
+        "uses_web": True,
+        "max_tokens": 4096,  # web_search reasoning is token-heavy; avoid truncating the final JSON
+        "system": (
+            "You are a catalyst-driven equity analyst. Use AT MOST 2 web searches to find the latest "
+            "AMZN news, earnings timing, analyst actions, and macro events relevant to the target "
+            "session, plus index futures sentiment. Then predict the target session's AMZN "
+            "regular-session CLOSE. Anchor on the latest pre-open price when there is one (else the "
+            "prior close); adjust only for catalysts it does not already reflect. Keep reasoning "
+            "brief. Your FINAL message must be ONLY the JSON object — no prose after it."
+        ),
+    },
+    "macro": {
+        "uses_web": False,
+        "system": (
+            "You are a macro/cross-asset analyst. Predict the target session's AMZN CLOSE by "
+            "reasoning about the broad-market regime (S&P 500 / Nasdaq direction, rates, risk "
+            "sentiment) and AMZN's typical beta to tech. Use the pre-open gap as the session's "
+            "opening risk signal."
+        ),
+    },
+}
+
+_JSON_INSTRUCTION = (
+    "Respond with ONLY a JSON object, no prose, of the form:\n"
+    '{"predicted_close": <number>, "direction": "up"|"down", '
+    '"confidence": <0..1>, "rationale": "<one or two sentences>"}\n'
+    'where direction is relative to the prior close.'
+)
+
+
+def _features_prompt(features: dict, context_block: str = "") -> str:
+    payload = {k: v for k, v in features.items() if k not in ("recent_ohlc", "anchor")}
+    ctx = f"{context_block}\n\n" if context_block else ""
+    pre_open = features.get("premarket_last")
+    pre_open_line = (f"{pre_open} (as of {features.get('premarket_asof')})" if pre_open else
+                     "none — no after-hours/pre-market trade seen yet; the gap is unknown, not zero")
+    return (
+        f"Symbol: {settings.SYMBOL}\n"
+        f"Target session: {features.get('target_session') or 'the next regular session'} "
+        f"(predict ITS regular-session close)\n"
+        f"Forecast made at (UTC): {features.get('forecast_made_at') or 'now'}\n"
+        f"Prior close (last completed session): {features.get('prev_close')}\n"
+        f"Latest pre-open price: {pre_open_line}\n"
+        f"Technical features (JSON):\n{json.dumps(payload, indent=2)}\n\n"
+        f"Recent daily OHLCV:\n{features.get('recent_ohlc')}\n\n"
+        f"{ctx}"
+        f"{_JSON_INSTRUCTION}"
+    )
+
+
+def _context_block(name: str, context: dict | None) -> str:
+    """Learning feedback into the analyst layer: own track record + desk failure patterns.
+
+    Without this, analysts are frozen — only the judge's weights adapt, and the diagnosed
+    root cause (all lenses converging on the same timid consensus) can never be corrected.
+    """
+    if not context:
+        return ""
+    parts = []
+    card = (context.get("scorecards") or {}).get(name) or {}
+    if card.get("n"):
+        parts.append(
+            f"Your track record over {card['n']} scored days: closest-analyst rate "
+            f"{card.get('hit_rate', 0.0):.0%}, MAPE {card.get('mape', 0.0) * 100:.2f}%."
+        )
+    wnw = (context.get("whats_not_working") or "").strip()
+    if wnw:
+        parts.append(f"Desk failure review — recurring mistakes to avoid repeating:\n{wnw[:1500]}")
+    parts.append(
+        "Reason strictly from YOUR lens and commit to it. The desk's most repeated failure is "
+        "every analyst clustering on the same timid consensus near the prior close; if your "
+        "signals point to a real move, size it honestly and call the direction explicitly."
+    )
+    return "\n\n".join(parts)
+
+
+def _stub_prediction(name: str, features: dict) -> dict:
+    """Deterministic offline prediction so the pipeline runs without an API key."""
+    prev = float(features.get("prev_close") or 0.0)
+    gap = float(features.get("premarket_gap_pct") or 0.0)
+    ret5 = float(features.get("ret_5d") or 0.0)
+    rsi = float(features.get("rsi_14") or 50.0)
+    nudges = {
+        "technical": gap * 0.5,
+        "momentum": (ret5 / 5.0) + gap * 0.6,
+        "contrarian": -(rsi - 50.0) / 5000.0 - gap * 0.3,
+        "news": gap * 0.4,
+        "macro": gap * 0.5 + ret5 * 0.05,
+    }
+    pred = round(prev * (1.0 + nudges.get(name, 0.0)), 2)
+    return {
+        "predicted_close": pred,
+        "direction": "up" if pred > prev else "down",
+        "confidence": 0.5,
+        "rationale": f"[stub:{name}] prev_close adjusted by feature heuristic (offline mode).",
+    }
+
+
+def _normalize(raw: dict, prev_close: float) -> dict | None:
+    pred = safe_float(raw.get("predicted_close"))
+    if pred is None or pred <= 0:
+        return None
+    direction = raw.get("direction")
+    if direction not in ("up", "down"):
+        direction = "up" if pred > prev_close else "down"
+    conf = safe_float(raw.get("confidence"), 0.5)
+    conf = max(0.0, min(1.0, conf if conf is not None else 0.5))
+    return {
+        "predicted_close": round(pred, 2),
+        "direction": direction,
+        "confidence": round(conf, 3),
+        "rationale": str(raw.get("rationale", ""))[:600],
+    }
+
+
+def _extract_from_blocks(resp) -> dict:
+    """Parse the analyst JSON from a response that may contain many text blocks.
+
+    With web_search the model emits interleaved reasoning + tool-result summaries as separate text
+    blocks; the JSON answer is the final one. Try blocks newest-first, then the concatenation.
+    """
+    blocks = [b.text for b in resp.content if getattr(b, "type", None) == "text" and b.text.strip()]
+    for text in reversed(blocks):
+        try:
+            return extract_json(text)
+        except ValueError:
+            continue
+    return extract_json("".join(blocks))
+
+
+def count_web_results(resp) -> int:
+    """Search results the model actually received.
+
+    Server-tool failures come back as content blocks, not exceptions, so a search that returned
+    nothing still yields clean JSON; recording the count makes that visible (review P1.4).
+    """
+    n = 0
+    for block in getattr(resp, "content", None) or []:
+        if getattr(block, "type", None) == "web_search_tool_result":
+            content = getattr(block, "content", None)
+            if isinstance(content, list):
+                n += len(content)
+    return n
+
+
+def _run_one(client, name: str, spec: dict, features: dict, context: dict | None = None) -> dict | None:
+    prev = float(features.get("prev_close") or 0.0)
+    if client is None:
+        return _normalize(_stub_prediction(name, features), prev)
+    try:
+        kwargs = dict(
+            model=settings.ANALYST_MODEL,
+            max_tokens=spec.get("max_tokens", settings.ANALYST_MAX_TOKENS),
+            system=spec["system"],
+            messages=[{"role": "user",
+                       "content": _features_prompt(features, _context_block(name, context))}],
+        )
+        if spec.get("uses_web"):
+            kwargs["tools"] = [
+                {"type": "web_search_20250305", "name": "web_search", "max_uses": 2}
+            ]
+        resp = client.messages.create(**kwargs)
+        pred = _normalize(_extract_from_blocks(resp), prev)
+        if pred is not None and spec.get("uses_web"):
+            pred["web_results"] = count_web_results(resp)
+        return pred
+    except Exception:
+        return None
+
+
+def run_analysts(features: dict, client=None, context: dict | None = None) -> dict:
+    """Run all analysts (in parallel when a client is provided). Returns {name: prediction}.
+
+    `context` carries the learning loop into the analyst layer:
+    {"scorecards": {...}, "whats_not_working": "<markdown>"}.
+    """
+    if client is None:
+        return {
+            name: pred
+            for name, spec in ANALYSTS.items()
+            if (pred := _run_one(None, name, spec, features)) is not None
+        }
+
+    results: dict[str, dict] = {}
+    with ThreadPoolExecutor(max_workers=len(ANALYSTS)) as pool:
+        futures = {
+            pool.submit(_run_one, client, name, spec, features, context): name
+            for name, spec in ANALYSTS.items()
+        }
+        for fut in as_completed(futures):
+            name = futures[fut]
+            pred = fut.result()
+            if pred is not None:
+                results[name] = pred
+    return results
+
+
+def get_client():
+    """Return an Anthropic client if a key is set, else None (dry-run/stub mode)."""
+    if not settings.anthropic_api_key:
+        return None
+    import anthropic
+
+    return anthropic.Anthropic()

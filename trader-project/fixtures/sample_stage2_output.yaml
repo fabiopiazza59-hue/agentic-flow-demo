@@ -1,0 +1,125 @@
+run_id: "test-001"
+scenarios:
+  - scenario_id: "S-001"
+    parent_theme_id: "T-001"
+    direction: long
+    instrument: "MU"
+    instrument_class: equity
+    thesis_summary: "Micron is the primary beneficiary of the HBM ramp cycle. HBM3E revenue is accelerating faster than consensus models. Q4 earnings on June 24 will reveal upward revisions to HBM capacity and pricing. Memory cycle is early-innings with AI-driven demand creating a structural floor."
+    proposed_horizon: weeks
+    proposed_catalyst: "Q4 earnings report June 24, 2026 — expected HBM revenue beat"
+    proposed_kill: "MU breaks below $245 (200-day MA) or HBM pricing data shows discounting"
+    key_data_points:
+      - claim: "HBM3E revenue grew 80% QoQ in Q3"
+        source: "Micron Q3 earnings transcript"
+        url: "https://example.com/mu-q3"
+      - claim: "SK Hynix raised HBM prices 15% for Q4 contracts"
+        source: "Reuters"
+        url: "https://example.com/hynix-pricing"
+    why_this_expression: "Highest HBM revenue concentration among memory names; SK Hynix is Korean-listed (less liquid for CFD), Samsung memory is bundled with conglomerate"
+    alternative_expressions: ["SOXX", "AMAT"]
+
+  - scenario_id: "S-002"
+    parent_theme_id: "T-001"
+    direction: long
+    instrument: "AMAT"
+    instrument_class: equity
+    thesis_summary: "Applied Materials supplies etch and deposition tools critical to HBM manufacturing. As TSMC and Samsung expand HBM capacity, AMAT's advanced packaging revenue should accelerate. Secondary play on the same theme as MU but upstream in the value chain."
+    proposed_horizon: months
+    proposed_catalyst: "AMAT Q3 earnings August 2026 — advanced packaging segment growth"
+    proposed_kill: "AMAT drops below $180 or semiconductor capex guidance cuts from major foundries"
+    key_data_points:
+      - claim: "AMAT advanced packaging revenue up 35% YoY"
+        source: "AMAT Q2 earnings call"
+        url: "https://example.com/amat-q2"
+    why_this_expression: "Purest equipment play on HBM capacity buildout; LRCX also exposed but less concentrated"
+    alternative_expressions: ["LRCX", "KLAC"]
+
+  - scenario_id: "S-003"
+    parent_theme_id: "T-002"
+    direction: short
+    instrument: "KRE"
+    instrument_class: etf
+    thesis_summary: "Regional banks face a CRE refinancing wall in Q3-Q4 2026. $480B in office CRE loans maturing, many underwater. KRE constituents have outsized CRE exposure relative to money-center banks. Rising deposit costs compressing NIMs further."
+    proposed_horizon: months
+    proposed_catalyst: "Q3 2026 CRE maturity wave begins July — first defaults expected August"
+    proposed_kill: "Fed cuts 50bps or more, flattening the refi pressure; KRE breaks above $52"
+    key_data_points:
+      - claim: "$480B in CRE loans mature in H2 2026"
+        source: "Trepp CRE data"
+        url: "https://example.com/trepp-cre"
+      - claim: "Regional bank NIM compression accelerating — Q2 average NIM 2.8% vs 3.2% a year ago"
+        source: "FDIC quarterly report"
+        url: "https://example.com/fdic-q2"
+      - claim: "Office vacancy rate 19.5%, highest since 1991"
+        source: "CBRE Q2 report"
+        url: "https://example.com/cbre-vacancy"
+    why_this_expression: "ETF gives broad regional exposure without single-name risk; individual regionals too illiquid for $2k CFD account"
+    alternative_expressions: ["NYCB", "WAL"]
+
+  - scenario_id: "S-004"
+    parent_theme_id: "T-003"
+    direction: long
+    instrument: "CCJ"
+    instrument_class: equity
+    thesis_summary: "Nuclear renaissance driven by AI data center power demand. Cameco is the largest publicly traded uranium producer. Utility long-term contracts being signed at higher prices. NRC permitting backlog clearing faster than expected."
+    proposed_horizon: months
+    proposed_catalyst: "NRC new plant approvals expected Q3 2026; utility contracting season ongoing"
+    proposed_kill: "Uranium spot drops below $70/lb or major nuclear project cancelled"
+    key_data_points:
+      - claim: "Uranium spot at $92/lb, up 40% YoY"
+        source: "UxC"
+        url: "https://example.com/uxc-spot"
+      - claim: "Microsoft and Amazon signed nuclear PPAs for data centers"
+        source: "Bloomberg"
+        url: "https://example.com/nuclear-ppa"
+    why_this_expression: "Largest pure-play uranium producer; OKLO and NNE are pre-revenue SMR plays with higher risk"
+    alternative_expressions: ["NNE", "OKLO", "URA"]
+
+  - scenario_id: "S-005"
+    parent_theme_id: "T-003"
+    direction: long
+    instrument: "OKLO"
+    instrument_class: equity
+    thesis_summary: "Oklo is developing small modular reactors for on-site data center power. Pre-revenue but has LOIs from hyperscalers. High-beta expression of the nuclear theme with multi-bagger potential if NRC approval comes through."
+    proposed_horizon: months
+    proposed_catalyst: "NRC combined license application decision expected late 2026"
+    proposed_kill: "NRC rejection or major design setback; stock below $15"
+    key_data_points:
+      - claim: "Oklo has $6B in LOIs from tech companies"
+        source: "Oklo investor presentation"
+        url: "https://example.com/oklo-ir"
+    why_this_expression: "Highest upside if SMR thesis plays out; most direct AI-power-demand play"
+    alternative_expressions: ["NNE", "CCJ"]
+
+  - scenario_id: "S-006"
+    parent_theme_id: "T-004"
+    direction: long
+    instrument: "NVDA"
+    instrument_class: equity
+    thesis_summary: "NVIDIA continues to dominate AI accelerator market. Blackwell ramp is ahead of schedule. Data center revenue expected to exceed $50B next quarter. Valuation stretched but momentum strong."
+    proposed_horizon: weeks
+    proposed_catalyst: "No specific near-term catalyst identified"
+    proposed_kill: "NVDA below $110 or major hyperscaler capex cut announcement"
+    key_data_points:
+      - claim: "NVDA data center revenue $47B in last quarter"
+        source: "NVIDIA earnings"
+        url: "https://example.com/nvda-q1"
+    why_this_expression: "Dominant market position in AI accelerators"
+    alternative_expressions: ["AMD", "AVGO"]
+
+  - scenario_id: "S-007"
+    parent_theme_id: "T-005"
+    direction: long
+    instrument: "GLD"
+    instrument_class: etf
+    thesis_summary: "Central bank gold buying continues at record pace. De-dollarization trend accelerating. Gold is a hedge against fiscal expansion and geopolitical uncertainty. ETF inflows turning positive after months of outflows."
+    proposed_horizon: months
+    proposed_catalyst: "Eventually central banks will keep buying"
+    proposed_kill: "Fed hikes rates or dollar surges above DXY 110"
+    key_data_points:
+      - claim: "Central bank gold purchases 1,100 tonnes in 2025, on pace for similar in 2026"
+        source: "World Gold Council"
+        url: "https://example.com/wgc-demand"
+    why_this_expression: "Most liquid gold ETF for CFD trading"
+    alternative_expressions: ["IAU", "GDX"]

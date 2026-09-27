@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AMZN Daily Close Predictor — Live Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <style>
+    :root { --bg:#0b1020; --card:#141b2e; --ink:#e8ecf6; --muted:#93a0bd; --good:#37d399; --bad:#ff6b6b; --accent:#5b8cff; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; background:var(--bg); color:var(--ink); }
+    header { padding:28px 24px 8px; }
+    h1 { margin:0; font-size:24px; }
+    .sub { color:var(--muted); font-size:13px; margin-top:6px; }
+    .verdict { margin:16px 24px; padding:16px 18px; border-radius:12px; background:var(--card); font-size:16px; font-weight:600; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:14px; padding:0 24px; }
+    .kpi { background:var(--card); border-radius:12px; padding:16px; }
+    .kpi .label { color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.04em; }
+    .kpi .value { font-size:26px; font-weight:700; margin-top:6px; }
+    .charts { display:grid; grid-template-columns:1fr; gap:18px; padding:22px 24px; }
+    @media(min-width:900px){ .charts{ grid-template-columns:1fr 1fr; } .full{ grid-column:1/3; } }
+    .card { background:var(--card); border-radius:12px; padding:16px; }
+    .card h3 { margin:0 0 10px; font-size:14px; color:var(--muted); font-weight:600; }
+    footer { color:var(--muted); font-size:12px; padding:8px 24px 30px; }
+    .good{color:var(--good);} .bad{color:var(--bad);}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>📈 AMZN Daily Close Predictor</h1>
+    <div class="sub">Self-improving agentic loop · verdicts use pre-open forecasts only, with anytime-valid 95% confidence sequences · <span id="updated"></span></div>
+  </header>
+  <div class="verdict" id="verdict">Loading…</div>
+  <div class="verdict" id="abVerdict" style="display:none"></div>
+  <div class="grid" id="kpis"></div>
+  <div class="grid" id="abKpis" style="margin-top:14px"></div>
+  <div class="charts">
+    <div class="card full"><h3>Predicted vs Actual close</h3><canvas id="priceChart" height="120"></canvas></div>
+    <div class="card"><h3>Absolute % error vs random-walk baseline</h3><canvas id="apeChart" height="160"></canvas></div>
+    <div class="card"><h3>Per-strategy MAPE (lower = better)</h3><canvas id="stratChart" height="160"></canvas></div>
+  </div>
+  <footer>Research experiment, not financial advice. Data: Alpha Vantage / yfinance / Finnhub · Forecasts: Claude.</footer>
+
+  <script>
+    const pct = x => (x==null? "—" : (x*100).toFixed(2)+"%");
+    const num = x => (x==null? "—" : (+x).toFixed(2));
+    async function load() {
+      const m = await (await fetch("./data.json?cb="+Date.now())).json();
+      document.getElementById("updated").textContent = "scored days: " + (m.all_time?.n_all_time ?? 0);
+      // Verdict: all-time, pre-open forecasts only, anytime-valid 95% confidence sequence on the
+      // paired daily gain over the free baseline (latest pre-open trade, else the prior close).
+      const a = m.all_time_pre_open || m.all_time || {};
+      const va = (m.value_added || {}).vs_free_baseline || {};
+      const pr = m.probabilistic || {};
+      const cs = (va.lo!=null) ? `anytime-valid 95% CS [${pct(va.lo)}, ${pct(va.hi)}]` : "too few days";
+      const v = document.getElementById("verdict");
+      if (!va.n || va.decision==="insufficient") { v.textContent = "⏳ Not enough pre-open scored days to judge the model yet."; }
+      else if (va.decision==="positive") { v.innerHTML = `✅ <span class="good">Edge confirmed</span> — all-time MAPE ${pct(a.mape)} beats the free baseline ${pct(a.anchor_mape)} over ${va.n} pre-open days (${cs}).`; }
+      else { v.innerHTML = `❌ <span class="bad">No edge yet</span> — all-time MAPE ${pct(a.mape)} vs free baseline ${pct(a.anchor_mape)} over ${va.n} pre-open days (${cs}).`; }
+
+      const cov = m.coverage || {};
+      const kpis = [
+        ["MAPE (pre-open)", pct(a.mape)],
+        ["Free-baseline MAPE", pct(a.anchor_mape)],
+        ["CRPS skill vs baseline", pct(pr.crps_skill_vs_anchor)],
+        ["80% interval coverage", pct(pr.model?.cover80)],
+        ["Direction skill vs RW", pct(pr.direction_brier_skill)],
+        ["Pre-open coverage", cov.n_sessions ? `${cov.n_pre_open}/${cov.n_sessions}` : "—"],
+      ];
+      document.getElementById("kpis").innerHTML = kpis.map(([l,val]) =>
+        `<div class="kpi"><div class="label">${l}</div><div class="value">${val}</div></div>`).join("");
+
+      if (m.ab) {
+        const av = document.getElementById("abVerdict");
+        av.style.display = "block";
+        av.innerHTML = `🅰️/🅱️ <span style="color:var(--accent)">A/B test</span> — ${m.ab.verdict}`;
+        const rb = m.variant_b?.all_time_pre_open || m.variant_b?.rolling || {};
+        const abk = [
+          ["B MAPE (pre-open)", pct(rb.mape)],
+          ["B edge vs baseline", pct(rb.anchor_edge)],
+          ["B directional acc.", pct(rb.directional_accuracy)],
+          ["Clean paired days", m.ab.n_clean ?? "—"],
+          ["B wins", `${m.ab.b_wins ?? "—"}/${m.ab.n_decisive ?? "—"}`],
+        ];
+        document.getElementById("abKpis").innerHTML = abk.map(([l,val]) =>
+          `<div class="kpi"><div class="label">${l}</div><div class="value">${val}</div></div>`).join("");
+      }
+
+      // Charts are progressive enhancement: if the CDN is blocked, the verdict and KPIs above
+      // must still stand instead of being replaced by a load error.
+      if (!window.Chart) return;
+      const s = m.series || [];
+      const labels = s.map(d=>d.date);
+      const bByDate = Object.fromEntries((m.variant_b?.series || []).map(d=>[d.date, d.predicted_close]));
+      const datasets = [
+        { label:"Predicted (A)", data:s.map(d=>d.predicted_close), borderColor:"#5b8cff", tension:.2 },
+        { label:"Actual", data:s.map(d=>d.actual_close), borderColor:"#37d399", tension:.2 },
+      ];
+      if (m.variant_b?.series?.length) {
+        datasets.push({ label:"Predicted (B)", data:labels.map(d=>bByDate[d] ?? null),
+                        borderColor:"#f6c453", borderDash:[6,3], tension:.2 });
+      }
+      new Chart(priceChart, { type:"line", data:{ labels, datasets },
+        options:{ plugins:{legend:{labels:{color:"#e8ecf6"}}}, scales:{x:{ticks:{color:"#93a0bd"}},y:{ticks:{color:"#93a0bd"}}} } });
+
+      new Chart(apeChart, { type:"line", data:{ labels, datasets:[
+        { label:"Model APE", data:s.map(d=>d.ape!=null?d.ape*100:null), borderColor:"#ff6b6b", tension:.2 },
+        { label:"Baseline APE", data:s.map(d=>d.baseline_ape!=null?d.baseline_ape*100:null), borderColor:"#93a0bd", borderDash:[5,4], tension:.2 },
+      ]}, options:{ plugins:{legend:{labels:{color:"#e8ecf6"}}}, scales:{x:{ticks:{color:"#93a0bd"}},y:{ticks:{color:"#93a0bd"}}} } });
+
+      const cards = m.scorecards || {};
+      const names = Object.keys(cards);
+      new Chart(stratChart, { type:"bar", data:{ labels:names, datasets:[
+        { label:"MAPE %", data:names.map(n=>(cards[n].mape||0)*100), backgroundColor:"#5b8cff" },
+      ]}, options:{ plugins:{legend:{display:false}}, scales:{x:{ticks:{color:"#93a0bd"}},y:{ticks:{color:"#93a0bd"}}} } });
+    }
+    load().catch(e => { document.getElementById("verdict").textContent = "No data yet — run the pipeline once."; console.error(e); });
+  </script>
+</body>
+</html>
