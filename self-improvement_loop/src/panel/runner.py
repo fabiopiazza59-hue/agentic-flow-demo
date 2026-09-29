@@ -132,7 +132,7 @@ def research(rows: list[dict], target: date, client, now: datetime | None = None
     shadows = {v["id"]: analyst.adjustments(names, iso, made_at, client, strategy=v["strategy"])
                for v in evolve.challengers(reg)} if client is not None else {}
     state = load_state()
-    created = now_iso()
+    created = now.isoformat()
     new_rows = []
     for s, f in names.items():
         a = adj[s]
@@ -176,7 +176,7 @@ def refresh(rows: list[dict], target: date, now: datetime | None = None) -> list
         return rows
     since = integrity.session_close(previous_trading_day(target).isoformat())
     anchors = data.extended_last([r["symbol"] for r in pending], since, now)
-    stamp, changed, out = now_iso(), 0, []
+    stamp, changed, out = now.isoformat(), 0, []
     for r in rows:
         a = anchors.get(r.get("symbol")) if r.get("date") == iso else None
         new = reanchor_row(r, a, stamp) if a else None
