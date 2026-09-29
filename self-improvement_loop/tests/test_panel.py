@@ -210,3 +210,17 @@ def test_challenger_prompts_run_in_shadow_and_are_scored(monkeypatch, isolated):
         for s in symbols})
     rows = runner.score(rows, datetime(2026, 9, 28, 21, 0, tzinfo=timezone.utc))
     assert all(r["shadow_ape"]["p1"] < r["llm_ape"] for r in rows)   # the move up was right
+
+
+def test_refused_batch_download_falls_back_to_single_tickers(monkeypatch):
+    from src.panel import data
+
+    day = pd.Timestamp("2026-09-28").date()
+    frame = pd.DataFrame({"Open": [1.0], "High": [1.0], "Low": [1.0], "Close": [101.0],
+                          "Volume": [1]}, index=pd.DatetimeIndex([pd.Timestamp("2026-09-28")]))
+    calls = []
+    monkeypatch.setattr(data, "_download", lambda *a, **k: None)          # batch refused
+    monkeypatch.setattr(data, "_single", lambda s, **k: calls.append(s) or frame)
+    out = data.daily_history(["AAA", "BBB"], day)
+    assert set(out) == {"AAA", "BBB"} and calls == ["AAA", "BBB"]
+    assert float(out["AAA"]["close"].iloc[-1]) == 101.0
