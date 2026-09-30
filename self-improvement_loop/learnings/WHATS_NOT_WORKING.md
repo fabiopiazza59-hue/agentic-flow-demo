@@ -3,21 +3,21 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- **Directional misses dominate** (27 of 42 fails, 64%). This is a sign problem, not just a magnitude problem — the model repeatedly picks the wrong side, not merely the wrong size.
-- Failures cluster in **high-volatility spikes**: APEs of 2–5%+ recur (06-22, 06-25, 06-29, 07-15, 07-30, 08-19) and the blowup on 07-31 (13.2% APE — likely earnings/gap event) where the model was helpless.
-- On big-move days the model **barely tracks baseline** (fail mean APE 2.39% vs baseline often within ~0.1–0.5%). It adds little value precisely when it matters.
-- **Macro is the worst engine**: 12% hit rate, highest MAPE (0.0168), yet still carries ~18% weight. Every day it "wins" the blend it tends to lose (06-12, 07-13, 07-15, 07-30, 08-19).
-- **Technical also weak** (14.7% hit rate) despite the second-highest weight hint (0.21) — over-weighted relative to its accuracy.
+- **Directional misses dominate**: 27 of 42 fails (64%) are wrong-direction, not just magnitude. This is a signal problem, not a calibration-of-size problem. The model can't call the sign on choppy days.
+- **We barely beat baseline**: many fails have ape ≈ baseline_ape (e.g. 2026-07-15, 08-20, 09-28). On hard days we add ~zero edge over naive persistence.
+- **macro is dead weight**: 11.8% hit rate, worst MAPE (0.0167), yet still carries ~18% weight. Every day macro "wins" the routing (06-12 setup, 07-13, 07-15, 07-30, 08-19) it fails. macro-led days are near-automatic misses.
+- **technical over-weighted vs. performance**: 14.5% hit rate but 0.209 weight_hint (2nd highest). It earns its worst outcomes on the days it's routed to lead.
+- **Large-error blowups cluster**: 06-22, 07-23, 07-31 (13% ape!), 07-30 — big moves the ensemble completely fails to size or direct.
 
 ## Unreliable under these conditions
-- **Trend reversals / gap days**: momentum and technical keep extrapolating the prior move and get run over (07-31, 07-30, 08-19, 08-20).
-- **Event-driven days** (earnings, macro prints): news wins the blend but still misses direction on the largest moves — it reacts too late/too small.
-- **Confidence is mildly miscalibrated at the top end**: several highest-confidence calls (0.72 on 08-31, 09-09; 0.62 on 08-19, 09-03) are fails. Only 4 flagged "overconfident," but the pattern shows confidence ≥0.5 does NOT reliably indicate a pass.
-- Best regime: quiet, low-range days with news/contrarian leading — those produce the sub-0.5% APE hits.
+- **High-volatility / gap days**: whenever the true move is large (ape >3%), directional_hit collapses. The model compresses toward small moves and gets run over (07-31, 06-22, 08-19).
+- **macro- and technical-led routing**: combined these two "winning_strategy" days are where most fails concentrate.
+- **Mild-but-real confidence miscalibration late**: 08-31 (conf 0.72, fail), 09-09 (0.72, fail), 08-19 (0.62, fail), 09-03 (0.62, fail). Confidence has drifted up recently without accuracy following — overconfident_misses is only 4 flagged but the 0.6+ fails are growing.
+- **news is the only reliable leg** (32.9% hit, best MAPE) — everything else is coin-flip-or-worse.
 
 ## Fixes to try next
-- **Cut macro weight toward zero** and reallocate to news (best hit rate 0.32, lowest MAPE); trim technical's weight to match its poor hit rate.
-- Add a **volatility/gap regime filter**: when expected range is high or an earnings/macro event is scheduled, widen intervals and lower confidence automatically.
-- Attack the **directional error directly** — add a sign-accuracy penalty in strategy selection rather than optimizing APE alone.
-- **Recalibrate confidence**: current high-confidence buckets pass at roughly coin-flip rates; fit confidence to realized hit rate and stop emitting 0.6+ on event days.
-- Investigate the **07-31 outlier** as a distinct earnings-day model; a single 13% miss is dragging risk and signals no gap handling exists.
+- **Cut macro to near-zero weight** or gate it to confirmed macro-event days only; it's actively hurting.
+- **Rebalance toward news** (raise), trim technical/macro to match their hit rates, not their historical priors.
+- **Add a volatility regime detector**: on high-expected-move days, widen predicted magnitude and de-trust mean-reverting legs (technical/contrarian).
+- **Recalibrate confidence**: cap confidence on macro/technical-led days; require news agreement before emitting conf >0.6.
+- **Track sign-accuracy separately** as the primary KPI — magnitude tuning is secondary while 64% of fails are directional.
