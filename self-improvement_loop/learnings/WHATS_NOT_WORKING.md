@@ -3,21 +3,21 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- **Directional misses dominate**: 27 of 42 fails (64%) are wrong-direction, not just magnitude. This is a signal problem, not a calibration-of-size problem. The model can't call the sign on choppy days.
-- **We barely beat baseline**: many fails have ape ≈ baseline_ape (e.g. 2026-07-15, 08-20, 09-28). On hard days we add ~zero edge over naive persistence.
-- **macro is dead weight**: 11.8% hit rate, worst MAPE (0.0167), yet still carries ~18% weight. Every day macro "wins" the routing (06-12 setup, 07-13, 07-15, 07-30, 08-19) it fails. macro-led days are near-automatic misses.
-- **technical over-weighted vs. performance**: 14.5% hit rate but 0.209 weight_hint (2nd highest). It earns its worst outcomes on the days it's routed to lead.
-- **Large-error blowups cluster**: 06-22, 07-23, 07-31 (13% ape!), 07-30 — big moves the ensemble completely fails to size or direct.
+- **Direction is the core failure, not magnitude.** 27 of 42 misses (64%) are directional. The model gets the move size roughly right but points the wrong way — a sign routing problem, not a calibration-of-size problem.
+- **Baseline is beating us too often.** Many fails also have `beats_baseline=false` (e.g. 06-12, 06-15, 06-25, 07-13, 08-19, 09-22). On a meaningful chunk of days a naive persistence baseline would have done as well or better.
+- **Macro is a net drag.** 11.7% hit rate, highest MAPE (0.0166). Every day macro is the winning strategy it tends to coincide with a fail (06-12 context, 07-13, 07-15, 07-30, 08-19). It is actively hurting.
+- **Technical is unreliable despite high weight.** 14% hit rate but carries ~0.21 weight — second-highest allocation to a near-worst performer.
+- **Big-move days blow up.** The large APEs (07-31 at 0.13, 06-22, 07-23, 06-17 ~0.037) cluster around apparent gap/event days the model can't anticipate.
 
 ## Unreliable under these conditions
-- **High-volatility / gap days**: whenever the true move is large (ape >3%), directional_hit collapses. The model compresses toward small moves and gets run over (07-31, 06-22, 08-19).
-- **macro- and technical-led routing**: combined these two "winning_strategy" days are where most fails concentrate.
-- **Mild-but-real confidence miscalibration late**: 08-31 (conf 0.72, fail), 09-09 (0.72, fail), 08-19 (0.62, fail), 09-03 (0.62, fail). Confidence has drifted up recently without accuracy following — overconfident_misses is only 4 flagged but the 0.6+ fails are growing.
-- **news is the only reliable leg** (32.9% hit, best MAPE) — everything else is coin-flip-or-worse.
+- **High-volatility / event days:** APE spikes 3–13% when the actual move is large; the ensemble reverts to small moves and misses both direction and size.
+- **When macro or technical is the deciding strategy:** disproportionately correlated with fails and baseline losses.
+- **Mild overconfidence creeping in late:** overconfident misses are only 4 total, but recent fails carry rising confidence (08-19 conf 0.62, 08-31 conf 0.72, 09-09 conf 0.72 all failed). High-confidence days are no longer reliably better.
+- **Choppy sideways days:** repeated ~1–2% directional misses (09-11, 09-22, 09-28) where the model picks a side on noise.
 
 ## Fixes to try next
-- **Cut macro to near-zero weight** or gate it to confirmed macro-event days only; it's actively hurting.
-- **Rebalance toward news** (raise), trim technical/macro to match their hit rates, not their historical priors.
-- **Add a volatility regime detector**: on high-expected-move days, widen predicted magnitude and de-trust mean-reverting legs (technical/contrarian).
-- **Recalibrate confidence**: cap confidence on macro/technical-led days; require news agreement before emitting conf >0.6.
-- **Track sign-accuracy separately** as the primary KPI — magnitude tuning is secondary while 64% of fails are directional.
+- **Cut macro weight toward zero** and reallocate to news (only strategy >0.30 hit rate); demote technical weight to match its hit rate.
+- **Add a directional gate:** when strategies disagree on sign, widen toward baseline/flat instead of committing — most losses are sign errors.
+- **Volatility regime detector:** on high-expected-move days, stop damping toward small moves; size predictions up or abstain.
+- **Recalibrate confidence** on recent window — current high-confidence predictions (0.6–0.72) are failing; confidence should track realized hit rate, not grow unanchored.
+- **Track beats_baseline as a first-class gate**; if the ensemble can't beat persistence in backtest for a regime, default to baseline there.
