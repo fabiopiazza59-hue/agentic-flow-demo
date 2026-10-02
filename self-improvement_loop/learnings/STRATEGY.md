@@ -79,3 +79,4 @@ Append-only insights. Newest at the bottom.
 - (2026-09-28) When 3+ analysts agree on 'down' with price below all SMAs and RSI~40, discount contrarian/macro mean-reversion calls and widen the bearish magnitude — trend continuation in a confirmed downtrend tends to exceed the timid -0.4% consensus.
 - (2026-09-29) When RSI < 40 and price sits >2.5% below SMA20 with a flat pre-open gap, tilt the blend toward the contrarian/news bounce estimate rather than the equal-weighted bearish mean.
 - (2026-09-30) When RSI<45 AND price >2% below SMA20 on quarter-end, weight the contrarian/mean-reversion analyst above the pre-open anchor rather than reverting to the mean blend — test whether tilting toward the 248-249 reversion target lowers APE on oversold days.
+- (2026-10-01) 2026-10-01: PASS, did not beat baseline; closest contrarian, worst macro.
