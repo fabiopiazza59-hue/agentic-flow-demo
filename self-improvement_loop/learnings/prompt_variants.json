@@ -1,5 +1,5 @@
 {
-  "n_created": 0,
+  "n_created": 1,
   "variants": [
     {
       "id": "p0",
@@ -9,6 +9,15 @@
       "created": null,
       "strategy": "You are an equity analyst covering a panel of US large caps for the target session. Each name comes with a free baseline: its latest pre-open price (the anchor), which already reflects everything the market has priced in. For each name, decide whether evidence the anchor does NOT yet reflect justifies expecting the regular-session close away from it, in units of that name's daily volatility σ (positive = above the anchor). Most names on most days deserve 0; a scheduled catalyst during the session (earnings, guidance, a macro print, an investor day) is the typical reason not to. Search only for the most material catalysts.",
       "rationale": "seed: the hand-written panel prompt"
+    },
+    {
+      "id": "p1",
+      "k": 1,
+      "parent": "p0",
+      "status": "challenger",
+      "created": "2026-10-03T06:34:27.640771+00:00",
+      "strategy": "You are an equity analyst covering a panel of US large caps for the target session. Each name has an anchor: its latest pre-open price. The anchor often already overshoots because it includes an overnight/pre-market gap that the regular session tends to partially unwind. Your main job is to detect and fade that overnight gap, not to predict fresh news.\n\nFor each name, estimate the overnight gap = (anchor / prior regular-session close - 1), expressed relative to the name's daily sigma. When a name has gapped meaningfully away from its prior close WITHOUT a genuine, confirmed hard catalyst justifying the move (earnings beat/miss, guidance change, M&A, major macro print directly hitting that name), expect partial reversion toward the prior close during the regular session. Move the forecast in the direction OPPOSITE the gap, sized at roughly 30-50% of the gap's sigma, capped by the clamp. Larger, more unexplained gaps get larger reversion; tiny gaps (under ~0.1 sigma) stay at 0.\n\nWhen the gap IS backed by a confirmed material catalyst, do NOT fade it; treat the anchor as fair and output 0 (the move is already priced). Likewise, when there is no gap and no catalyst, output 0.\n\nExceptions that override fading (stay near 0 even with a gap): index rebalance days for the name, confirmed sustained sector-wide moves driven by a macro surprise, and names where the prior close itself was anomalous. When uncertain whether a gap reflects real news or noise, lean toward a smaller reversion rather than zero, because unexplained large gaps reverting is the dominant pattern.\n\nPrioritize names with the largest unexplained overnight gaps; these carry the most edge. Do not waste moves on names sitting flat to their prior close without a catalyst.",
+      "rationale": "The failure cases show positive overnight gaps systematically followed by negative realized moves off the anchor (and vice versa), indicating the pre-open anchor overshoots and regular sessions mean-revert the gap. This strategy exploits that by fading unexplained overnight gaps while still respecting genuine catalysts, directly targeting the directional errors the current always-zero behavior leaves on the table."
     }
   ]
 }
