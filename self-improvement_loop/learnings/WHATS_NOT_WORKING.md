@@ -3,21 +3,19 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- Directional misses dominate (27 of 42 fails, 64%). The model is getting the *direction* wrong more than the magnitude — this is a sign problem, not a precision problem.
-- Fails cluster on high-volatility days: mean fail APE 2.39% and the worst days (2026-07-31 at 13.2%, 06-22 at 5.1%, 07-23 at 4.2%, 06-17/06-25/07-15/07-30 at 3-4%) are all large-move sessions the model smooths over.
-- On big-move days the model barely beats or loses to the naive baseline (06-12, 06-15, 06-17, 06-22, 06-25, 07-13 all fail AND lose to baseline). Edge collapses exactly when it matters.
-- `macro` is a persistent loser: 11.4% hit rate, highest MAPE (0.0164), yet it still "wins" the ensemble on volatile days (06-08, 07-13, 07-15, 07-30, 08-19) and drags accuracy down.
-- `technical` is nearly as bad (13.9% hit rate) despite carrying the 2nd-highest weight hint (0.208). Weighting is inversely correlated with reliability.
+- **Direction, not magnitude, is the core problem.** 27 of 42 fails are directional misses (64%). Mean fail APE is only 2.39% — the model is close on size but picks the wrong sign repeatedly. We're guessing the daily turn poorly.
+- **The ensemble barely beats baseline.** On fail days APE ≈ baseline APE almost every time; many "passes" also lose to baseline (e.g., 06-16, 07-14, 08-06, 08-27/28, 10-01, 10-05). On flat days we add noise, not signal.
+- **Macro is the weakest winner.** When macro is the winning strategy it fails hard (06-12 region, 07-13, 07-15, 07-30, 08-19, 08-25) — macro hit_rate 0.11, worst MAPE 0.0163. Yet it still gets ~18% weight.
+- **Big-miss days are regime breaks, not model errors.** 07-31 (APE 13%!), 06-22/25/26, 08-19/20 cluster around large moves the model never sized — it stays near prior close while price gaps.
 
 ## Unreliable under these conditions
-- Large daily moves / volatility spikes: both direction and magnitude break down together.
-- Any day the ensemble lands on `macro` or `technical` as the winner — low hit rates, high error.
-- Recent confidence inflation: late-period confidence runs 0.52-0.72 while pass rate is mixed; overconfident misses (08-19 conf 0.62, 08-31 conf 0.72, 09-09 conf 0.72, 09-11 conf 0.54, 09-03 conf 0.62) show confidence rising without accuracy rising. Calibration is drifting high.
-- `weights: {}` / `null` days (06-30, 07-22, 07-28, 08-05, 08-13, 09-17, 09-22, and all post-09-28) correlate with fails — ensemble config appears broken/unlogged in those windows.
+- **High-volatility / large-move days:** any day the true move >3% gets both direction and magnitude wrong; the model is anchored to prior close.
+- **Macro- and technical-led days:** technical hit_rate 0.14, macro 0.11 — these two "win" the ensemble but lose the prediction. They are dragging the blend.
+- **Confidence is weakly calibrated but not wildly overconfident:** only 4 overconfident misses. However the recent high-confidence era (0.52–0.63, late Sep–Oct) still throws directional misses (10-01, 10-05, 09-22, 09-11) — rising confidence is NOT tracking rising accuracy. Confidence has drifted up with no accuracy gain.
 
 ## Fixes to try next
-- Cut `macro` and `technical` weights sharply (or gate them off on high-vol days); reallocate to `news` (best hit rate 0.329, lowest MAPE).
-- Add a volatility regime filter: widen intervals / lower confidence when expected range is large, since that's where directional sign flips.
-- Recalibrate confidence against realized outcomes — current high-confidence late-period predictions are not earning it.
-- Fix the null/empty-weights logging path; those days are untraceable and skew toward failure.
-- Build a direction-only sub-model or sign-check layer, since 64% of fails are directional, not magnitude.
+- **Cut macro and technical weight** toward their hit_rate (0.11/0.14); lean on news (0.325) and contrarian (0.225). Current weight_hints over-reward losers.
+- **Add a direction-focused sub-model / sign gate** — most error value is in the sign, not the size. Score and optimize directional hit explicitly.
+- **Detect high-vol regime** (ATR / gap signal) and widen predicted move or defer to baseline; stop anchoring to prior close on breakout days.
+- **Recalibrate confidence** against realized hit rate; the late-sample confidence inflation (0.5→0.63) is unearned.
+- **Add a "don't beat baseline → abstain" rule** for low-signal flat days where we currently just add noise.

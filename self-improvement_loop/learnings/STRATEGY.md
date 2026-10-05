@@ -81,3 +81,4 @@ Append-only insights. Newest at the bottom.
 - (2026-09-30) When RSI<45 AND price >2% below SMA20 on quarter-end, weight the contrarian/mean-reversion analyst above the pre-open anchor rather than reverting to the mean blend — test whether tilting toward the 248-249 reversion target lowers APE on oversold days.
 - (2026-10-01) 2026-10-01: PASS, did not beat baseline; closest contrarian, worst macro.
 - (2026-10-02) When news analyst flags a fresh sell-side conviction add on an RSI-oversold name, test overweighting its target vs the blend mean — the shrink gate may be systematically truncating valid catalyst-driven moves.
+- (2026-10-05) On near-flat gap days (|gap|<0.1%) where the analyst blend disagrees with the live anchor, shrink harder toward the anchor — the baseline flat-close wins in low-signal sessions.
