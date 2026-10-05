@@ -1562,13 +1562,13 @@
     "quote_source": "yfinance_ext",
     "anchor": 251.5982,
     "anchor_source": "yfinance_ext",
-    "anchor_time": "2026-10-05T20:46:00+00:00",
+    "anchor_time": "2026-10-05T21:10:00+00:00",
     "anchor_live": true,
-    "anchored_at": "2026-10-05T20:48:30.871891+00:00",
-    "anchor_updates": 0,
+    "anchored_at": "2026-10-05T21:11:58.420897+00:00",
+    "anchor_updates": 1,
     "status": "pending",
     "actual_close": null,
-    "late_minutes": -1002
+    "late_minutes": -979
   },
   "updated_count": 108
 }

@@ -5,7 +5,7 @@ _Auto-generated after every run. Verdicts use pre-open forecasts only and anytim
 ## Verdict
 ❌ **No edge yet** — all-time MAPE 1.52% is nominally ahead of the free baseline 1.53% by 0.01%, but the difference is not distinguishable from noise (paired over 40 pre-open days: mean 0.01%, anytime-valid 95% CS [-0.133%, +0.149%]; fixed-sample 90% CI [-0.07%, 0.09%], sign test p=0.2682).
 
-**Next forecast (2026-10-06):** close ≈ **252.04** (up, P(up) 59%, 80% interval 248.69–255.44) vs prior close 251.40; anchored to 251.60 (yfinance_ext, live, refreshed 0×).
+**Next forecast (2026-10-06):** close ≈ **252.04** (up, P(up) 59%, 80% interval 248.69–255.44) vs prior close 251.40; anchored to 251.60 (yfinance_ext, live, refreshed 1×).
 
 ## Scoreboard — all-time, pre-open forecasts only
 
