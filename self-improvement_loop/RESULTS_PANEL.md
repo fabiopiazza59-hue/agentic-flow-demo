@@ -3,9 +3,9 @@
 _30 US large caps a session. Every name's free baseline is its latest pre-open trade (the anchor); the LLM may move it by at most ±0.5σ. Verdicts average each metric over the names of a session and read an anytime-valid 95% confidence sequence on that daily series, so they stay valid although this page is regenerated daily. Pre-open forecasts only. Design: [spec/panel.md](spec/panel.md)._
 
 ## Verdict
-⏳ **Not enough clean sessions yet** to judge the LLM against the free baseline (7 sessions, 209 name-forecasts; mean daily APE gain 0.002%, CS n=7 sessions (too few)).
+⏳ **Not enough clean sessions yet** to judge the LLM against the free baseline (7 sessions, 210 name-forecasts; mean daily APE gain 0.002%, CS n=7 sessions (too few)).
 
-**Pending (2026-10-06):** 30 names, 30 anchored on a live pre-open trade, the LLM moved 0 off their anchor.
+**Pending (2026-10-07):** 29 names, 29 anchored on a live pre-open trade, the LLM moved 0 off their anchor.
 
 | Daily metric (mean over names) | Mean | 95% CS | Verdict |
 |---|---|---|---|
@@ -13,10 +13,10 @@ _30 US large caps a session. Every name's free baseline is its latest pre-open t
 | CRPS gain: LLM vs free baseline | 0.001% | n=7 sessions (too few) | ⏳ too few sessions |
 | Rank IC (adjustment vs realized move off the anchor) | 0.075 | n=1 sessions (too few) | ⏳ too few sessions |
 | Direction (Brier of P(up)) vs free baseline | 0.001 | n=7 sessions (too few) | ⏳ too few sessions |
-| APE gain: LLM vs prior close | -0.030% | n=7 sessions (too few) | ⏳ too few sessions |
-| APE gain: anchor vs prior close (the free information itself) | -0.032% | n=7 sessions (too few) | ⏳ too few sessions |
+| APE gain: LLM vs prior close | -0.031% | n=7 sessions (too few) | ⏳ too few sessions |
+| APE gain: anchor vs prior close (the free information itself) | -0.033% | n=7 sessions (too few) | ⏳ too few sessions |
 
-MAPE — LLM 1.15%, free baseline 1.15%, prior close 1.12%; LLM 80% interval coverage 80.85%; names moved per session 0.6. LLM is **on**.
+MAPE — LLM 1.14%, free baseline 1.15%, prior close 1.11%; LLM 80% interval coverage 80.95%; names moved per session 0.6. LLM is **on**.
 
 ## Prompt evolution — shadow challengers, promoted only on proof
 
@@ -26,7 +26,7 @@ _Challenger prompts run on the same snapshot without shipping. One replaces the 
 |---|---|---|---|---|---|---|
 | p0 | champion | — | — | — | — | seed: the hand-written panel prompt |
 | p1 | challenger | p0 | 2 | -0.015% | — | The failure cases show positive overnight gaps systematically followed by negative realized moves off the anchor (and vi |
-| p2 | challenger | p0 | 1 | -0.033% | — | The champion moved almost nothing (2.2% of names) and realized moves were overwhelmingly opposite the overnight gap, so  |
+| p2 | challenger | p0 | 1 | -0.032% | — | The champion moved almost nothing (2.2% of names) and realized moves were overwhelmingly opposite the overnight gap, so  |
 
 ## Per name (pre-open forecasts)
 
@@ -50,7 +50,7 @@ _Challenger prompts run on the same snapshot without shipping. One replaces the 
 | KO | 7 | 0.59% | 0.59% | 0 |
 | LLY | 7 | 0.80% | 0.80% | 0 |
 | MA | 7 | 1.14% | 1.14% | 0 |
-| META | 6 | 2.02% | 2.02% | 0 |
+| META | 7 | 1.80% | 1.80% | 0 |
 | MSFT | 7 | 0.78% | 0.78% | 0 |
 | NFLX | 7 | 1.77% | 1.78% | 0 |
 | NVDA | 7 | 0.95% | 0.95% | 0 |

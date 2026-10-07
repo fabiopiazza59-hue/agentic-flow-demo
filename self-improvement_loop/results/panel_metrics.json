@@ -1,6 +1,6 @@
 {
   "n_sessions": 7,
-  "n_forecasts": 209,
+  "n_forecasts": 210,
   "n_late_rows": 0,
   "cs": {
     "ape_gain_vs_anchor": {
@@ -14,7 +14,7 @@
     },
     "ape_gain_vs_rw": {
       "n": 7,
-      "mean": -0.00029983,
+      "mean": -0.0003061,
       "lo": null,
       "hi": null,
       "alpha": 0.05,
@@ -32,7 +32,7 @@
     },
     "direction_gain_vs_anchor": {
       "n": 7,
-      "mean": 0.00104955,
+      "mean": 0.00104957,
       "lo": null,
       "hi": null,
       "alpha": 0.05,
@@ -50,7 +50,7 @@
     },
     "anchor_gain_vs_rw": {
       "n": 7,
-      "mean": -0.00032054,
+      "mean": -0.0003268,
       "lo": null,
       "hi": null,
       "alpha": 0.05,
@@ -151,17 +151,17 @@
     },
     {
       "date": "2026-10-06",
-      "n_names": 29,
-      "ape_gain_vs_anchor": 1.502780981299561e-06,
-      "ape_gain_vs_rw": 0.0004368103487226534,
-      "crps_gain_vs_anchor": 1.1843678069970928e-06,
-      "direction_gain_vs_anchor": -4.717352937444463e-06,
-      "anchor_gain_vs_rw": 0.00043530756774135383,
+      "n_names": 30,
+      "ape_gain_vs_anchor": 1.4526882819229091e-06,
+      "ape_gain_vs_rw": 0.00039292634292249133,
+      "crps_gain_vs_anchor": 1.1448888800969295e-06,
+      "direction_gain_vs_anchor": -4.560107839529648e-06,
+      "anchor_gain_vs_rw": 0.0003914736546405684,
       "rank_ic": null,
-      "llm_cover80": 0.7931034482758621,
-      "llm_mape": 0.009871452630026837,
-      "anchor_mape": 0.009872955411008138,
-      "rw_mape": 0.010308262978749492,
+      "llm_cover80": 0.8,
+      "llm_mape": 0.009707969889196592,
+      "anchor_mape": 0.009709422577478515,
+      "rw_mape": 0.010100896232119082,
       "n_moved": 0
     }
   ],
@@ -275,9 +275,9 @@
       "moved": 0
     },
     "META": {
-      "n": 6,
-      "llm": 0.02017567184271715,
-      "anchor": 0.02017567184271715,
+      "n": 7,
+      "llm": 0.01800300020877462,
+      "anchor": 0.01800300020877462,
       "moved": 0
     },
     "MSFT": {
@@ -348,17 +348,17 @@
     }
   },
   "mean": {
-    "llm_mape": 0.011467439083968144,
-    "anchor_mape": 0.011488141354293165,
-    "rw_mape": 0.011167604371482261,
-    "llm_cover80": 0.8085385878489327,
+    "llm_mape": 0.01144408440670668,
+    "anchor_mape": 0.01146477952093179,
+    "rw_mape": 0.011137980550535059,
+    "llm_cover80": 0.8095238095238095,
     "n_moved": 0.5714285714285714
   },
   "pending": {
-    "date": "2026-10-06",
-    "n": 30,
+    "date": "2026-10-07",
+    "n": 29,
     "n_moved": 0,
-    "n_live": 30
+    "n_live": 29
   },
   "state": {
     "llm_enabled": true,
@@ -382,7 +382,7 @@
       "rationale": "The failure cases show positive overnight gaps systematically followed by negative realized moves off the anchor (and vice versa), indicating the pre-open anchor overshoots and regular sessions mean-revert the gap. This strategy exploits that by fading unexplained overnight gaps while still respecting genuine catalysts, directly targeting the directional errors the current always-zero behavior leaves on the table.",
       "stats": {
         "n": 2,
-        "mean": -0.00015372,
+        "mean": -0.00014562,
         "lo": null,
         "hi": null,
         "decision": "insufficient",
@@ -397,7 +397,7 @@
       "rationale": "The champion moved almost nothing (2.2% of names) and realized moves were overwhelmingly opposite the overnight gap, so the market is systematically unwinding gaps the strategy left untouched at 0. This variant tells the analyst to actively fade sizeable, catalyst-free gaps while still staying flat on tiny gaps and genuine pending catalysts, differing from p1 by conditioning the fade on catalyst presence rather than blanket gap-fading.",
       "stats": {
         "n": 1,
-        "mean": -0.00032838,
+        "mean": -0.00031743,
         "lo": null,
         "hi": null,
         "decision": "insufficient",
