@@ -82,3 +82,4 @@ Append-only insights. Newest at the bottom.
 - (2026-10-01) 2026-10-01: PASS, did not beat baseline; closest contrarian, worst macro.
 - (2026-10-02) When news analyst flags a fresh sell-side conviction add on an RSI-oversold name, test overweighting its target vs the blend mean — the shrink gate may be systematically truncating valid catalyst-driven moves.
 - (2026-10-05) On near-flat gap days (|gap|<0.1%) where the analyst blend disagrees with the live anchor, shrink harder toward the anchor — the baseline flat-close wins in low-signal sessions.
+- (2026-10-06) When a dated hard catalyst (e.g. Prime Big Deal Days launch) is live and the news analyst diverges upside from the technical cluster, suppress the negative_edge_shrink gate and tilt the blend toward news — test whether catalyst days produce >1.5% moves that the SMA-anchored analysts systematically underprice.

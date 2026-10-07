@@ -3,19 +3,21 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- **Direction, not magnitude, is the core problem.** 27 of 42 fails are directional misses (64%). Mean fail APE is only 2.39% — the model is close on size but picks the wrong sign repeatedly. We're guessing the daily turn poorly.
-- **The ensemble barely beats baseline.** On fail days APE ≈ baseline APE almost every time; many "passes" also lose to baseline (e.g., 06-16, 07-14, 08-06, 08-27/28, 10-01, 10-05). On flat days we add noise, not signal.
-- **Macro is the weakest winner.** When macro is the winning strategy it fails hard (06-12 region, 07-13, 07-15, 07-30, 08-19, 08-25) — macro hit_rate 0.11, worst MAPE 0.0163. Yet it still gets ~18% weight.
-- **Big-miss days are regime breaks, not model errors.** 07-31 (APE 13%!), 06-22/25/26, 08-19/20 cluster around large moves the model never sized — it stays near prior close while price gaps.
+- **Directional misses dominate failures (27 of 43, ~63%).** The system is picking the wrong *sign* more than it's sizing moves wrong — this is a signal problem, not a calibration-of-magnitude problem.
+- **The ensemble barely beats baseline.** A large share of failures also fail `beats_baseline`, meaning on hard days the blend adds nothing over a naive hold/persistence call.
+- **Tail blowups go uncaught.** The 2026-07-31 miss (APE ~13%, likely earnings) and repeated 3-5% APE days show no event/vol guardrail — the model keeps committing on gap days.
+- **macro is the worst winner.** When `macro` is the winning strategy it fails often (2026-07-13, -15, -19, -30); hit_rate 0.11, highest MAPE (0.0163). It's actively dragging the blend.
+- **technical is nearly a coin-flip-loser:** hit_rate 0.136, yet still carries the 2nd-highest weight hint (0.208). Weight does not track reliability.
 
 ## Unreliable under these conditions
-- **High-volatility / large-move days:** any day the true move >3% gets both direction and magnitude wrong; the model is anchored to prior close.
-- **Macro- and technical-led days:** technical hit_rate 0.14, macro 0.11 — these two "win" the ensemble but lose the prediction. They are dragging the blend.
-- **Confidence is weakly calibrated but not wildly overconfident:** only 4 overconfident misses. However the recent high-confidence era (0.52–0.63, late Sep–Oct) still throws directional misses (10-01, 10-05, 09-22, 09-11) — rising confidence is NOT tracking rising accuracy. Confidence has drifted up with no accuracy gain.
+- **High-volatility / large-move days (APE >3%):** nearly all big-APE entries are directional misses — the model underperforms exactly when moves are big.
+- **When macro or technical is the lead strategy:** combined these drive a disproportionate share of fails.
+- **Recent high-confidence regime (Sept–Oct, conf 0.52–0.66):** passes on small-move days but still misses direction on several (09-11, 09-17, 09-22, 10-06). Confidence rose system-wide without accuracy rising — **miscalibration is creeping in**: conf 0.72 on 08-31 and 09-09 both failed.
+- **Overconfident misses (5):** small count but concentrated at conf ≥0.54 (08-19 @0.62, 08-20 @0.54, 09-03 @0.62) — the model is most wrong when it feels most sure on choppy days.
 
 ## Fixes to try next
-- **Cut macro and technical weight** toward their hit_rate (0.11/0.14); lean on news (0.325) and contrarian (0.225). Current weight_hints over-reward losers.
-- **Add a direction-focused sub-model / sign gate** — most error value is in the sign, not the size. Score and optimize directional hit explicitly.
-- **Detect high-vol regime** (ATR / gap signal) and widen predicted move or defer to baseline; stop anchoring to prior close on breakout days.
-- **Recalibrate confidence** against realized hit rate; the late-sample confidence inflation (0.5→0.63) is unearned.
-- **Add a "don't beat baseline → abstain" rule** for low-signal flat days where we currently just add noise.
+- **Cut macro's weight toward ~0 and cap technical** until hit_rate recovers; reallocate to news (best: 0.333 hit, lowest MAPE).
+- **Recalibrate confidence against realized hit-rate** — current conf 0.5–0.66 band shows no edge; shrink confidence on high-vol days.
+- **Add an event/earnings + volatility gate** that widens intervals or abstains instead of committing on gap days.
+- **Weight strategies by trailing directional hit-rate, not static hints** — current weights invert the reliability ranking.
+- **Track directional accuracy as the primary KPI**, not APE, since sign errors are the core failure.
