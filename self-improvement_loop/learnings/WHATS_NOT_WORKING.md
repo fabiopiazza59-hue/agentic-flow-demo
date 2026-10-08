@@ -3,21 +3,19 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- **Directional misses dominate failures (27 of 43, ~63%).** The system is picking the wrong *sign* more than it's sizing moves wrong — this is a signal problem, not a calibration-of-magnitude problem.
-- **The ensemble barely beats baseline.** A large share of failures also fail `beats_baseline`, meaning on hard days the blend adds nothing over a naive hold/persistence call.
-- **Tail blowups go uncaught.** The 2026-07-31 miss (APE ~13%, likely earnings) and repeated 3-5% APE days show no event/vol guardrail — the model keeps committing on gap days.
-- **macro is the worst winner.** When `macro` is the winning strategy it fails often (2026-07-13, -15, -19, -30); hit_rate 0.11, highest MAPE (0.0163). It's actively dragging the blend.
-- **technical is nearly a coin-flip-loser:** hit_rate 0.136, yet still carries the 2nd-highest weight hint (0.208). Weight does not track reliability.
+- **Direction, not magnitude, is the core problem**: 27 of 44 fails are directional misses. The model gets the move size roughly right but points the wrong way too often. On quiet days APE is tiny; the fails cluster on real moves.
+- **Big-move days are routinely blown**: the worst APEs (0.13 on 2026-07-31, 0.05 on 06-22, 0.038–0.042 on 06-17/07-30/07-23) all come on large real moves. The system is essentially a low-vol mean reverter that cannot size shocks.
+- **Beating baseline is coin-flip at best**: many fails (06-12, 06-15, 06-17, 06-25, 06-26, 07-13, 09-22) have ape > baseline_ape, meaning the ensemble actively *hurts* vs. a naive last-price carry.
+- **macro and technical are dead weight**: macro hit_rate 0.11, technical 0.13 — both below random. Yet they still carry ~0.18–0.21 weight. Every day macro "wins" the blend (06-12, 07-13, 07-15, 08-19, 08-30) it misses.
 
 ## Unreliable under these conditions
-- **High-volatility / large-move days (APE >3%):** nearly all big-APE entries are directional misses — the model underperforms exactly when moves are big.
-- **When macro or technical is the lead strategy:** combined these drive a disproportionate share of fails.
-- **Recent high-confidence regime (Sept–Oct, conf 0.52–0.66):** passes on small-move days but still misses direction on several (09-11, 09-17, 09-22, 10-06). Confidence rose system-wide without accuracy rising — **miscalibration is creeping in**: conf 0.72 on 08-31 and 09-09 both failed.
-- **Overconfident misses (5):** small count but concentrated at conf ≥0.54 (08-19 @0.62, 08-20 @0.54, 09-03 @0.62) — the model is most wrong when it feels most sure on choppy days.
+- **Macro-led days**: near-universal failure (06-12, 07-13, 07-15, 08-19, 07-30). macro is the worst strategy and should rarely drive the call.
+- **High-volatility / gap days**: errors blow out 5–20x normal; directional sign flips.
+- **Late-period overconfidence**: confidence has crept to 0.6–0.72 while fails persist (08-19 conf 0.62 fail, 08-31 conf 0.72 fail, 09-09 conf 0.72 fail, 09-11 conf 0.54 fail, 10-06 conf 0.66 fail). 6 overconfident misses — calibration is drifting upward without accuracy support.
+- **Momentum in reversals**: momentum "wins" then eats the turn (06-12, 06-25, 07-08, 08-07).
 
 ## Fixes to try next
-- **Cut macro's weight toward ~0 and cap technical** until hit_rate recovers; reallocate to news (best: 0.333 hit, lowest MAPE).
-- **Recalibrate confidence against realized hit-rate** — current conf 0.5–0.66 band shows no edge; shrink confidence on high-vol days.
-- **Add an event/earnings + volatility gate** that widens intervals or abstains instead of committing on gap days.
-- **Weight strategies by trailing directional hit-rate, not static hints** — current weights invert the reliability ranking.
-- **Track directional accuracy as the primary KPI**, not APE, since sign errors are the core failure.
+- **Cut macro and technical weight toward ~0.05–0.10**; reallocate to news (best: 0.33 hit, lowest MAPE).
+- **Add a volatility/regime gate**: widen intervals and lower confidence on high-vol or earnings/gap days instead of committing to a point direction.
+- **Recalibrate confidence** — recent 0.6–0.72 confidences are not earned; cap confidence until directional hit_rate on that regime exceeds ~0.5.
+- **Build a direction-specific ensemble** separate from magnitude; the magnitude model is fine, the sign vote is broken.
