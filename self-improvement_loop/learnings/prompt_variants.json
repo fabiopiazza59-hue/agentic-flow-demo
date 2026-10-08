@@ -20,7 +20,7 @@
       "rationale": "The failure cases show positive overnight gaps systematically followed by negative realized moves off the anchor (and vice versa), indicating the pre-open anchor overshoots and regular sessions mean-revert the gap. This strategy exploits that by fading unexplained overnight gaps while still respecting genuine catalysts, directly targeting the directional errors the current always-zero behavior leaves on the table.",
       "stats": {
         "n": 2,
-        "mean": -0.00015372,
+        "mean": -0.00014562,
         "lo": null,
         "hi": null,
         "decision": "insufficient",
@@ -37,7 +37,7 @@
       "rationale": "The champion moved almost nothing (2.2% of names) and realized moves were overwhelmingly opposite the overnight gap, so the market is systematically unwinding gaps the strategy left untouched at 0. This variant tells the analyst to actively fade sizeable, catalyst-free gaps while still staying flat on tiny gaps and genuine pending catalysts, differing from p1 by conditioning the fade on catalyst presence rather than blanket gap-fading.",
       "stats": {
         "n": 1,
-        "mean": -0.00032838,
+        "mean": -0.00031743,
         "lo": null,
         "hi": null,
         "decision": "insufficient",
