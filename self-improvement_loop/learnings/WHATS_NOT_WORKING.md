@@ -3,19 +3,19 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- **Direction, not magnitude, is the core problem**: 27 of 44 fails are directional misses. The model gets the move size roughly right but points the wrong way too often. On quiet days APE is tiny; the fails cluster on real moves.
-- **Big-move days are routinely blown**: the worst APEs (0.13 on 2026-07-31, 0.05 on 06-22, 0.038–0.042 on 06-17/07-30/07-23) all come on large real moves. The system is essentially a low-vol mean reverter that cannot size shocks.
-- **Beating baseline is coin-flip at best**: many fails (06-12, 06-15, 06-17, 06-25, 06-26, 07-13, 09-22) have ape > baseline_ape, meaning the ensemble actively *hurts* vs. a naive last-price carry.
-- **macro and technical are dead weight**: macro hit_rate 0.11, technical 0.13 — both below random. Yet they still carry ~0.18–0.21 weight. Every day macro "wins" the blend (06-12, 07-13, 07-15, 08-19, 08-30) it misses.
+- **Directional misses dominate**: 28 of 45 failures (62%) are wrong-way calls, not just magnitude slips. The system can't reliably call direction — it's near a coin flip on down days.
+- **Baseline-beat rate is poor**: failures routinely have ape > baseline_ape (e.g., 06-12, 06-25, 06-26, 09-22), meaning the ensemble actively adds error over a naive persistence baseline on hard days.
+- **Big-move days blow up**: the worst APEs (03-31 at 13.2%, 06-22 at 5.1%, 06-17/06-15 at ~3.7%) cluster on high-volatility sessions. The model systematically under-reacts to large gap moves.
+- **macro and technical are dead weight**: macro hit_rate 10.8%, technical 13.3% — both below random and both have the highest MAPE. They're dragging the ensemble.
 
 ## Unreliable under these conditions
-- **Macro-led days**: near-universal failure (06-12, 07-13, 07-15, 08-19, 07-30). macro is the worst strategy and should rarely drive the call.
-- **High-volatility / gap days**: errors blow out 5–20x normal; directional sign flips.
-- **Late-period overconfidence**: confidence has crept to 0.6–0.72 while fails persist (08-19 conf 0.62 fail, 08-31 conf 0.72 fail, 09-09 conf 0.72 fail, 09-11 conf 0.54 fail, 10-06 conf 0.66 fail). 6 overconfident misses — calibration is drifting upward without accuracy support.
-- **Momentum in reversals**: momentum "wins" then eats the turn (06-12, 06-25, 07-08, 08-07).
+- **High-volatility / large-gap days**: magnitude is consistently too small and direction flips. All of the >3% APE fails are large-move sessions.
+- **macro as winning_strategy**: 06-12 region, 07-13, 07-15, 08-19, 08-25 — macro "wins" mostly on losing days. It surfaces when nothing else agrees, and it's usually wrong.
+- **Rising-confidence regime (late Sept–Oct)**: confidence climbed to 0.58–0.66 but 10-06/10-07/10-08 still failed. Confidence is trending up while pass rate isn't — **miscalibration is worsening recently**.
+- **Overconfident misses (7)**: 08-19 (0.62), 08-20 (0.54), 09-03 (0.62), 09-09 (0.72), 09-11 (0.54), 08-31 (0.72) — high conf on wrong-direction calls, several news/macro/contrarian-led.
 
 ## Fixes to try next
-- **Cut macro and technical weight toward ~0.05–0.10**; reallocate to news (best: 0.33 hit, lowest MAPE).
-- **Add a volatility/regime gate**: widen intervals and lower confidence on high-vol or earnings/gap days instead of committing to a point direction.
-- **Recalibrate confidence** — recent 0.6–0.72 confidences are not earned; cap confidence until directional hit_rate on that regime exceeds ~0.5.
-- **Build a direction-specific ensemble** separate from magnitude; the magnitude model is fine, the sign vote is broken.
+- **Cut macro and technical weights hard** (toward 0.05–0.10); reallocate to news (best hit rate 0.33, lowest MAPE). They're the only strategies beating the field.
+- **Add a volatility regime gate**: when expected range is large, widen magnitude and down-weight mean-reverting (contrarian) calls that fight the move.
+- **Recalibrate confidence**: current high-confidence buckets (>0.6) are not outperforming — refit confidence against realized hit rate; penalize macro/news-led high-conf signals.
+- **Track direction separately from magnitude**: build a dedicated direction classifier; 62% of failures are directional, so fixing sign beats shrinking APE.
