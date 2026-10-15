@@ -3,20 +3,21 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- **Directional misses dominate** (28 of 48 fails, 58%). The system gets the *sign* wrong more than the *size* — this is a signal problem, not a calibration-of-magnitude problem.
-- **Big-move days are a bloodbath.** On every day with baseline APE > ~2.5% the model also fails and barely beats baseline (e.g. 2026-06-22 5.1%, 2026-07-31 13.2%, 2026-07-30 3.9%, 2026-08-19 2.9%). Mean fail APE is 2.3% vs sub-0.5% on clean passes — errors cluster entirely in high-volatility sessions.
-- **Barely-better-than-baseline even when "winning."** Many fails have ape ≈ baseline_ape (within 0.001), meaning the blend adds no edge on hard days — it just tracks the naive baseline into the same wall.
-- **Confidence is drifting upward without accuracy.** Recent block (2026-10-06 → 10-14) shows confidence 0.59–0.66 on a run of fails. The 7 overconfident misses are concentrated here and around 2026-08-19/20 (conf 0.62/0.54).
+- **Directional misses dominate** (29 of 49 fails, ~59%). The system isn't just sizing moves wrong — it's getting the *sign* wrong, which is a model-quality problem, not a calibration one.
+- **Overall pass rate is a coin flip** (39/88, 44%) and most strategies lose to baseline on fails. Mean fail APE 2.29% means misses are expensive, not marginal.
+- **Big-move days blow up the book.** Fails cluster on high-ape days (3–5%+, e.g. 2026-06-22, 07-15, 07-30, and the 13.2% blowup on 07-31). On jumps the model stays anchored near prior close and misses direction entirely.
+- **Macro and technical are dead weight** — both at 12.5% hit rate, and macro has the worst MAPE (0.0163). Yet macro keeps getting picked as the "winning" strategy on losing days (07-13, 07-15, 07-30, 08-19) — it wins the ensemble on exactly the days it's wrong.
+- **News is the only strategy pulling weight** (30.7% hit, lowest MAPE). Everything else dilutes it.
 
 ## Unreliable under these conditions
-- **High realized volatility / gap days:** both news and macro get selected as "winner" and still miss direction (macro 2026-07-15, 07-30, 08-19; news 06-15, 06-22, 06-25).
-- **macro and technical are the weakest engines** — hit rate 12.6% each, macro has the worst MAPE (1.63%). They should not be driving picks yet they win on several of the worst fails.
-- **Rising-confidence regime (Oct):** confidence climbing 0.53→0.66 while pass rate falls — calibration breaks exactly when the model feels most sure.
-- **contrarian over-weighted on choppy days** (2026-08-20, 09-22, 10-08 all fails with heavy contrarian weight).
+- **High-volatility / gap days (>2.5% baseline move):** directional accuracy collapses; this is where the worst APEs live.
+- **When macro or technical is the winning strategy:** near-guaranteed loss — these drive confident wrong calls.
+- **Recent high-confidence regime (Sept–Oct, conf 0.5–0.66):** confidence rose but pass rate didn't — 10-06 through 10-15 are mostly fails at 0.56–0.66 conf. Calibration is drifting: rising confidence on a flat/declining hit rate. The 7 overconfident misses concentrate here (08-19 @0.62, 09-03 @0.62, 09-09 @0.72, 10-08 @0.62).
+- **Contrarian on trending days:** frequent sign errors when price keeps running (10-08, 10-15, 09-22).
 
 ## Fixes to try next
-- **Cap confidence as a function of recent realized vol**; on high-vol days force wider intervals and lower stated confidence.
-- **Demote macro and technical** in the blend (hit rate ~0.13); lean on news (0.31) and contrarian (0.24), but gate contrarian off during trending/high-vol sessions.
-- **Add a volatility regime flag**: if expected range > ~2%, switch to a defensive ensemble or abstain rather than committing a directional call.
-- **Recalibrate confidence** against the last 20 outcomes — the Oct upward drift is unearned; tie confidence to out-of-sample hit rate, not model internals.
-- **Directional loss over magnitude:** retrain/weight selection to penalize sign errors, since 58% of fails are directional.
+- **Cut or cap macro and technical weight** (both 12.5% hit); reallocate toward news. Stop letting macro "win" the ensemble.
+- **Add a volatility/gap regime filter:** on expected large moves, widen the predicted magnitude and lean on news/momentum sign rather than anchoring to prior close.
+- **Recalibrate confidence** — recent 0.6+ predictions are no more accurate than 0.4 ones; flatten or retrain the confidence head against realized hit rate.
+- **Fix the directional model first** (59% of fails are sign errors); magnitude tuning is secondary until sign accuracy clears ~55%.
+- **Gate contrarian** off when momentum/trend is strong to stop fighting the tape.
