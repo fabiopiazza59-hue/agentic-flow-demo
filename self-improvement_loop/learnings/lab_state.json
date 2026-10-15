@@ -2,7 +2,7 @@
   "champion": "mean",
   "judge_enabled": true,
   "gates_enabled": true,
-  "n_days": 46,
+  "n_days": 47,
   "why": {
     "champion": "reference",
     "judge_effect": "undecided",

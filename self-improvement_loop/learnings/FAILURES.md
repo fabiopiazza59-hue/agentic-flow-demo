@@ -249,3 +249,11 @@ The blend leaned mildly bullish (+0.12%) into a 2.26% down day — wrong directi
 ## 2026-10-12 — FAIL (APE 1.10%)
 - Predicted 262.39 vs actual 259.53 (prior 262.43); dir hit: True; beat baseline: True; closest analyst: contrarian.
 **What went wrong:** Direction was right but we captured only 1.4% of a 2.9-pt down move because the mean blend anchored us flat. **Root cause:** Momentum and macro both posted identical +264.80 by naively extrapolating the 5-day return off one large Prime-Day spike (10/09 +3.3%) — a move the news analyst correctly noted was 'fully absorbed' pre-open. Equal-weight averaging let these two low-hit-rate analysts (momentum 0.20, macro 0.12 hit-rate, worst MAPE in the book) cancel out contrarian's 259.50 bullseye and news' 261.00. We paid full price for signals our own scorecard says are the weakest. **One change:** Replace the flat mean with a scorecard-weighted blend using the existing weight_hints (news 0.229, technical 0.208 > macro 0.180) — and when post-spike mean-reversion is the dominant thesis, apply an additional penalty to pure trend-extrapolation analysts whose target is just prior_close × (1 + recent daily rate).
+
+## 2026-10-14 — FAIL (APE 1.26%)
+- Predicted 257.27 vs actual 254.08 (prior 258.58); dir hit: True; beat baseline: True; closest analyst: contrarian.
+**What went wrong:** directional call was correct but we captured only 29% of the actual move (1.31 of 4.50). All five analysts anchored to the -0.31% premarket gap and predicted a near-flat close, producing a tight 256.5–258.1 cluster that the mean aggregator flattened further to 257.27.
+
+**Root cause:** anchor-hugging groupthink — every model treated the premarket gap as the terminal price rather than an early waypoint on a trend-continuation day, and the mean blend rewarded the timid majority over the (still too-conservative) contrarian. A same-day CPI print was a flagged volatility catalyst that no analyst sized for.
+
+**One change to try:** on days with unanimous directional agreement plus a scheduled macro catalyst, replace the mean with a magnitude-amplified blend (e.g., weight toward the most-extreme analyst or multiply the consensus delta-from-prior by ~1.5x) to stop systematically under-shooting continuation moves.

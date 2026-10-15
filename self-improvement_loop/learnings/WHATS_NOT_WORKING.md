@@ -3,21 +3,20 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- **Directional misses dominate** (28 of 47 fails, ~60%). The core problem is getting *sign* wrong, not just magnitude — the model can't call the next day's direction better than a coin flip.
-- **Failures cluster on big-move days.** Nearly every high-APE fail (3-5%+, and the 13% blowup on 07-31) is a day where the realized move was large and the model stayed anchored near the prior close. Baseline APE is comparable on these days — we're not adding edge when it matters.
-- **Beating baseline is rare on fails.** Many fails also have `beats_baseline=false`, meaning on bad days we're worse than a naive carry-forward, not just unlucky.
-- **Macro and technical are dead weight.** Both at 12.8% hit rate and the two highest MAPEs (macro 0.0163, technical 0.0142). Macro-led days are disproportionately large-error fails (07-15, 07-30, 08-19).
+- **Directional misses dominate** (28 of 48 fails, 58%). The system gets the *sign* wrong more than the *size* — this is a signal problem, not a calibration-of-magnitude problem.
+- **Big-move days are a bloodbath.** On every day with baseline APE > ~2.5% the model also fails and barely beats baseline (e.g. 2026-06-22 5.1%, 2026-07-31 13.2%, 2026-07-30 3.9%, 2026-08-19 2.9%). Mean fail APE is 2.3% vs sub-0.5% on clean passes — errors cluster entirely in high-volatility sessions.
+- **Barely-better-than-baseline even when "winning."** Many fails have ape ≈ baseline_ape (within 0.001), meaning the blend adds no edge on hard days — it just tracks the naive baseline into the same wall.
+- **Confidence is drifting upward without accuracy.** Recent block (2026-10-06 → 10-14) shows confidence 0.59–0.66 on a run of fails. The 7 overconfident misses are concentrated here and around 2026-08-19/20 (conf 0.62/0.54).
 
 ## Unreliable under these conditions
-- **High-volatility / gap days:** model systematically under-reacts, predicting near-flat while price moves 2-5%.
-- **macro as winning_strategy:** 11/86 wins, repeatedly the strategy behind the worst misses. Lowest weight_hint yet still steering bad calls.
-- **technical:** same 12.8% hit rate; adds magnitude error without directional value.
-- **Rising-confidence late window (Oct, conf 0.59-0.66):** 10-06 through 10-09 are confident fails. **Recent overconfidence is emerging** — the newer regime (conf creeping up) shows passes falling while confidence rises. Miscalibration is directional: confidence is trending up precisely as accuracy degrades.
-- **contrarian** carries decent hit rate (23%) but is behind several directional fails on choppy reversals (08-20, 09-22, 10-08) — unreliable when the market is actually trending.
+- **High realized volatility / gap days:** both news and macro get selected as "winner" and still miss direction (macro 2026-07-15, 07-30, 08-19; news 06-15, 06-22, 06-25).
+- **macro and technical are the weakest engines** — hit rate 12.6% each, macro has the worst MAPE (1.63%). They should not be driving picks yet they win on several of the worst fails.
+- **Rising-confidence regime (Oct):** confidence climbing 0.53→0.66 while pass rate falls — calibration breaks exactly when the model feels most sure.
+- **contrarian over-weighted on choppy days** (2026-08-20, 09-22, 10-08 all fails with heavy contrarian weight).
 
 ## Fixes to try next
-- **Cut macro and technical weights hard** (toward ~0.05-0.10); reallocate to **news** (best: 31% hit, lowest MAPE).
-- **Add a volatility regime gate:** when expected/realized range is high, widen prediction away from prior close or defer to the higher-variance strategies instead of anchoring flat.
-- **Recalibrate confidence** — recent confidence (0.6+) is not earning its keep; cap confidence on macro/technical-led and high-vol days.
-- **Build a dedicated directional model** (sign classifier) since 60% of failures are sign errors, not magnitude.
-- **Stop trusting contrarian in trending tapes** — add a trend filter before it can win the ensemble.
+- **Cap confidence as a function of recent realized vol**; on high-vol days force wider intervals and lower stated confidence.
+- **Demote macro and technical** in the blend (hit rate ~0.13); lean on news (0.31) and contrarian (0.24), but gate contrarian off during trending/high-vol sessions.
+- **Add a volatility regime flag**: if expected range > ~2%, switch to a defensive ensemble or abstain rather than committing a directional call.
+- **Recalibrate confidence** against the last 20 outcomes — the Oct upward drift is unearned; tie confidence to out-of-sample hit rate, not model internals.
+- **Directional loss over magnitude:** retrain/weight selection to penalize sign errors, since 58% of fails are directional.
