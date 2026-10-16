@@ -261,3 +261,12 @@ The blend leaned mildly bullish (+0.12%) into a 2.26% down day — wrong directi
 ## 2026-10-15 — FAIL (APE 1.55%)
 - Predicted 250.82 vs actual 254.76 (prior 254.08); dir hit: False; beat baseline: False; closest analyst: contrarian.
 **What went wrong:** All five analysts anchored to the -1.43% premarket gap (250.45) and predicted down; the stock instead fully reversed and closed +0.27%. The blend had no dispersion to protect against consensus error, and the 'winning_strategy: contrarian' at 251.5 was still directionally wrong. **Root cause:** Gap-anchoring groupthink — a large overnight gap on neutral RSI (55.56) was misread as directional conviction when it was a fade candidate; prior close would have won by 5x. **One change:** Add a gap-fade rule — when |premarket gap| > 1% and RSI is neutral (45-60), pull the blend at least halfway back toward prior close instead of anchoring on the gap, and cap p_up/p_down extremity when the gap is the dominant signal.
+
+## 2026-10-16 — FAIL (APE 1.15%)
+- Predicted 252.88 vs actual 250.0 (prior 254.76); dir hit: True; beat baseline: True; closest analyst: technical.
+## What went wrong
+Direction was correct (down) but we badly underestimated magnitude: predicted -0.74%, actual -1.87%. The blend herded — four analysts sat at 252.47–252.50, all leaning on the -0.64% premarket gap and SMA20 (~253.41) as a support floor that price blew straight through. News at 253.80 pulled the mean *up*, compounding the shortfall.
+
+**Root cause:** shared mean-reversion anchoring. Every analyst saw the same lower-highs series (263.70→255.60) but treated SMA20 as a landing zone instead of a level to break, and ignored that 1.5%+ realized vol made a 1.87% down-day ordinary.
+
+**One change to try:** on high-consensus directional days, override the tight cluster by scaling the move toward the vol-implied range (sigma_pct ≈ 1.7% here) — a 1.3x stretch would have landed near 251.5, cutting the error below the 1% gate.

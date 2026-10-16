@@ -3,21 +3,20 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- **Directional misses dominate** (29 of 49 fails, ~59%). The system isn't just sizing moves wrong — it's getting the *sign* wrong, which is a model-quality problem, not a calibration one.
-- **Overall pass rate is a coin flip** (39/88, 44%) and most strategies lose to baseline on fails. Mean fail APE 2.29% means misses are expensive, not marginal.
-- **Big-move days blow up the book.** Fails cluster on high-ape days (3–5%+, e.g. 2026-06-22, 07-15, 07-30, and the 13.2% blowup on 07-31). On jumps the model stays anchored near prior close and misses direction entirely.
-- **Macro and technical are dead weight** — both at 12.5% hit rate, and macro has the worst MAPE (0.0163). Yet macro keeps getting picked as the "winning" strategy on losing days (07-13, 07-15, 07-30, 08-19) — it wins the ensemble on exactly the days it's wrong.
-- **News is the only strategy pulling weight** (30.7% hit, lowest MAPE). Everything else dilutes it.
+- **Directional misses dominate** (29 of 50 fails). The model gets the *direction* wrong more than it gets the magnitude wrong — this is a sign/trend problem, not just a sizing problem.
+- **Baseline is often better.** A large share of fails have ape > baseline_ape (e.g. 06-12, 06-25, 06-26, 09-22, 10-15). The ensemble frequently adds noise over a naive carry-forward.
+- **Big tail events wreck the mean.** 2026-07-31 (ape 13.2%) and a cluster of 3–5% misses (06-22, 06-25, 07-15, 08-19, 07-30) drive the 2.26% mean fail APE. These are gap/regime days the model has no answer for.
+- **Confidence is weakly calibrated.** 7 overconfident misses, and recent high-confidence days (08-19 @0.62, 09-03 @0.62, 10-08 @0.62, 10-15 @0.57) still fail. Rising confidence (0.52→0.66 in Oct) is NOT matched by rising accuracy.
 
 ## Unreliable under these conditions
-- **High-volatility / gap days (>2.5% baseline move):** directional accuracy collapses; this is where the worst APEs live.
-- **When macro or technical is the winning strategy:** near-guaranteed loss — these drive confident wrong calls.
-- **Recent high-confidence regime (Sept–Oct, conf 0.5–0.66):** confidence rose but pass rate didn't — 10-06 through 10-15 are mostly fails at 0.56–0.66 conf. Calibration is drifting: rising confidence on a flat/declining hit rate. The 7 overconfident misses concentrate here (08-19 @0.62, 09-03 @0.62, 09-09 @0.72, 10-08 @0.62).
-- **Contrarian on trending days:** frequent sign errors when price keeps running (10-08, 10-15, 09-22).
+- **High-volatility / large-move days:** every >3% move day is a miss. The model reverts toward small moves and gets run over.
+- **`macro` and `technical` as winning strategy:** hit rates 12.4% and 13.5% — barely better than noise. When macro wins the day it usually fails (07-13, 07-15, 08-19, 07-30).
+- **`contrarian` in trending stretches:** 24.7% overall but clusters of consecutive fails in Oct (10-08, 10-12, 10-14, 10-15) show it fights persistent trends.
+- **Recent regime (late Sep–Oct):** fail rate elevated despite highest confidence of the whole sample — calibration drift.
 
 ## Fixes to try next
-- **Cut or cap macro and technical weight** (both 12.5% hit); reallocate toward news. Stop letting macro "win" the ensemble.
-- **Add a volatility/gap regime filter:** on expected large moves, widen the predicted magnitude and lean on news/momentum sign rather than anchoring to prior close.
-- **Recalibrate confidence** — recent 0.6+ predictions are no more accurate than 0.4 ones; flatten or retrain the confidence head against realized hit rate.
-- **Fix the directional model first** (59% of fails are sign errors); magnitude tuning is secondary until sign accuracy clears ~55%.
-- **Gate contrarian** off when momentum/trend is strong to stop fighting the tape.
+- **Re-weight toward `news` (30% hit, lowest MAPE) and `contrarian`; cut `macro`/`technical` weight** given sub-14% hit rates.
+- **Add a volatility/gap detector:** on high-expected-move days, widen the predicted magnitude or defer to baseline instead of mean-reverting.
+- **Recalibrate confidence** against realized hit rate; current scores are inflated and uninformative — cap confidence until calibration is proven.
+- **Fix the directional model first** (sign is wrong 58% of fails) — magnitude tuning is secondary.
+- **Track beats_baseline as a gate:** if the ensemble can't consistently beat carry-forward, fall back to baseline on low-signal days.
