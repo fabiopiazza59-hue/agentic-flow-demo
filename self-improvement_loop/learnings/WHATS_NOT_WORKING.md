@@ -3,20 +3,22 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- **Directional misses dominate** (29 of 50 fails). The model gets the *direction* wrong more than it gets the magnitude wrong — this is a sign/trend problem, not just a sizing problem.
-- **Baseline is often better.** A large share of fails have ape > baseline_ape (e.g. 06-12, 06-25, 06-26, 09-22, 10-15). The ensemble frequently adds noise over a naive carry-forward.
-- **Big tail events wreck the mean.** 2026-07-31 (ape 13.2%) and a cluster of 3–5% misses (06-22, 06-25, 07-15, 08-19, 07-30) drive the 2.26% mean fail APE. These are gap/regime days the model has no answer for.
-- **Confidence is weakly calibrated.** 7 overconfident misses, and recent high-confidence days (08-19 @0.62, 09-03 @0.62, 10-08 @0.62, 10-15 @0.57) still fail. Rising confidence (0.52→0.66 in Oct) is NOT matched by rising accuracy.
+- Overall 51/90 fail (57%). Directional misses (30) outnumber magnitude misses (21) — the core problem is **getting the sign wrong**, not just the size.
+- Big-move days blow up: APE spikes to 3-13% (2026-06-22, 07-31, 08-19, 10-19). The model systematically under-reacts and lags on large daily swings.
+- **Macro** is the worst strategy: 12% hit rate, highest MAPE (0.0167). Every day it wins outright (06-12, 07-13, 07-15, 08-19, 07-30) it tends to miss. It's a loser whenever it dominates the blend.
+- **Technical** also weak (13% hit rate) yet carries the second-highest weight hint (0.207). Weighting is misaligned with realized skill.
+- Recent October stretch is ugly: 10-06 through 10-19 is almost all fails despite rising confidence — persistent regime the model hasn't adapted to.
+- Note: many fails still "beat baseline" — meaning the baseline is also missing. These are hard regime days, not pure model error, but the model isn't beating the bar often enough.
 
 ## Unreliable under these conditions
-- **High-volatility / large-move days:** every >3% move day is a miss. The model reverts toward small moves and gets run over.
-- **`macro` and `technical` as winning strategy:** hit rates 12.4% and 13.5% — barely better than noise. When macro wins the day it usually fails (07-13, 07-15, 08-19, 07-30).
-- **`contrarian` in trending stretches:** 24.7% overall but clusters of consecutive fails in Oct (10-08, 10-12, 10-14, 10-15) show it fights persistent trends.
-- **Recent regime (late Sep–Oct):** fail rate elevated despite highest confidence of the whole sample — calibration drift.
+- High-volatility / large-gap days (>2% true move): consistent magnitude under-shoot and frequent sign error.
+- When macro or technical is the winning strategy, especially with low macro sub-weight (~0.07-0.12) — the blend leans on a strategy that's already failing.
+- **Confidence is miscalibrated upward over time.** Recent conf 0.55-0.66 days (10-06, 10-08, 10-19, 09-03, 08-19) are misses. 7 overconfident misses confirm high conf ≠ accuracy; calibration has drifted since the 0.1-0.4 early period.
+- Choppy sideways runs where contrarian wins but still misses direction (10-08, 10-15, 10-19).
 
 ## Fixes to try next
-- **Re-weight toward `news` (30% hit, lowest MAPE) and `contrarian`; cut `macro`/`technical` weight** given sub-14% hit rates.
-- **Add a volatility/gap detector:** on high-expected-move days, widen the predicted magnitude or defer to baseline instead of mean-reverting.
-- **Recalibrate confidence** against realized hit rate; current scores are inflated and uninformative — cap confidence until calibration is proven.
-- **Fix the directional model first** (sign is wrong 58% of fails) — magnitude tuning is secondary.
-- **Track beats_baseline as a gate:** if the ensemble can't consistently beat carry-forward, fall back to baseline on low-signal days.
+- Cut macro and technical weights toward their realized hit rates; raise news (0.30 hit, lowest MAPE) and contrarian.
+- Add a volatility regime filter: widen intervals / lower confidence on predicted large-move days instead of under-reacting.
+- Recalibrate confidence against recent realized pass rate — current 0.55-0.66 band is unjustified; shrink it.
+- Build a directional-accuracy gate separate from magnitude; 30 sign errors is the biggest lever.
+- Investigate the October regime break specifically — retrain or down-weight stale signals.
