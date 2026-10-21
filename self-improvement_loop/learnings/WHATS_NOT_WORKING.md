@@ -3,22 +3,21 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- Overall 51/90 fail (57%). Directional misses (30) outnumber magnitude misses (21) — the core problem is **getting the sign wrong**, not just the size.
-- Big-move days blow up: APE spikes to 3-13% (2026-06-22, 07-31, 08-19, 10-19). The model systematically under-reacts and lags on large daily swings.
-- **Macro** is the worst strategy: 12% hit rate, highest MAPE (0.0167). Every day it wins outright (06-12, 07-13, 07-15, 08-19, 07-30) it tends to miss. It's a loser whenever it dominates the blend.
-- **Technical** also weak (13% hit rate) yet carries the second-highest weight hint (0.207). Weighting is misaligned with realized skill.
-- Recent October stretch is ugly: 10-06 through 10-19 is almost all fails despite rising confidence — persistent regime the model hasn't adapted to.
-- Note: many fails still "beat baseline" — meaning the baseline is also missing. These are hard regime days, not pure model error, but the model isn't beating the bar often enough.
+- **Directional misses dominate**: 30 of 51 fails are wrong-direction, not just magnitude. The model isn't sized wrong — it's pointed wrong. This is the core problem.
+- **Baseline-matching behavior**: on large-move days (ape 3-13%), predictions track baseline and miss together (06-15, 06-22, 07-15, 07-31, 10-19). The ensemble adds no edge when it matters most — it just mirrors naive persistence.
+- **macro strategy is dead weight**: hit_rate 0.12, worst MAPE (0.0166), yet still carries ~0.18 weight. When macro "wins" the vote it frequently fails (06-12 region, 07-13, 07-15, 07-30, 08-19).
+- **technical also weak**: hit_rate 0.13 but still ~0.21 weight — second-highest allocation to a near-coinflip-loser.
+- **news is the only real signal**: hit_rate 0.31, lowest MAPE. Everything else is below 0.26.
 
 ## Unreliable under these conditions
-- High-volatility / large-gap days (>2% true move): consistent magnitude under-shoot and frequent sign error.
-- When macro or technical is the winning strategy, especially with low macro sub-weight (~0.07-0.12) — the blend leans on a strategy that's already failing.
-- **Confidence is miscalibrated upward over time.** Recent conf 0.55-0.66 days (10-06, 10-08, 10-19, 09-03, 08-19) are misses. 7 overconfident misses confirm high conf ≠ accuracy; calibration has drifted since the 0.1-0.4 early period.
-- Choppy sideways runs where contrarian wins but still misses direction (10-08, 10-15, 10-19).
+- **High-volatility / gap days** (>2.5% true moves): consistent directional failure and APE blowouts. Mean fail APE 2.33% vs tiny win APEs shows fails cluster on big days.
+- **Confidence is miscalibrated upward over time**: recent block (09-28→10-19) runs confidence 0.53-0.66 while failing repeatedly (10-06, 10-08, 10-15, 10-19). Confidence rose but accuracy didn't — 7 overconfident misses concentrated late.
+- **contrarian in trending moves**: wins on some reversals but fails hard when the move continues (10-15, 10-19 at conf ~0.57).
+- **macro-led days in any regime**: unreliable regardless of market condition.
 
 ## Fixes to try next
-- Cut macro and technical weights toward their realized hit rates; raise news (0.30 hit, lowest MAPE) and contrarian.
-- Add a volatility regime filter: widen intervals / lower confidence on predicted large-move days instead of under-reacting.
-- Recalibrate confidence against recent realized pass rate — current 0.55-0.66 band is unjustified; shrink it.
-- Build a directional-accuracy gate separate from magnitude; 30 sign errors is the biggest lever.
-- Investigate the October regime break specifically — retrain or down-weight stale signals.
+- **Cut macro and technical weights hard** (toward ~0.08 floor); reallocate to news (proven best) and contrarian.
+- **Decouple confidence from recency drift** — recalibrate against realized hit-rate; current high-conf late predictions are not earning it.
+- **Add a volatility regime gate**: on expected large-move/gap days, stop mirroring baseline — widen and lean on news only.
+- **Diagnose directional sign logic** — 59% of fails are direction, so a sign-flip bias (likely from contrarian/technical) needs isolation.
+- **Track strategy hit-rate conditioned on volatility bucket**, not just overall, before re-weighting.
