@@ -3,18 +3,20 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- **Directional misses dominate** (30 of 52 fails, 58%). The system isn't just imprecise on magnitude — it's frequently picking the wrong sign. That's the core defect; a coin flip on direction would do comparably.
-- **Fails cluster on high-volatility days.** Every large-APE fail (2.5%+) — 06-22, 06-25, 07-15, 07-30, 07-31 (13%!), 08-19, 10-19 (5.5%), 10-22 (4.5%) — happens when the move is large. On quiet days APE is tiny; the model only breaks when it matters.
-- **Barely beats baseline on fails.** mean_fail_ape 2.37% vs comparable baseline; on many misses baseline_ape ≈ or beats our ape. The ensemble adds little edge over naive persistence.
-- **macro and technical are dead weight.** macro hit_rate 11.8%, technical 12.9% — both worse than contrarian (25.8%) and news (31%), yet they still win selection and carry ~0.18–0.21 weight.
+- 55% fail rate (52/94) with directional misses (30) outnumbering magnitude misses (22) — the system is getting the *direction* wrong more often than it's just mis-sizing. Getting the sign right is the bigger problem.
+- Big-move days are where it bleeds: APE spikes to 3–13% (2026-06-22, 07-23, 07-31, 10-19, 10-22) consistently coincide with fails. The model reverts to small moves and gets run over on gaps/volatility.
+- On many fails the model barely differs from baseline (fail APE ≈ baseline APE, e.g. 06-15, 06-29, 09-11). It's adding no edge on those days — it's just tracking the random-walk and losing anyway.
+- `macro` (11% hit, 0.167 MAPE) and `technical` (13% hit) are the worst-performing winning-strategy labels yet still get picked as the "winner" repeatedly — selection is routing to weak strategies.
 
 ## Unreliable under these conditions
-- **macro-led and technical-led predictions on volatile days** are the worst offenders (07-15, 07-30, 08-19, 06-17 all macro/technical winners with big APE and wrong direction).
-- **Confidence is miscalibrated upward over time.** Newer predictions carry rising confidence (0.55–0.66) but still fail frequently (10-06, 10-07, 10-08, 10-09, 10-19 all conf >0.59 and fail). Recent overconfident misses (08-19 0.62, 08-20 0.54, 09-03 0.62) confirm high confidence ≠ accuracy.
-- **Large-gap/event days** (earnings-type moves like 07-31) produce catastrophic APE with no regime awareness.
+- **High-volatility / gap days:** every APE>3% event is a fail; magnitude estimates are systematically too timid.
+- **When `macro` or `technical` is the chosen strategy:** combined ~12% hit rate. macro-led fails (07-13, 07-15, 07-30, 08-19) are large-APE misses.
+- **Rising confidence, flat accuracy:** recent window (conf 0.53–0.66, Oct) is still ~50% failing — 7 overconfident misses. Confidence climbed without accuracy following; calibration is drifting upward falsely. 08-31/09-09 fired conf 0.72 and failed.
+- **contrarian** carries many directional *hits* but still fails on magnitude (08-04, 10-22 directional-right, huge APE) — right call, wrong size.
 
 ## Fixes to try next
-- **Down-weight or bench macro and technical** as lead strategies; shift weight toward news/contrarian. Require a volatility-regime gate before trusting macro/technical.
-- **Add a directional accuracy loss/selector** — current selection optimizes magnitude but keeps missing sign. Prioritize strategies by recent directional hit_rate, not just APE.
-- **Recalibrate confidence** against realized hit rate; current high-confidence band (0.55–0.66) is not earning its score. Shrink confidence on high-volatility days.
-- **Flag event/high-vol days** (widen intervals, defer to baseline) instead of forcing a point call where the system demonstrably collapses.
+- Demote/penalize `macro` and `technical` in selection; lean toward `news` (32% hit, lowest MAPE) and `contrarian` for direction.
+- Add a volatility regime gate: widen predicted move magnitude when recent realized vol / gap risk is elevated instead of mean-reverting to small moves.
+- Recalibrate confidence against realized hit-rate — current high-conf band (>0.6) is not earning its confidence; cap or shrink it until it predicts pass rate.
+- Separate direction and magnitude models; directional misses dominate, so a dedicated sign classifier may beat the blended point estimate.
+- Flag days where pred≈baseline and either abstain or defer to baseline rather than adding noise.
