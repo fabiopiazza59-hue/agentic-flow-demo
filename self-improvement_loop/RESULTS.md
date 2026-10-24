@@ -5,7 +5,7 @@ _Auto-generated after every run. Verdicts use pre-open forecasts only and anytim
 ## Verdict
 ❌ **No edge yet** — all-time MAPE 1.57% is nominally ahead of the free baseline 1.60% by 0.03%, but the difference is not distinguishable from noise (paired over 54 pre-open days: mean 0.03%, anytime-valid 95% CS [-0.078%, +0.142%]; fixed-sample 90% CI [-0.06%, 0.10%], sign test p=0.8919).
 
-**Next forecast (2026-10-26):** close ≈ **248.53** (up, P(up) 57%, 80% interval 243.72–253.44) vs prior close 248.00; anchored to 248.70 (yfinance_ext, live, refreshed 0×).
+**Next forecast (2026-10-26):** close ≈ **248.61** (up, P(up) 58%, 80% interval 243.80–253.52) vs prior close 248.00; anchored to 248.78 (yfinance_ext, live, refreshed 1×).
 
 ## Scoreboard — all-time, pre-open forecasts only
 
@@ -110,7 +110,7 @@ _Both arms forecast the same sessions from the same pre-open snapshot (paired te
 
 **Verdict:** Arm B leads on paired MAPE (mean daily delta 0.01% in B's favor over 46 pre-open days); B wins 23/46 decisive days (sign test p=1.0, descriptive); anytime-valid 95% CS [-0.193%, +0.222%] includes zero — not distinguishable from noise.
 
-**B's next forecast (2026-10-26):** close ≈ **248.7** (up, adj 0.0σ, 0 evidence items).
+**B's next forecast (2026-10-26):** close ≈ **248.78** (up, adj 0.0σ, 0 evidence items).
 
 | All-time, pre-open | A — ensemble+gates | B — raven prior+pulse |
 |---|---|---|
