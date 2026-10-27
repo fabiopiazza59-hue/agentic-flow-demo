@@ -3,20 +3,19 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- 55% fail rate (52/94) with directional misses (30) outnumbering magnitude misses (22) — the system is getting the *direction* wrong more often than it's just mis-sizing. Getting the sign right is the bigger problem.
-- Big-move days are where it bleeds: APE spikes to 3–13% (2026-06-22, 07-23, 07-31, 10-19, 10-22) consistently coincide with fails. The model reverts to small moves and gets run over on gaps/volatility.
-- On many fails the model barely differs from baseline (fail APE ≈ baseline APE, e.g. 06-15, 06-29, 09-11). It's adding no edge on those days — it's just tracking the random-walk and losing anyway.
-- `macro` (11% hit, 0.167 MAPE) and `technical` (13% hit) are the worst-performing winning-strategy labels yet still get picked as the "winner" repeatedly — selection is routing to weak strategies.
+- **Directional misses dominate**: 30 of 52 fails are wrong-direction, not just magnitude. The model can't call sign on volatile days, and sign errors are the core problem, not calibration of size.
+- **Big moves blow up APE**: nearly every fail with APE >3% (e.g. 2026-06-22, 07-15, 07-31 @13%, 10-19 @5.5%, 10-22 @4.5%) is a large-move day the model smooths over. Mean fail APE 2.37% vs pass days near 0.3-0.6%.
+- **Barely beating baseline**: many fails have APE ≈ baseline_ape (e.g. 09-11, 10-08, 06-17), meaning the ensemble adds no edge on hard days — it's just tracking the naive forecast then eating the error.
+- **macro and technical are dead weight**: macro hit_rate 11.6%, technical 12.6%, yet both still carry ~18-21% weight and are "winning_strategy" on several of the worst fails (07-15, 08-19, 07-30).
 
 ## Unreliable under these conditions
-- **High-volatility / gap days:** every APE>3% event is a fail; magnitude estimates are systematically too timid.
-- **When `macro` or `technical` is the chosen strategy:** combined ~12% hit rate. macro-led fails (07-13, 07-15, 07-30, 08-19) are large-APE misses.
-- **Rising confidence, flat accuracy:** recent window (conf 0.53–0.66, Oct) is still ~50% failing — 7 overconfident misses. Confidence climbed without accuracy following; calibration is drifting upward falsely. 08-31/09-09 fired conf 0.72 and failed.
-- **contrarian** carries many directional *hits* but still fails on magnitude (08-04, 10-22 directional-right, huge APE) — right call, wrong size.
+- **High-volatility / gap days**: clustered large-APE fails suggest earnings/macro-news spikes the model systematically underreacts to.
+- **macro-led and contrarian-led days**: contrarian is winning_strategy on a disproportionate share of recent fails (10-08, 10-15, 10-19); macro leads the biggest misses.
+- **Confidence is miscalibrated upward recently**: late-period fails run confidence 0.56-0.72 (08-19 @0.62, 08-31 @0.72, 09-09 @0.72, 10-06 @0.66, 10-08 @0.62). Rising confidence has NOT bought accuracy — overconfident misses concentrate in the high-conf regime.
 
 ## Fixes to try next
-- Demote/penalize `macro` and `technical` in selection; lean toward `news` (32% hit, lowest MAPE) and `contrarian` for direction.
-- Add a volatility regime gate: widen predicted move magnitude when recent realized vol / gap risk is elevated instead of mean-reverting to small moves.
-- Recalibrate confidence against realized hit-rate — current high-conf band (>0.6) is not earning its confidence; cap or shrink it until it predicts pass rate.
-- Separate direction and magnitude models; directional misses dominate, so a dedicated sign classifier may beat the blended point estimate.
-- Flag days where pred≈baseline and either abstain or defer to baseline rather than adding noise.
+- Cut or floor macro and technical weights; shift mass to news (hit_rate 0.33, lowest MAPE).
+- Add a volatility/earnings-day regime flag; widen intervals and down-weight confidence when expected move is large.
+- Recalibrate confidence against realized hit-rate — current high-conf band (0.6+) is not earning its score.
+- Build a dedicated sign/direction classifier; magnitude blending is masking that the real failure is directional.
+- Flag "ensemble ≈ baseline" days and route them to a fallback rather than claiming edge.
