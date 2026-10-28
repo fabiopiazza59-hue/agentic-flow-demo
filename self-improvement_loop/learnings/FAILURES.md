@@ -278,3 +278,11 @@ Direction was correct (down) but we badly underestimated magnitude: predicted -0
 ## 2026-10-22 — FAIL (APE 4.49%)
 - Predicted 261.61 vs actual 250.38 (prior 262.37); dir hit: True; beat baseline: True; closest analyst: contrarian.
 **What went wrong:** The blend was directionally correct but magnitude-blind — predicted -0.29%, actual -4.6%. No analyst entertained a large down move; all five anchored to premarket -0.37% and recited identical technical talking points (RSI 63, extended above SMA20), producing a degenerate consensus around 261. **Root cause:** Shared over-reliance on premarket gap + static technical overextension signals, with zero mechanism to detect or price a tail event (likely news/sector-driven gap down ahead of Oct 29 earnings). The analysts are not independent — they're paraphrasing the same three indicators, so the committee has no diversity to catch a regime break, and sigma=1.92% was far too narrow. **The one change:** Introduce a regime/tail-risk gate that detects analyst clustering (all predictions within ~0.7%) and, when the pre-earnings window or sector volatility is elevated, fattens sigma and pulls the point estimate toward the more aggressive contrarian leg rather than the mean — the mean-blend actively diluted the only analyst leaning toward a bigger move.
+
+## 2026-10-27 — FAIL (APE 1.09%)
+- Predicted 250.33 vs actual 253.1 (prior 249.09); dir hit: True; beat baseline: True; closest analyst: contrarian.
+**What went wrong:** Direction was right (up) but we captured only ~1.3 of the actual 1.6% move — a magnitude failure driven by the mean aggregator averaging three low-hit-rate bearish trend analysts (macro/technical/momentum) against the two correct mean-reversion reads (news 251.1, contrarian 251.5).
+
+**Root cause:** Unconditional mean weighting ignored regime. This was a textbook pre-earnings oversold bounce where news (32% hit-rate) and contrarian (26%) should dominate, yet macro (11% hit-rate, predicting *down*) got nearly equal vote and pulled the blend back toward prior_close.
+
+**One change to try:** When within 3 days of earnings AND price is >2% below SMA20, drop or halve macro/technical weight and set the blend to the max of news/contrarian targets rather than the mean — this would have printed ~251.5+ and roughly halved the error.
