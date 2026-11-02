@@ -101,3 +101,4 @@ Append-only insights. Newest at the bottom.
 - (2026-10-28) On pre-earnings/pre-FOMC holding sessions with no intraday catalyst, weight the news analyst's modest-drift call and cap the blend-to-prediction nudge to avoid overshooting beyond analyst consensus.
 - (2026-10-29) When a named macro/sector catalyst (e.g. peer AI-capex miss dragging index futures >1%) is present on an earnings-eve session, widen sigma and push the news analyst's magnitude 2-3x beyond its instinctive drift — the panel systematically under-prices catalyst-driven tail moves.
 - (2026-10-30) On earnings-gap days where premarket gap exceeds ~5% AND RSI < 40, widen sigma and raise p_up floor to >=0.20 — extreme oversold gaps mean-revert far more than partial-fill consensus assumes.
+- (2026-11-02) After a >10% two-day volume-capitulation selloff with RSI<35, the mean-reversion bounce tends to exceed the analyst blend's magnitude — test a +0.3σ upward skew on the first post-flush session.
