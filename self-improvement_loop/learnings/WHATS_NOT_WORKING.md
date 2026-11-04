@@ -3,19 +3,20 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- 55% fail rate with directional misses (30) slightly outnumbering magnitude misses (25) — the model is wrong on *direction* more than on size, meaning the core signal, not calibration of magnitude, is the deeper problem.
-- Big-move days blow up: APEs of 13.2%, 5.5%, 5.2%, 5.1%, 4.5%, 4.2% all cluster on volatile/gap sessions. The model systematically under-reacts to large moves (mean fail APE 2.42% vs typical ~0.5% on wins).
-- On many fails the model loses to the naive baseline too (2026-06-12/15/17/25/26, 10-15, 10-19) — it isn't just hard days, the model actively adds error.
-- `macro` is the recurring winning strategy on the worst misses (07-30 3.9%, 08-19 2.9%, 10-30 5.2%) despite being the weakest overall.
+- **55% fail rate (56/101)** with mean fail APE 2.4% — magnitude on big-move days is the killer. Several fails are 3–5% APE, plus one blowout at 13.2% (2026-07-31) and 5.5% (2026-10-30).
+- **Directional misses (30) slightly outnumber magnitude misses (26)** — the model is not just mis-sizing, it frequently gets the sign wrong. That's a core signal problem, not a calibration tweak.
+- **A recurring pattern: directional_hit=true but still FAIL** (e.g. 07-23, 07-31, 10-22, 10-29, 10-14). Right direction, badly undersized move → systematic magnitude compression on volatile days.
+- **macro and technical are dead weight**: both hit_rate 11.9% and the two highest MAPEs. macro wins the day only on big-error days (07-15, 07-30, 08-19, 10-30) — it "wins" by being least-wrong in a bad regime, not by being good.
 
 ## Unreliable under these conditions
-- **macro** (hit rate 12%, worst MAPE 1.70%) and **technical** (12%) are near coin-flip-bad; they "win" the ensemble mostly on high-volatility days and then miss badly.
-- **momentum** (17%) fails in choppy/mean-reverting regimes — see the June cluster of consecutive misses where momentum/news were selected.
-- Large single-day gaps (earnings/macro-print days) — every APE >3% is a regime the ensemble cannot handle.
-- Confidence is miscalibrated upward over time: later predictions carry 0.5–0.72 confidence yet still fail (08-19 conf .62, 08-31 .72, 09-09 .72, 10-06 .66, 10-08 .62). 7 overconfident misses are concentrated in the high-confidence band.
+- **High-volatility / large-move days**: whenever the realized move is large (baseline_ape >2%), the model tends to underclip and fail even when directionally right. Clustered late-June, late-July, mid-Oct, late-Oct.
+- **macro-led and technical-led predictions**: unreliable almost always; when macro is the winning strategy it's usually a fail (07-15, 07-30, 08-19, 10-09, 10-30).
+- **Mild overconfidence creep in Oct**: confidence drifted up to 0.56–0.66 while fail rate stayed high (10-06 through 10-19 mostly fails at conf ~0.57–0.66). Only 7 flagged overconfident misses, but the recent rising-confidence/flat-accuracy trend is the warning sign.
+- **contrarian over-fires in choppy stretches** (10-08, 10-15, 10-19 fails) — it's the best hit-rate ex-news but produces the worst single tail errors.
 
 ## Fixes to try next
-- Cut or cap `macro` and `technical` weight; they drag MAPE and win rarely. Lean on `news`/`contrarian` (the only strategies >25% hit rate).
-- Add a volatility/gap detector; on high-vol days widen predicted magnitude and distrust momentum.
-- Recalibrate confidence — current scores above 0.5 don't predict passes; shrink confidence toward empirical ~0.45 base rate and penalize overconfident regimes.
-- Add a baseline-guard: when the ensemble diverges far from naive persistence, fall back toward baseline to stop sub-baseline losses.
+- **Cut or floor macro and technical weights** (both 11.9% hit); reallocate toward news (32.7%) and contrarian (26.7%).
+- **Add a volatility-scaled magnitude term**: on high-ATR/large-gap days, widen predicted move — the model is chronically compressing big moves even when the sign is right.
+- **Re-calibrate confidence downward in high-vol regimes**; cap confidence when macro/technical is the lead strategy since those lead on the worst days.
+- **Build a regime gate**: detect large-move days (earnings, macro prints) and switch to a wider-interval mode rather than trusting the ensemble point estimate.
+- **Audit the sign model separately** — 30 directional misses means an independent direction classifier may beat the current weighted blend.

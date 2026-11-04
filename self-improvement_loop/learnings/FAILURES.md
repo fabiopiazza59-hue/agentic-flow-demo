@@ -294,3 +294,13 @@ Direction was correct (down) but we badly underestimated magnitude: predicted -0
 ## 2026-10-30 — FAIL (APE 5.23%)
 - Predicted 227.77 vs actual 240.35 (prior 243.79); dir hit: True; beat baseline: False; closest analyst: macro.
 **What went wrong:** The desk anchored all five analysts to the -7.3% premarket print and predicted a shallow partial gap-fill (227.77); the stock instead recovered nearly the entire gap to 240.35. Direction was correct but magnitude was off by 5.2%, worse than the naive prior-close baseline (1.4%). **Root cause:** Treating the live premarket anchor as a near-certain floor (p_up=0.025) on an earnings-driven oversold gap, where sharp intraday reversals are common — the positive AWS/margin fundamentals were acknowledged in rationale but never priced in. Zero analyst dispersion removed any protection against the bounce scenario. **One change:** On >5% gap days with RSI<40, blend the premarket anchor with the prior close (e.g., 50/50) rather than anchoring fully to premarket, and raise the p_up floor to capture oversold mean-reversion risk.
+
+## 2026-11-03 — FAIL (APE 1.07%)
+- Predicted 248.0 vs actual 250.69 (prior 245.63); dir hit: True; beat baseline: True; closest analyst: contrarian.
+## What Went Wrong
+
+The miss was **pure magnitude, not direction** — all analysts were up, but the whole cone (246.5–248.5) sat below the actual 250.69. The blend got pinned to the pre-market gap (+0.46%) and the 5d SMA at 247.49, which every analyst named as resistance; none priced resistance as a level the stock overshoots on an oversold snapback.
+
+**Root cause:** gap-anchoring compressed dispersion precisely when conditions (RSI 39.78, 3.3% below SMA20/50, post-2-day-selloff) favored a large reversion move. The judge's +0.64 nudge to 248.0 was directionally right but an order of magnitude too small.
+
+**One change:** in confirmed oversold-reversion setups, widen the upside target to ~1.5x the pre-market gap and let the 5d SMA act as a magnet to pierce, not a ceiling — and raise confidence/sizing when 4+ analysts agree on direction off a stretched RSI.
