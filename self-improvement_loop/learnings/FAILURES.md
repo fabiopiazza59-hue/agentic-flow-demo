@@ -304,3 +304,9 @@ The miss was **pure magnitude, not direction** — all analysts were up, but the
 **Root cause:** gap-anchoring compressed dispersion precisely when conditions (RSI 39.78, 3.3% below SMA20/50, post-2-day-selloff) favored a large reversion move. The judge's +0.64 nudge to 248.0 was directionally right but an order of magnitude too small.
 
 **One change:** in confirmed oversold-reversion setups, widen the upside target to ~1.5x the pre-market gap and let the 5d SMA act as a magnet to pierce, not a ceiling — and raise confidence/sizing when 4+ analysts agree on direction off a stretched RSI.
+
+## 2026-11-04 — FAIL (APE 6.69%)
+- Predicted 248.22 vs actual 266.03 (prior 250.69); dir hit: False; beat baseline: False; closest analyst: contrarian.
+- **What went wrong:** wrong direction; final blend 248.22 missed by 6.69%.
+- **Likely culprit:** analyst `momentum` was furthest from actual and pulled the blend.
+- **Try next:** reduce weight on `momentum` under today's conditions and lean on `contrarian`.
