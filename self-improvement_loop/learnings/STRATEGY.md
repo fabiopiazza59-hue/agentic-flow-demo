@@ -104,3 +104,4 @@ Append-only insights. Newest at the bottom.
 - (2026-11-02) After a >10% two-day volume-capitulation selloff with RSI<35, the mean-reversion bounce tends to exceed the analyst blend's magnitude — test a +0.3σ upward skew on the first post-flush session.
 - (2026-11-03) When RSI<40 AND price >3% below SMA20/50 after a multi-day selloff, scale the reversion target to at least 1.5x the pre-market gap rather than capping at the 5d SMA — test whether oversold snapbacks systematically overshoot the first resistance.
 - (2026-11-04) 2026-11-04: FAIL, did not beat baseline; closest contrarian, worst momentum.
+- (2026-11-05) 2026-11-05: FAIL, beat baseline; closest news, worst technical.

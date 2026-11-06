@@ -3,20 +3,20 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- 56% fail rate (57/102) with directional misses (31) edging out magnitude misses (26) — the system gets the *sign* wrong more than the size, meaning this isn't just a calibration problem, the core signal is coin-flip on direction.
-- Many fails barely beat or lose to baseline even when "passing," and several large-APE days (0.05–0.13) show the model has no handle on gap/vol days.
-- Blended weights add little: `winning_strategy` rotates constantly, suggesting post-hoc attribution rather than a stable edge. The ensemble is averaging toward mush.
-- Error magnitude on fails is high (mean fail APE 2.47%) — misses aren't near-misses, they're real blowups clustered on volatile sessions.
+- 56% fail rate (58/103) with mean fail APE 2.45% — misses are large, not marginal. Direction errors (31) slightly outnumber magnitude errors (27), so the model is roughly as bad at *where* as *how much*.
+- Tail blowups dominate the damage: APEs of 13.2% (07-31), 6.7% (11-04), 5.5% (06-22), 5.4% (10-30), 5.5% (10-19). These single-day gaps are where the system hemorrhages and several still "beat baseline" (baseline also blew up) — a false comfort.
+- Beating baseline ≠ passing. Many fails beat baseline on big-move days (e.g. 10-29, 11-05) — the model tracks direction but undershoots magnitude on large moves.
+- **macro** and **technical** are near-useless as winners: 11.6% hit rate each, highest MAPE (1.74% / 1.56%). Yet macro keeps getting selected on the worst days (06-12, 07-13, 07-30, 10-30, 10-09) — it wins the vote precisely when it's wrong.
 
 ## Unreliable under these conditions
-- **High-volatility / large-move days**: the worst APEs (2026-07-31 ~13%, 10-19 ~5.5%, 11-04 ~6.7%, 10-30 ~5.2%) are all big-move days the model under-reacted to. It systematically compresses toward small moves.
-- **Macro strategy**: hit rate 11.8%, worst MAPE (1.74%). When macro "wins" it's usually on a blowup day (07-15, 07-30, 10-30). Unreliable and should carry minimal weight.
-- **Technical strategy**: also 11.8% hit rate — nearly useless standalone; stop treating it as a 20% pillar.
-- **Overconfidence**: 7 overconfident misses, concentrated in the Aug–Sep 0.6–0.72 confidence runs (08-19 conf .62 fail, 08-31 conf .72 fail, 09-03 conf .62 fail, 09-09 conf .72 fail). Rising confidence in late Aug/Sep did NOT track rising accuracy — calibration is drifting upward without justification.
-- Recent Oct–Nov stretch: many fails still "beat baseline" directionally right but magnitude-wrong — the model lags trend changes.
+- **High-volatility / gap days**: whenever the true move is large (baseline_ape >2%), the model systematically underpredicts magnitude. All the big APEs cluster here.
+- **macro-led regimes**: macro-winning predictions fail disproportionately and carry the worst errors — it fires on turbulent days and misdirects.
+- **technical- and momentum-led calls**: lowest hit rates; momentum notably whipsaws in choppy stretches (06-12, 07-08, 07-25, 09-15).
+- **Confidence is miscalibrated upward in the recent run**: late-period confidence drifted to 0.55–0.66 while fail rate stayed high (08-19 conf 0.62 fail, 09-09 conf 0.72 fail, 10-06/10-08 conf ~0.62 fail). Only 7 flagged overconfident misses understates this — confidence rose without accuracy rising.
 
 ## Fixes to try next
-- Reweight ensemble by hit rate: lift **news** (0.32) and **contrarian** (0.27), cut **macro** and **technical** toward zero. News+contrarian carry nearly all the edge.
-- Add a volatility regime flag; on high-vol/gap days widen predicted moves or abstain — the model's mean-reversion bias is killing it on big days.
-- Recalibrate confidence against realized hit rate; cap confidence >0.6 until the 0.6–0.72 bucket proves out — currently those are disproportionately misses.
-- Investigate directional sign logic directly: 31 direction misses means the problem is feature/signal, not sizing.
+- Down-weight or gate **macro** and **technical** as *winning* strategies; cap their vote unless corroborated. Lean on **news** (33% hit, lowest MAPE) and **contrarian** (27%).
+- Add a volatility regime detector; on high-expected-move days widen magnitude and stop trusting point estimates — this is where losses concentrate.
+- Recalibrate confidence against realized hit rate (isotonic/Platt); current 0.5–0.66 band shows no accuracy edge over 0.4 band.
+- Stop rewarding "beats_baseline" when both miss; track absolute pass separately so baseline co-blowups don't mask failures.
+- Investigate the 07-31 13% outlier (earnings/event?) — likely an unmodeled scheduled catalyst class.
