@@ -3,20 +3,19 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- 56% fail rate (58/103) with mean fail APE 2.45% — misses are large, not marginal. Direction errors (31) slightly outnumber magnitude errors (27), so the model is roughly as bad at *where* as *how much*.
-- Tail blowups dominate the damage: APEs of 13.2% (07-31), 6.7% (11-04), 5.5% (06-22), 5.4% (10-30), 5.5% (10-19). These single-day gaps are where the system hemorrhages and several still "beat baseline" (baseline also blew up) — a false comfort.
-- Beating baseline ≠ passing. Many fails beat baseline on big-move days (e.g. 10-29, 11-05) — the model tracks direction but undershoots magnitude on large moves.
-- **macro** and **technical** are near-useless as winners: 11.6% hit rate each, highest MAPE (1.74% / 1.56%). Yet macro keeps getting selected on the worst days (06-12, 07-13, 07-30, 10-30, 10-09) — it wins the vote precisely when it's wrong.
+- Overall pass rate is weak (46/104, 44%), and directional misses (31) slightly outnumber magnitude misses (27) — the model struggles with *both* direction and sizing, not just one.
+- Big-tail blowups recur on event days: 2026-07-31 (13.2% APE), 2026-11-04 (6.7%), 2026-10-19 (5.5%), 2026-10-30 (5.2%), 2026-06-22 (5.1%). These dominate mean fail APE (2.45%) and cluster around earnings/macro prints.
+- `macro` and `technical` are net value-destroyers: hit rates 12.5% and 11.5%, highest MAPEs (1.73%, 1.55%). When `macro` is the winning strategy, outcomes are consistently poor (06-12, 07-13, 07-15, 08-19, 10-30).
+- Many "wins" are hollow — they pass APE but still lose on direction and fail to beat baseline (e.g. 08-17, 08-27, 09-02, 10-01, 10-05). Passing the threshold ≠ adding edge.
 
 ## Unreliable under these conditions
-- **High-volatility / gap days**: whenever the true move is large (baseline_ape >2%), the model systematically underpredicts magnitude. All the big APEs cluster here.
-- **macro-led regimes**: macro-winning predictions fail disproportionately and carry the worst errors — it fires on turbulent days and misdirects.
-- **technical- and momentum-led calls**: lowest hit rates; momentum notably whipsaws in choppy stretches (06-12, 07-08, 07-25, 09-15).
-- **Confidence is miscalibrated upward in the recent run**: late-period confidence drifted to 0.55–0.66 while fail rate stayed high (08-19 conf 0.62 fail, 09-09 conf 0.72 fail, 10-06/10-08 conf ~0.62 fail). Only 7 flagged overconfident misses understates this — confidence rose without accuracy rising.
+- High-volatility / large-move days (baseline APE >2.5%): model barely dents the baseline and often misses direction — these are where all the tail losses live.
+- Late-Oct/early-Nov stretch (10-29 → 11-05): sustained large errors, likely earnings + macro regime it can't price.
+- Overconfidence is creeping in: recent high-confidence calls (0.62–0.72) on 08-19, 09-03, 09-11, 09-09, 06-30, 07-13 were misses. Confidence rose in Oct (0.5–0.66) while pass rate stayed flat — calibration is drifting the wrong way.
+- `contrarian` has decent hit rate (27%) but produces the worst tail losses (10-19, 11-04) — reliable in chop, dangerous in trends.
 
 ## Fixes to try next
-- Down-weight or gate **macro** and **technical** as *winning* strategies; cap their vote unless corroborated. Lean on **news** (33% hit, lowest MAPE) and **contrarian** (27%).
-- Add a volatility regime detector; on high-expected-move days widen magnitude and stop trusting point estimates — this is where losses concentrate.
-- Recalibrate confidence against realized hit rate (isotonic/Platt); current 0.5–0.66 band shows no accuracy edge over 0.4 band.
-- Stop rewarding "beats_baseline" when both miss; track absolute pass separately so baseline co-blowups don't mask failures.
-- Investigate the 07-31 13% outlier (earnings/event?) — likely an unmodeled scheduled catalyst class.
+- Cut or floor `macro` and `technical` weights; they lose on both accuracy and direction. Shift mass toward `news` (best hit rate 33%, lowest MAPE).
+- Add an event-day guard (earnings/CPI/FOMC): widen intervals, down-weight contrarian, and suppress confidence on known high-vol dates.
+- Recalibrate confidence against realized hit rate — current high-confidence buckets are no better than low ones; shrink confidence toward 0.5 until calibration validates.
+- Track "beats_baseline" as the real KPI, not APE-pass; penalize hollow passes that lose direction.

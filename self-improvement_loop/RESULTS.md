@@ -3,9 +3,9 @@
 _Auto-generated after every run. Verdicts use pre-open forecasts only and anytime-valid 95% confidence sequences, so they stay valid although this page is re-read daily. PASS = predicted close within ±1% of actual._
 
 ## Verdict
-❌ **No edge yet** — all-time MAPE 1.66% is nominally ahead of the free baseline 1.76% by 0.09%, but the difference is not distinguishable from noise (paired over 63 pre-open days: mean 0.09%, anytime-valid 95% CS [-0.035%, +0.225%]; fixed-sample 90% CI [-0.12%, 0.16%], sign test p=0.8013).
+❌ **No edge yet** — all-time MAPE 1.65% is nominally ahead of the free baseline 1.74% by 0.09%, but the difference is not distinguishable from noise (paired over 64 pre-open days: mean 0.09%, anytime-valid 95% CS [-0.039%, +0.218%]; fixed-sample 90% CI [-0.12%, 0.15%], sign test p=0.9007).
 
-**Next forecast (2026-11-06):** close ≈ **257.15** (down, P(up) 28%, 80% interval 250.69–263.78) vs prior close 260.21; anchored to 257.75 (yfinance_ext, live, refreshed 0×).
+**Next forecast (2026-11-09):** close ≈ **260.31** (up, P(up) 59%, 80% interval 253.96–266.82) vs prior close 259.30; anchored to 259.84 (yfinance_ext, live, refreshed 0×).
 
 ## Scoreboard — all-time, pre-open forecasts only
 
@@ -13,76 +13,77 @@ _Every forecaster is scored as a calibrated predictive distribution (CRPS: lower
 
 | Metric | Model (arm A) | Random walk (prior close) | Free baseline (pre-open price) |
 |---|---|---|---|
-| Days | 63 | 63 | 63 |
-| MAPE | 1.66% | 1.69% | 1.76% |
-| CRPS | 1.37% | 1.38% | 1.43% |
-| 80% interval coverage | 80.95% | 77.78% | 79.37% |
-| 50% interval coverage | 53.97% | 49.21% | 49.21% |
-| Brier of P(up) | 0.228 | 0.250 | 0.243 |
+| Days | 64 | 64 | 64 |
+| MAPE | 1.65% | 1.67% | 1.74% |
+| CRPS | 1.36% | 1.36% | 1.42% |
+| 80% interval coverage | 81.25% | 78.12% | 79.69% |
+| 50% interval coverage | 54.69% | 50.00% | 50.00% |
+| Brier of P(up) | 0.226 | 0.250 | 0.241 |
 
 **Does the model add value?** Paired daily gains, anytime-valid 95% confidence sequences (valid although this page is re-read every day):
 
 | Comparison | Mean daily gain | 95% CS | Verdict |
 |---|---|---|---|
-| APE vs free baseline | 0.09% | [-0.035%, +0.225%] | ≈ not distinguishable |
-| APE vs random walk | 0.03% | [-0.226%, +0.293%] | ≈ not distinguishable |
-| CRPS vs free baseline | 0.06% | [-0.023%, +0.147%] | ≈ not distinguishable |
-| CRPS vs random walk | 0.01% | [-0.200%, +0.214%] | ≈ not distinguishable |
-| Direction (Brier of P(up)) vs random walk | 0.022 | [-0.025, +0.069] | ≈ not distinguishable |
+| APE vs free baseline | 0.09% | [-0.039%, +0.218%] | ≈ not distinguishable |
+| APE vs random walk | 0.03% | [-0.231%, +0.282%] | ≈ not distinguishable |
+| CRPS vs free baseline | 0.06% | [-0.023%, +0.144%] | ≈ not distinguishable |
+| CRPS vs random walk | 0.01% | [-0.198%, +0.209%] | ≈ not distinguishable |
+| Direction (Brier of P(up)) vs random walk | 0.024 | [-0.022, +0.071] | ≈ not distinguishable |
 
 ## Self-improvement lab — measured, not narrated
 
 Aggregation rules are replayed over every pre-open day using only earlier data. A rule replaces the equal-weight mean only when its anytime-valid confidence sequence (Bonferroni over 5 challengers, α=0.05) shows it is better; the judge and the gates are switched off the same way once shown to hurt ([`evals/lab.py`](src/evals/lab.py)).
 
-**Champion: `mean`** (reference — no challenger has proven better yet; 63 days replayed).
+**Champion: `mean`** (reference — no challenger has proven better yet; 64 days replayed).
 
 | Rule | MAPE | Gain vs mean | CS (α/K) | Status |
 |---|---|---|---|---|
-| mean (reference) | 1.59% | — | — | 🏆 champion |
-| median | 1.64% | -0.05% | [-0.181%, +0.087%] | ≈ not distinguishable |
-| trimmed_mean | 1.63% | -0.04% | [-0.140%, +0.053%] | ≈ not distinguishable |
-| inverse_mse | 1.61% | -0.02% | [-0.060%, +0.028%] | ≈ not distinguishable |
-| best_recent | 1.80% | -0.21% | [-0.457%, +0.033%] | ≈ not distinguishable |
-| shrink_half | 1.67% | -0.08% | [-0.176%, +0.020%] | ≈ not distinguishable |
+| mean (reference) | 1.57% | — | — | 🏆 champion |
+| median | 1.62% | -0.04% | [-0.176%, +0.090%] | ≈ not distinguishable |
+| trimmed_mean | 1.61% | -0.04% | [-0.136%, +0.055%] | ≈ not distinguishable |
+| inverse_mse | 1.59% | -0.02% | [-0.059%, +0.028%] | ≈ not distinguishable |
+| best_recent | 1.79% | -0.22% | [-0.461%, +0.023%] | ≈ not distinguishable |
+| shrink_half | 1.65% | -0.08% | [-0.173%, +0.019%] | ≈ not distinguishable |
 
-- **Judge adjustment** (APE of blend − APE after the judge's clamped σ-move; v2 rows): n=29, mean 0.05%, CS [-0.026%, +0.128%] → judge **on**.
-- **Guardrail gates** (APE before − after the gates): n=29, mean -0.00%, CS [-0.030%, +0.025%] → gates **on**.
+- **Judge adjustment** (APE of blend − APE after the judge's clamped σ-move; v2 rows): n=30, mean 0.04%, CS [-0.040%, +0.122%] → judge **on**.
+- **Guardrail gates** (APE before − after the gates): n=30, mean -0.00%, CS [-0.029%, +0.024%] → gates **on**.
 - **Legacy v1 pipeline** (judge wrote the number) vs the plain mean of its own analysts: mean -0.17% over 34 pre-open days, CS [-0.407%, +0.059%] — ≈ not distinguishable (negative = the judge cost accuracy).
 
 ### Integrity & mechanism
 
 - **40 scored row(s) were created after their session opened** and are excluded from every verdict. They saw part of the tape they forecast. New post-open rows are refused (`--allow-late` to override), and the schedule now researches the evening before and only re-anchors in the morning.
-- **Pre-open coverage:** 20 of the last 20 sessions (since 2026-10-12) got a forecast written before the open.
-- **Live anchors:** 29 of 63 pre-open forecasts were anchored on a real after-hours/pre-market trade (the rest on the prior close — before v2 the quote feed silently echoed it).
-- **Gate effect** (ungated − gated APE, paired over 29 days): -0.00% 90% CI [-0.02%, 0.01%], gates helped on 5/9 decisive days (sign test p=1.0). Gates fired on 9 of them.
+- **Pre-open coverage:** 20 of the last 20 sessions (since 2026-10-13) got a forecast written before the open.
+- **Live anchors:** 30 of 64 pre-open forecasts were anchored on a real after-hours/pre-market trade (the rest on the prior close — before v2 the quote feed silently echoed it).
+- **Gate effect** (ungated − gated APE, paired over 30 days): -0.00% 90% CI [-0.02%, 0.01%], gates helped on 5/9 decisive days (sign test p=1.0). Gates fired on 9 of them.
 
 ## Metrics
 
 | Metric | All-time (pre-open) — verdict basis | Last 20 (all rows) | All-time (all rows) |
 |---|---|---|---|
-| Scored days | 63 | 20 | 103 |
-| PASS rate (±1%) | 41.27% | 35.00% | 43.69% |
-| Directional accuracy | 58.73% | 80.00% | 57.28% |
-| MAPE | 1.66% | 1.94% | 1.56% |
-| Baseline MAPE (random walk) | 1.69% | 2.00% | 1.57% |
-| Edge (baseline − model) | 0.03% | 0.05% | 0.01% |
+| Scored days | 64 | 20 | 104 |
+| PASS rate (±1%) | 42.19% | 40.00% | 44.23% |
+| Directional accuracy | 59.38% | 80.00% | 57.69% |
+| MAPE | 1.65% | 1.84% | 1.55% |
+| Baseline MAPE (random walk) | 1.67% | 1.85% | 1.56% |
+| Edge (baseline − model) | 0.03% | 0.01% | 0.01% |
 | Brier (confidence calib.) | 0.24 | 0.27 | 0.26 |
 
 ## Per-strategy scorecards
 
 | Strategy | Obs | Win rate (closest) | MAPE | Weight hint |
 |---|---|---|---|---|
-| news | 103 | 33.01% | 1.41% | 0.23 |
-| technical | 103 | 11.65% | 1.56% | 0.20 |
-| contrarian | 103 | 27.18% | 1.60% | 0.20 |
-| momentum | 103 | 16.50% | 1.70% | 0.19 |
-| macro | 103 | 11.65% | 1.74% | 0.18 |
+| news | 104 | 32.69% | 1.41% | 0.23 |
+| technical | 104 | 11.54% | 1.55% | 0.20 |
+| contrarian | 104 | 26.92% | 1.59% | 0.20 |
+| momentum | 104 | 16.35% | 1.69% | 0.19 |
+| macro | 104 | 12.50% | 1.73% | 0.18 |
 
 ## Last 20 scored model predictions
 _(backfill seed rows are excluded from metrics and this table; they appear only as price-history context on the dashboard chart. ⚠️ = written after the open, excluded from verdicts)_
 
 | Date | Predicted | Actual | APE | PASS | Dir hit | Beat baseline | Closest | Pre-open |
 |---|---|---|---|---|---|---|---|---|
+| 2026-11-06 | 257.15 | 259.30 | 0.83% | ✅ | ✅ | ❌ | macro | ✅ |
 | 2026-11-05 | 262.97 | 260.21 | 1.06% | ❌ | ✅ | ✅ | news | ✅ |
 | 2026-11-04 | 248.22 | 266.03 | 6.69% | ❌ | ❌ | ❌ | contrarian | ✅ |
 | 2026-11-03 | 248.00 | 250.69 | 1.07% | ❌ | ✅ | ✅ | contrarian | ✅ |
@@ -102,23 +103,22 @@ _(backfill seed rows are excluded from metrics and this table; they appear only 
 | 2026-10-14 | 257.27 | 254.08 | 1.26% | ❌ | ✅ | ✅ | contrarian | ✅ |
 | 2026-10-13 | 258.70 | 258.58 | 0.05% | ✅ | ✅ | ✅ | macro | ✅ |
 | 2026-10-12 | 262.39 | 259.53 | 1.10% | ❌ | ✅ | ✅ | contrarian | ✅ |
-| 2026-10-09 | 254.94 | 262.43 | 2.85% | ❌ | ✅ | ✅ | macro | ✅ |
 
 ## 🅰️/🅱️ A/B test — ensemble+gates vs raven-style prior+pulse
 
 _Both arms forecast the same sessions from the same pre-open snapshot (paired test). Only days on which both forecasts were written before the open count._
 
-**Verdict:** Arm A leads on paired MAPE (mean daily delta 0.05% in A's favor over 55 pre-open days); B wins 27/55 decisive days (sign test p=1.0, descriptive); anytime-valid 95% CS [-0.257%, +0.164%] includes zero — not distinguishable from noise.
+**Verdict:** Arm A leads on paired MAPE (mean daily delta 0.06% in A's favor over 56 pre-open days); B wins 27/56 decisive days (sign test p=0.8939, descriptive); anytime-valid 95% CS [-0.264%, +0.153%] includes zero — not distinguishable from noise.
 
-**B's next forecast (2026-11-06):** close ≈ **255.67** (down, adj -0.3σ, 8 evidence items).
+**B's next forecast (2026-11-09):** close ≈ **259.17** (down, adj -0.1σ, 8 evidence items).
 
 | All-time, pre-open | A — ensemble+gates | B — raven prior+pulse |
 |---|---|---|
-| Scored days | 63 | 55 |
-| PASS rate (±1%) | 41.27% | 47.27% |
-| Directional accuracy | 58.73% | 63.64% |
-| MAPE | 1.66% | 1.81% |
-| Edge vs free baseline | 0.09% | 0.05% |
+| Scored days | 64 | 56 |
+| PASS rate (±1%) | 42.19% | 46.43% |
+| Directional accuracy | 59.38% | 64.29% |
+| MAPE | 1.65% | 1.80% |
+| Edge vs free baseline | 0.09% | 0.03% |
 
-Clean paired days: 55 (of 78 paired); B wins 27/55 decisive; mean daily APE delta (A−B) -0.05%; CRPS delta (A−B) anytime-valid 95% CS [-0.181%, +0.110%] (undecided).
+Clean paired days: 56 (of 79 paired); B wins 27/56 decisive; mean daily APE delta (A−B) -0.06%; CRPS delta (A−B) anytime-valid 95% CS [-0.183%, +0.104%] (undecided).
 _This is a research experiment, not financial advice._
