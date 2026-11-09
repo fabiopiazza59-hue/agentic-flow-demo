@@ -106,3 +106,4 @@ Append-only insights. Newest at the bottom.
 - (2026-11-04) 2026-11-04: FAIL, did not beat baseline; closest contrarian, worst momentum.
 - (2026-11-05) 2026-11-05: FAIL, beat baseline; closest news, worst technical.
 - (2026-11-06) When live ext-hours anchor already prices a >0.75% gap down and all analysts agree on direction, bias the final estimate toward the anchor (not below it), since post-gap intraday reversion statistically recovers part of the gap.
+- (2026-11-09) 2026-11-09: FAIL, beat baseline; closest momentum, worst contrarian.
