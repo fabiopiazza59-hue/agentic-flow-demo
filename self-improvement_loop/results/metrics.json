@@ -4,71 +4,71 @@
   "rolling_window": 20,
   "rolling": {
     "n": 20,
-    "n_all_time": 105,
-    "pass_rate": 0.4,
+    "n_all_time": 106,
+    "pass_rate": 0.35,
     "directional_accuracy": 0.8,
-    "mape": 0.019099186572336925,
-    "baseline_mape": 0.01941299628902806,
-    "edge": 0.0003138097166911352,
-    "anchor_mape": 0.021770429713588408,
-    "anchor_edge": 0.002671243141251483,
+    "mape": 0.019766350994874688,
+    "baseline_mape": 0.019956586872953996,
+    "edge": 0.00019023587807930759,
+    "anchor_mape": 0.022253196699064906,
+    "anchor_edge": 0.002486845704190218,
     "n_live_anchor": 20,
     "beats_baseline_overall": true,
-    "brier": 0.262761865
+    "brier": 0.2595679975
   },
   "all_time": {
-    "n": 105,
-    "n_all_time": 105,
-    "pass_rate": 0.4380952380952381,
-    "directional_accuracy": 0.580952380952381,
-    "mape": 0.015581570143249016,
-    "baseline_mape": 0.015699273673632934,
-    "edge": 0.00011770353038391759,
-    "anchor_mape": 0.01607068926979116,
-    "anchor_edge": 0.0004891191265421445,
-    "n_live_anchor": 31,
+    "n": 106,
+    "n_all_time": 106,
+    "pass_rate": 0.4339622641509434,
+    "directional_accuracy": 0.5849056603773585,
+    "mape": 0.015564832325528832,
+    "baseline_mape": 0.01568839112049086,
+    "edge": 0.0001235587949620278,
+    "anchor_mape": 0.016052123390785347,
+    "anchor_edge": 0.00048729106525651454,
+    "n_live_anchor": 32,
     "beats_baseline_overall": true,
-    "brier": 0.26204751228571427
+    "brier": 0.2609069743396227
   },
   "rolling_pre_open": {
     "n": 20,
-    "n_all_time": 65,
-    "pass_rate": 0.4,
+    "n_all_time": 66,
+    "pass_rate": 0.35,
     "directional_accuracy": 0.8,
-    "mape": 0.019099186572336925,
-    "baseline_mape": 0.01941299628902806,
-    "edge": 0.0003138097166911352,
-    "anchor_mape": 0.021770429713588408,
-    "anchor_edge": 0.002671243141251483,
+    "mape": 0.019766350994874688,
+    "baseline_mape": 0.019956586872953996,
+    "edge": 0.00019023587807930759,
+    "anchor_mape": 0.022253196699064906,
+    "anchor_edge": 0.002486845704190218,
     "n_live_anchor": 20,
     "beats_baseline_overall": true,
-    "brier": 0.262761865
+    "brier": 0.2595679975
   },
   "all_time_pre_open": {
-    "n": 65,
-    "n_all_time": 65,
-    "pass_rate": 0.4153846153846154,
-    "directional_accuracy": 0.6,
-    "mape": 0.016612322021933926,
-    "baseline_mape": 0.016922091524781805,
-    "edge": 0.0003097695028478793,
-    "anchor_mape": 0.017522070564729708,
-    "anchor_edge": 0.0009097485427957824,
-    "n_live_anchor": 31,
+    "n": 66,
+    "n_all_time": 66,
+    "pass_rate": 0.4090909090909091,
+    "directional_accuracy": 0.6060606060606061,
+    "mape": 0.016569822619554767,
+    "baseline_mape": 0.016886085941687733,
+    "edge": 0.0003162633221329668,
+    "anchor_mape": 0.017470262012160693,
+    "anchor_edge": 0.0009004393926059263,
+    "n_live_anchor": 32,
     "beats_baseline_overall": true,
-    "brier": 0.24333521215384615
+    "brier": 0.2417869587878788
   },
   "n_late_rows": 40,
   "coverage": {
     "n_sessions": 20,
     "n_pre_open": 20,
-    "since": "2026-10-14"
+    "since": "2026-10-15"
   },
   "gate_effect": {
-    "n": 31,
-    "mean": -2.303e-05,
-    "ci_low": -0.00015633,
-    "ci_high": 9.607e-05,
+    "n": 32,
+    "mean": -2.231e-05,
+    "ci_low": -0.00015423,
+    "ci_high": 9.749e-05,
     "wins": 5,
     "n_decisive": 9,
     "sign_test_p": 1.0,
@@ -76,146 +76,146 @@
     "n_gates_fired": 9
   },
   "baseline_effect": {
-    "n": 65,
-    "mean": 0.00030977,
-    "ci_low": -0.00111815,
-    "ci_high": 0.00154618,
-    "wins": 34,
-    "n_decisive": 65,
-    "sign_test_p": 0.8043,
+    "n": 66,
+    "mean": 0.00031626,
+    "ci_low": -0.00107344,
+    "ci_high": 0.0015395,
+    "wins": 35,
+    "n_decisive": 66,
+    "sign_test_p": 0.7122,
     "significant": false
   },
   "probabilistic": {
-    "n": 65,
+    "n": 66,
     "model": {
-      "crps": 0.013648706941502015,
-      "cover50": 0.5384615384615384,
-      "cover80": 0.8,
-      "cover90": 0.8769230769230769,
-      "brier_up": 0.22484270759287153
+      "crps": 0.013576072241488348,
+      "cover50": 0.5303030303030303,
+      "cover80": 0.803030303030303,
+      "cover90": 0.8787878787878788,
+      "brier_up": 0.22486642050898026
     },
     "random_walk": {
-      "crps": 0.013740935745094433,
-      "cover50": 0.49230769230769234,
-      "cover80": 0.7692307692307693,
-      "cover90": 0.8307692307692308,
+      "crps": 0.013675041042991236,
+      "cover50": 0.5,
+      "cover80": 0.7727272727272727,
+      "cover90": 0.8333333333333334,
       "brier_up": 0.25
     },
     "anchor": {
-      "crps": 0.01425612540403058,
-      "cover50": 0.49230769230769234,
-      "cover80": 0.7846153846153846,
-      "cover90": 0.8307692307692308,
-      "brier_up": 0.23976224921558897
+      "crps": 0.01417795105697389,
+      "cover50": 0.5,
+      "cover80": 0.7878787878787878,
+      "cover90": 0.8333333333333334,
+      "brier_up": 0.23970121910733905
     },
-    "crps_skill_vs_random_walk": 0.006711974009873667,
-    "crps_skill_vs_anchor": 0.04260754204342443,
-    "direction_brier_skill": 0.10062916962851387
+    "crps_skill_vs_random_walk": 0.007237184970176891,
+    "crps_skill_vs_anchor": 0.04245174870945034,
+    "direction_brier_skill": 0.10053431796407897
   },
   "value_added": {
     "vs_free_baseline": {
-      "n": 65,
-      "mean": 0.00090975,
-      "lo": -0.00035588,
-      "hi": 0.00217538,
+      "n": 66,
+      "mean": 0.00090044,
+      "lo": -0.00034542,
+      "hi": 0.0021463,
       "alpha": 0.05,
       "t_star": 120,
       "decision": "undecided"
     },
     "vs_random_walk": {
-      "n": 65,
-      "mean": 0.00030977,
-      "lo": -0.0022209,
-      "hi": 0.00284044,
+      "n": 66,
+      "mean": 0.00031626,
+      "lo": -0.00217429,
+      "hi": 0.00280682,
       "alpha": 0.05,
       "t_star": 120,
       "decision": "undecided"
     },
     "crps_vs_random_walk": {
-      "n": 65,
-      "mean": 9.223e-05,
-      "lo": -0.00191432,
-      "hi": 0.00209877,
+      "n": 66,
+      "mean": 9.897e-05,
+      "lo": -0.00187582,
+      "hi": 0.00207376,
       "alpha": 0.05,
       "t_star": 120,
       "decision": "undecided"
     },
     "crps_vs_free_baseline": {
-      "n": 65,
-      "mean": 0.00060742,
-      "lo": -0.00021431,
-      "hi": 0.00142915,
+      "n": 66,
+      "mean": 0.00060188,
+      "lo": -0.00020698,
+      "hi": 0.00141074,
       "alpha": 0.05,
       "t_star": 120,
       "decision": "undecided"
     },
     "direction_vs_random_walk": {
-      "n": 65,
-      "mean": 0.02515729,
-      "lo": -0.02063872,
-      "hi": 0.0709533,
+      "n": 66,
+      "mean": 0.02513358,
+      "lo": -0.0199352,
+      "hi": 0.07020236,
       "alpha": 0.05,
       "t_star": 120,
       "decision": "undecided"
     }
   },
   "lab": {
-    "n_days": 65,
+    "n_days": 66,
     "reference": "mean",
-    "reference_mape": 0.015876699709899186,
+    "reference_mape": 0.015845475871098372,
     "champion": "mean",
     "alpha": 0.05,
     "alpha_per_challenger": 0.01,
     "challengers": {
       "median": {
-        "n": 65,
-        "mean": -0.00035547,
-        "lo": -0.00168769,
-        "hi": 0.00097675,
+        "n": 66,
+        "mean": -0.00027923,
+        "lo": -0.00161895,
+        "hi": 0.0010605,
         "alpha": 0.01,
         "t_star": 120,
         "decision": "undecided",
-        "mape": 0.016232171360232292
+        "mape": 0.01612470225612408
       },
       "trimmed_mean": {
-        "n": 65,
-        "mean": -0.00035197,
-        "lo": -0.00131341,
-        "hi": 0.00060948,
+        "n": 66,
+        "mean": -0.0003066,
+        "lo": -0.00126693,
+        "hi": 0.00065373,
         "alpha": 0.01,
         "t_star": 120,
         "decision": "undecided",
-        "mape": 0.016228667498695813
+        "mape": 0.016152076035236024
       },
       "inverse_mse": {
-        "n": 65,
-        "mean": -0.00016701,
-        "lo": -0.00059673,
-        "hi": 0.00026272,
+        "n": 66,
+        "mean": -0.00017027,
+        "lo": -0.0005934,
+        "hi": 0.00025286,
         "alpha": 0.01,
         "t_star": 120,
         "decision": "undecided",
-        "mape": 0.016043706322123742
+        "mape": 0.016015745667938622
       },
       "best_recent": {
-        "n": 65,
-        "mean": -0.00237313,
-        "lo": -0.00484788,
-        "hi": 0.00010162,
+        "n": 66,
+        "mean": -0.00226631,
+        "lo": -0.00473235,
+        "hi": 0.00019973,
         "alpha": 0.01,
         "t_star": 120,
         "decision": "undecided",
-        "mape": 0.01824982756215505
+        "mape": 0.01811178790953286
       },
       "shrink_half": {
-        "n": 65,
-        "mean": -0.00077014,
-        "lo": -0.00171787,
-        "hi": 0.00017759,
+        "n": 66,
+        "mean": -0.00076064,
+        "lo": -0.0016941,
+        "hi": 0.00017282,
         "alpha": 0.01,
         "t_star": 120,
         "decision": "undecided",
-        "mape": 0.016646838064298546
+        "mape": 0.016606118036386598
       }
     },
     "legacy_shipped_vs_mean": {
@@ -228,19 +228,19 @@
       "decision": "undecided"
     },
     "judge_effect": {
-      "n": 31,
-      "mean": 0.00039298,
-      "lo": -0.00038957,
-      "hi": 0.00117554,
+      "n": 32,
+      "mean": 0.0003807,
+      "lo": -0.00037529,
+      "hi": 0.0011367,
       "alpha": 0.05,
       "t_star": 120,
       "decision": "undecided"
     },
     "gates_effect": {
-      "n": 31,
-      "mean": -2.303e-05,
-      "lo": -0.00028189,
-      "hi": 0.00023584,
+      "n": 32,
+      "mean": -2.231e-05,
+      "lo": -0.00027205,
+      "hi": 0.00022744,
       "alpha": 0.05,
       "t_star": 120,
       "decision": "undecided"
@@ -253,44 +253,44 @@
   },
   "scorecards": {
     "technical": {
-      "n": 105,
+      "n": 106,
       "wins": 12,
-      "sum_ape": 1.6337898683826086,
-      "hit_rate": 0.11428571428571428,
-      "mape": 0.015559903508405797,
-      "weight_hint": 0.2049
+      "sum_ape": 1.6449760462539122,
+      "hit_rate": 0.11320754716981132,
+      "mape": 0.015518641945791625,
+      "weight_hint": 0.2047
     },
     "momentum": {
-      "n": 105,
-      "wins": 18,
-      "sum_ape": 1.778004108315973,
-      "hit_rate": 0.17142857142857143,
-      "mape": 0.016933372460152123,
-      "weight_hint": 0.1883
+      "n": 106,
+      "wins": 19,
+      "sum_ape": 1.7819543427457734,
+      "hit_rate": 0.1792452830188679,
+      "mape": 0.01681089002590352,
+      "weight_hint": 0.189
     },
     "contrarian": {
-      "n": 105,
+      "n": 106,
       "wins": 28,
-      "sum_ape": 1.6946159357801756,
-      "hit_rate": 0.26666666666666666,
-      "mape": 0.016139199388382625,
-      "weight_hint": 0.1976
+      "sum_ape": 1.7181327519650613,
+      "hit_rate": 0.2641509433962264,
+      "mape": 0.0162087995468402,
+      "weight_hint": 0.196
     },
     "news": {
-      "n": 105,
+      "n": 106,
       "wins": 34,
-      "sum_ape": 1.4881488035494894,
-      "hit_rate": 0.3238095238095238,
-      "mape": 0.014172845748090376,
-      "weight_hint": 0.225
+      "sum_ape": 1.4932065803427852,
+      "hit_rate": 0.32075471698113206,
+      "mape": 0.014086854531535709,
+      "weight_hint": 0.2255
     },
     "macro": {
-      "n": 105,
+      "n": 106,
       "wins": 13,
-      "sum_ape": 1.8173174305204989,
-      "hit_rate": 0.12380952380952381,
-      "mape": 0.01730778505257618,
-      "weight_hint": 0.1842
+      "sum_ape": 1.8223752073137947,
+      "hit_rate": 0.12264150943396226,
+      "mape": 0.01719221893692259,
+      "weight_hint": 0.1848
     }
   },
   "series": [
@@ -1756,92 +1756,103 @@
       "baseline_ape": 0.028584273030382478,
       "pass": false,
       "pre_open": true
+    },
+    {
+      "date": "2026-11-10",
+      "predicted_close": 267.13,
+      "actual_close": 270.87,
+      "prior_close": 266.93,
+      "anchor": 267.05,
+      "ape": 0.0138073614649094,
+      "baseline_ape": 0.01454572304057296,
+      "pass": false,
+      "pre_open": true
     }
   ],
   "pending": {
-    "date": "2026-11-10",
-    "created_at": "2026-11-09T22:40:43.393137+00:00",
+    "date": "2026-11-11",
+    "created_at": "2026-11-11T01:28:53.556002+00:00",
     "pipeline_version": "v2",
-    "prior_close": 266.93,
-    "predicted_close": 267.13,
-    "predicted_close_raw": 267.13,
-    "predicted_close_pre_gates": 267.13,
-    "predicted_close_blend": 267.13,
+    "prior_close": 270.87,
+    "predicted_close": 273.14,
+    "predicted_close_raw": 273.14,
+    "predicted_close_pre_gates": 273.14,
+    "predicted_close_blend": 272.35,
     "aggregator": "mean",
-    "judge_adjustment_sigma_raw": 0.0,
-    "judge_adjustment_sigma": 0.0,
+    "judge_adjustment_sigma_raw": 0.12,
+    "judge_adjustment_sigma": 0.12,
     "predicted_direction": "up",
-    "confidence": 0.3757,
-    "p_up": 0.5242,
-    "sigma_pct": 0.024818,
+    "confidence": 0.3829,
+    "p_up": 0.6621,
+    "sigma_pct": 0.024313,
     "quantiles": [
-      252.4149,
-      260.4279,
-      261.8651,
-      262.9747,
-      263.5256,
-      264.2868,
-      265.0477,
-      265.8781,
-      266.7167,
-      267.1297,
-      267.5433,
-      268.3872,
-      269.228,
-      270.0031,
-      270.783,
-      271.3501,
-      272.5,
-      274.0039,
-      282.7023
+      258.3919,
+      266.5388,
+      267.9418,
+      269.012,
+      269.5293,
+      270.2919,
+      271.0544,
+      271.8862,
+      272.7263,
+      273.14,
+      273.5543,
+      274.3996,
+      275.2417,
+      276.0181,
+      276.799,
+      277.3313,
+      278.4391,
+      279.9047,
+      288.7299
     ],
     "calibration": "conformal_n60",
     "analyst_predictions": {
-      "contrarian": {
-        "predicted_close": 264.5,
-        "direction": "down",
-        "confidence": 0.55,
-        "rationale": "RSI at 52.85 is neutral but price is extended ~4.8-5.1% above SMA20/SMA50 with a strong 5-day return of +8.7%, suggesting mild mean-reversion pressure. The premarket gap is small (+0.46%) and the prior session showed a bearish close well off the intraday high (275.31 high vs 266.93 close), signaling supply overhead; fading back toward 264-265 is the contrarian lean."
-      },
       "momentum": {
-        "predicted_close": 269.8,
+        "predicted_close": 273.5,
         "direction": "up",
-        "confidence": 0.58,
-        "rationale": "Strong short-term momentum (ret_1d +2.9%, ret_5d +8.7%) with price well above all major SMAs and a positive pre-open gap of +0.46% to 268.15 supports continuation bias; extrapolating modest intraday drift above the gap open yields ~269.8, respecting that RSI at 52.85 is neutral (not overbought) and realized vol suggests moves of ~2.5% daily are plausible but the trend signal here is constructive rather than extreme."
+        "confidence": 0.62,
+        "rationale": "Strong short-term momentum with 1d +1.5%, 5d +8.1%, price well above all key SMAs, and a +0.4% pre-market gap confirm trend persistence; extrapolating the recent upward drift from 266.93\u2192270.87 suggests continued upside toward 273-274, sized honestly above the timid consensus."
       },
       "macro": {
-        "predicted_close": 269.5,
+        "predicted_close": 272.8,
         "direction": "up",
         "confidence": 0.58,
-        "rationale": "Pre-market gap of +0.46% signals mild positive momentum, AMZN is trading well above all key moving averages (SMA5/20/50), RSI at 52.85 is neutral-to-bullish, and the 5-day return of +8.67% reflects a strong underlying trend; however, the prior session showed intraday selling from highs (opened 269.75, closed 266.93), and the stock is ~6% off 52-week highs suggesting some overhead resistance, so I expect modest continuation of the pre-market bid with limited upside beyond the open gap."
+        "rationale": "AMZN enters the session with a +0.4% pre-market gap, strong 5-day momentum (+8%), RSI at 55 (healthy but not overbought), and price well above all major SMAs. With 11/11 being a low-vol mid-week session and no obvious macro headwinds, the path of least resistance is a modest continuation higher from the pre-market signal, sizing the move slightly above the gap to avoid the desk's chronic magnitude-undershoot on trending days."
+      },
+      "contrarian": {
+        "predicted_close": 269.5,
+        "direction": "down",
+        "confidence": 0.52,
+        "rationale": "RSI at 55.37 is neutral, not overextended, so the contrarian fade signal is weak; however, AMZN is ~6.1% above SMA20 and ~6.6% above SMA50 after a strong 5-day run of +8%, suggesting mild mean-reversion pressure. The tiny premarket gap (+0.4%) offers no directional conviction, so I fade slightly from the prior close of 270.87 toward modest reversion without oversizing the move."
       },
       "technical": {
-        "predicted_close": 267.84,
+        "predicted_close": 272.84,
         "direction": "up",
-        "confidence": 0.52,
-        "rationale": "Pre-open gap of +0.46% (+1.22 pts) from 266.93 to 268.15 provides a mild upward anchor; RSI at 52.85 is neutral with no overbought resistance, and price sits ~4.8% above SMA20 suggesting momentum but also some mean-reversion risk after a strong multi-week run. The session on 11-09 showed a wide intraday range (269.75 open to 275.31 high, closing near the low at 266.93), indicating potential overhead resistance near 275 and a drift toward consolidation around 268-270; targeting a modest close slightly above prior close reflecting gap fill with mild drift higher."
+        "confidence": 0.58,
+        "rationale": "Pre-open gap of +0.40% (~$1.08) anchors the open above prior close; RSI at 55.37 is constructive but not overbought, price is extended above SMA20/SMA50 supporting continuation, and the 5-day return of +8% reflects strong momentum that has not yet exhausted. Recent sessions show buyers absorbing supply near 272-273 resistance; sizing the move modestly above the pre-open level to ~272.84 reflects trend persistence without over-reaching into the 252-week high zone of 284."
       },
       "news": {
-        "predicted_close": 269.5,
+        "predicted_close": 273.1,
         "direction": "up",
-        "confidence": 0.56,
-        "rationale": "JPMorgan's Focus List addition and AWS momentum already catalyzed Monday's session; pre-open at $268.15 reflects a modest residual bid. CPI on 11-10 is the key swing variable \u2014 a benign print sustains drift toward $270, while a hot print compresses growth multiples and stalls the move. Net: slim upside from anchor, sized conservatively given macro binary and desk failure history on gap days.",
+        "confidence": 0.58,
+        "rationale": "AMZN pre-open at 271.95 already reflects Ring launch and Black Friday deal catalysts; mild positive index futures (+0.2\u20130.4% S&P/NQ), strong AWS narrative, positive news sentiment (0.85), and AMZN's recent relative strength vs a down tape support a modest further grind higher. No earnings or macro shocks expected; sizing a ~0.4% gain above pre-open consistent with one-third of daily sigma.",
         "web_results": 18
       }
     },
-    "analyst_anchor": 268.15,
-    "rationale": "Analysts are split and clustered within ~2% of the base (contrarian 264.5 down vs momentum/macro/news ~269.5-269.8 up), with low confidence (0.52-0.58) \u2014 classic weak, conflicting signal that deserves 0. The one macro-level swing factor (CPI on 11-10) is a genuine binary the blend can't resolve directionally, and desk history shows macro/contrarian directional bets into gap/catalyst days are the biggest failure source. With a tiny 0.46% gap, neutral RSI, and no clear edge, I defer to the base. [gates: none; consensus 0.80; rolling edge 0.43%]",
+    "analyst_anchor": 271.95,
+    "rationale": "Four of five analysts cluster bullish (272.8-273.5) with contrarian as the lone 269.5 outlier dragging the mean down \u2014 the exact dilution pattern that caused repeated magnitude-undershoot fails (11-09, 10-10 notes). News (best strategy) and momentum both sit ~0.3-0.6% above the base, and the documented systematic undershoot on continuation days favors a small upward nudge. Keeping it modest since the move is a low-vol grind, not a catalyst day. [gates: none; consensus 0.80; rolling edge 0.39%]",
     "gates_applied": [],
     "quote_source": "yfinance_ext",
-    "anchor": 267.05,
+    "anchor": 271.95,
     "anchor_source": "yfinance_ext",
-    "anchor_time": "2026-11-10T00:59:00+00:00",
+    "anchor_time": "2026-11-11T00:59:00+00:00",
     "anchor_live": true,
-    "anchored_at": "2026-11-10T03:47:21.921651+00:00",
-    "anchor_updates": 2,
+    "anchored_at": "2026-11-11T01:28:53.556002+00:00",
+    "anchor_updates": 0,
     "status": "pending",
     "actual_close": null,
-    "late_minutes": -643
+    "late_minutes": -782
   },
-  "updated_count": 133
+  "updated_count": 134
 }

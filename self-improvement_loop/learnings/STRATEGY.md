@@ -107,3 +107,4 @@ Append-only insights. Newest at the bottom.
 - (2026-11-05) 2026-11-05: FAIL, beat baseline; closest news, worst technical.
 - (2026-11-06) When live ext-hours anchor already prices a >0.75% gap down and all analysts agree on direction, bias the final estimate toward the anchor (not below it), since post-gap intraday reversion statistically recovers part of the gap.
 - (2026-11-09) 2026-11-09: FAIL, beat baseline; closest momentum, worst contrarian.
+- (2026-11-10) When >=4/5 analysts agree on direction with one contrarian outlier >1% away from the cluster, drop the outlier and use the cluster median instead of the full mean — test whether trimmed-mean blending beats equal-weight on agreement days.

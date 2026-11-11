@@ -322,3 +322,7 @@ The miss was **pure magnitude, not direction** — all analysts were up, but the
 - **What went wrong:** right direction, magnitude off; final blend 260.31 missed by 2.48%.
 - **Likely culprit:** analyst `contrarian` was furthest from actual and pulled the blend.
 - **Try next:** reduce weight on `contrarian` under today's conditions and lean on `momentum`.
+
+## 2026-11-10 — FAIL (APE 1.38%)
+- Predicted 267.13 vs actual 270.87 (prior 266.93); dir hit: True; beat baseline: True; closest analyst: momentum.
+**What went wrong:** Right direction (up), but we predicted +0.07% when the stock moved +1.48% — a pure magnitude under-call. **Root cause:** Equal-weight mean let contrarian's 264.5 (a -0.9% bet contradicting a strong, confirmed uptrend) pull the blend down ~1.3 pts, even though momentum/macro/news clustered tightly at 269.5-269.8 and nailed it. The desk over-weighted mean-reversion fear ('extended above SMA20', gap-day loss aversion) in a tape that had just gone +8.7% in 5 days on a JPM catalyst with a benign CPI — exactly the regime where momentum continues. **One change:** On high-agreement days (4+ analysts same direction), trim the lone contrarian outlier and blend the agreeing cluster's median; here that yields ~269.5, cutting APE from 1.38% to ~0.5% and passing.

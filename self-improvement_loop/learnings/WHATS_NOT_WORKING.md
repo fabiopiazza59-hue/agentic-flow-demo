@@ -3,19 +3,20 @@
 _Auto-generated each scoring run._
 
 ## What keeps going wrong
-- 56% fail rate (59/105). Failures split almost evenly: 31 directional misses vs 28 magnitude misses — this is BOTH a sign-problem and a size-problem, not one axis.
-- Directional misses dominate the worst days. On large-move days (APE > 3%) the model repeatedly gets the sign wrong (2026-06-15, -22, -25, 07-15, 08-19, 10-19, 11-04). When the market actually moves, we flip the wrong way.
-- Even "passes" frequently fail to beat baseline (many pass=true, beats_baseline=false). On quiet days we're barely better than a naive carry-forward, so our edge is thin where it's easy and absent where it's hard.
-- Tail blowups: 2026-07-31 (13.2% APE), 10-30 (5.2%), 11-04 (6.7%), 10-19 (5.5%). These single-day disasters dwarf the mean fail APE of 2.45% and drag aggregate performance.
+- Nearly even split: 31 directional misses vs 29 magnitude misses — the model fails on *both* axes, not one. It can't be patched by a single sign-flip fix.
+- Failures cluster around large-move days. The biggest APEs (0.13 on 07-31, 0.067 on 11-04, 0.055 on 10-19, 0.052 on 10-30) are all days where the move far exceeded the model's muted, mean-reverting estimate. Magnitude is chronically under-sized on volatile days.
+- On many fails the model still beat baseline (e.g. 10-29, 11-05, 11-09) — i.e. it got direction right but undershot the magnitude. The pass/fail threshold is being tripped by magnitude error on correct-direction calls.
+- `macro` and `technical` are dead weight: macro 12% hit rate / 0.0172 MAPE, technical 11% / 0.0155. Yet macro wins the blend on several of the worst days (07-30, 08-19, 10-30) — it surfaces exactly when it's least reliable.
 
 ## Unreliable under these conditions
-- High-volatility / gap days: every strategy's magnitude estimate collapses; macro and contrarian specifically pick the wrong direction into the move.
-- macro and technical are the weakest engines (hit_rate 12% and 11%, highest MAPE ~0.017 and 0.016). Macro-won days are disproportionately big misses (07-15, 08-19, 10-30). Technical wins almost never.
-- contrarian wins the most count (28) but is overrepresented in the biggest fails (10-19, 11-04, 10-08) — it fades real trends and gets run over.
-- Confidence is mildly miscalibrated on the high end: only 7 overconfident misses, but note 08-19 (conf 0.62 fail), 08-31 (0.72 fail), 09-09 (0.72 fail), 10-06/10-08 (~0.66/0.62 fail). High confidence ≥0.6 does not reliably indicate a pass.
+- High-volatility / event days (earnings-like gaps): every strategy under-predicts magnitude; macro and contrarian lead the blend into the biggest misses (10-19, 11-04, 10-08, 06-22).
+- `contrarian` when fading a real trend: it logs good hit-rate overall (26%) but owns several large-APE fails (10-19 0.055, 11-04 0.067, 10-15, 06-26) — it's catching falling knives.
+- Confidence is modestly miscalibrated, not catastrophically: only 7 overconfident misses, but note 08-19 (conf 0.62, fail), 08-31/09-09 (conf 0.72, fail), 09-03 (0.62, fail). Rising recent confidence (0.5–0.66) does NOT track accuracy — calibration is flat/noisy above ~0.5.
+- `news` is the single best strategy (32% hit, lowest MAPE) yet still only wins ~1/3 of the time it's chosen.
 
 ## Fixes to try next
-- Cut or cap macro and technical weight; they add MAPE without hit rate. Lean on news (33% hit, lowest MAPE) and contrarian for quiet regimes only.
-- Add a volatility regime gate: when expected daily range is high, suppress contrarian/macro sign bets and widen magnitude or abstain.
-- Recalibrate confidence against realized pass rate; current ≥0.6 band is not earning its label. Isotonic/Platt recal on the last 100.
-- Add outlier guardrails (earnings/gap flag) to prevent 5–13% single-day blowups that dominate loss.
+- Drop or heavily down-weight macro and technical; shift that mass to news/contrarian. They add noise, not signal.
+- Add a volatility regime detector; on high-vol days widen magnitude and suppress contrarian fading.
+- Scale predicted magnitude up when recent realized vol is high — systematic undershoot is the dominant error.
+- Recalibrate confidence against realized hit-rate; current 0.6–0.7 confidence shows no accuracy edge.
+- Gate contrarian: block it when a strong multi-day trend is intact.
