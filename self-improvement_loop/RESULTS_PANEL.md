@@ -3,20 +3,20 @@
 _30 US large caps a session. Every name's free baseline is its latest pre-open trade (the anchor); the LLM may move it by at most ±0.5σ. Verdicts average each metric over the names of a session and read an anytime-valid 95% confidence sequence on that daily series, so they stay valid although this page is regenerated daily. Pre-open forecasts only. Design: [spec/panel.md](spec/panel.md)._
 
 ## Verdict
-❌ **No edge yet** — the LLM's gain over the free baseline is not distinguishable from noise (35 sessions, 1048 name-forecasts; mean daily APE gain -0.003%, CS [-0.014%, +0.009%]).
+❌ **No edge yet** — the LLM's gain over the free baseline is not distinguishable from noise (35 sessions, 1049 name-forecasts; mean daily APE gain -0.003%, CS [-0.014%, +0.009%]).
 
-**Pending (2026-11-13):** 30 names, 30 anchored on a live pre-open trade, the LLM moved 1 off their anchor.
+**Pending (2026-11-16):** 29 names, 29 anchored on a live pre-open trade, the LLM moved 1 off their anchor.
 
 | Daily metric (mean over names) | Mean | 95% CS | Verdict |
 |---|---|---|---|
 | APE gain: LLM vs free baseline | -0.003% | [-0.014%, +0.009%] | ≈ not distinguishable |
 | CRPS gain: LLM vs free baseline | -0.001% | [-0.011%, +0.008%] | ≈ not distinguishable |
 | Rank IC (adjustment vs realized move off the anchor) | -0.035 | [-0.264, +0.195] | ≈ not distinguishable |
-| Direction (Brier of P(up)) vs free baseline | -0.0014 | [-0.003, +0.001] | ≈ not distinguishable |
-| APE gain: LLM vs prior close | 0.076% | [-0.062%, +0.214%] | ≈ not distinguishable |
+| Direction (Brier of P(up)) vs free baseline | -0.0013 | [-0.003, +0.001] | ≈ not distinguishable |
+| APE gain: LLM vs prior close | 0.077% | [-0.061%, +0.214%] | ≈ not distinguishable |
 | APE gain: anchor vs prior close (the free information itself) | 0.079% | [-0.054%, +0.212%] | ≈ not distinguishable |
 
-MAPE — LLM 1.58%, free baseline 1.58%, prior close 1.66%; LLM 80% interval coverage 79.39%; names moved per session 1.1. LLM is **on**.
+MAPE — LLM 1.58%, free baseline 1.58%, prior close 1.66%; LLM 80% interval coverage 79.32%; names moved per session 1.1. LLM is **on**.
 
 ## Prompt evolution — shadow challengers, promoted only on proof
 
@@ -50,7 +50,7 @@ _Challenger prompts run on the same snapshot without shipping. One replaces the 
 | KO | 35 | 0.90% | 0.89% | 1 |
 | LLY | 35 | 1.46% | 1.48% | 3 |
 | MA | 35 | 1.22% | 1.22% | 1 |
-| META | 33 | 1.93% | 1.93% | 0 |
+| META | 34 | 1.94% | 1.94% | 0 |
 | MSFT | 35 | 1.46% | 1.45% | 2 |
 | NFLX | 35 | 1.58% | 1.58% | 0 |
 | NVDA | 35 | 2.14% | 2.06% | 4 |

@@ -1,6 +1,6 @@
 {
   "n_sessions": 35,
-  "n_forecasts": 1048,
+  "n_forecasts": 1049,
   "n_late_rows": 0,
   "cs": {
     "ape_gain_vs_anchor": {
@@ -14,27 +14,27 @@
     },
     "ape_gain_vs_rw": {
       "n": 35,
-      "mean": 0.00076196,
-      "lo": -0.00061677,
-      "hi": 0.00214069,
+      "mean": 0.00076677,
+      "lo": -0.00061017,
+      "hi": 0.00214371,
       "alpha": 0.05,
       "t_star": 120,
       "decision": "undecided"
     },
     "crps_gain_vs_anchor": {
       "n": 35,
-      "mean": -1.473e-05,
-      "lo": -0.00010945,
-      "hi": 8e-05,
+      "mean": -1.489e-05,
+      "lo": -0.00010962,
+      "hi": 7.985e-05,
       "alpha": 0.05,
       "t_star": 120,
       "decision": "undecided"
     },
     "direction_gain_vs_anchor": {
       "n": 35,
-      "mean": -0.00136142,
-      "lo": -0.00344663,
-      "hi": 0.0007238,
+      "mean": -0.00134295,
+      "lo": -0.00342298,
+      "hi": 0.00073708,
       "alpha": 0.05,
       "t_star": 120,
       "decision": "undecided"
@@ -50,9 +50,9 @@
     },
     "anchor_gain_vs_rw": {
       "n": 35,
-      "mean": 0.00078704,
-      "lo": -0.00054497,
-      "hi": 0.00211906,
+      "mean": 0.00079185,
+      "lo": -0.00053828,
+      "hi": 0.00212199,
       "alpha": 0.05,
       "t_star": 120,
       "decision": "undecided"
@@ -571,17 +571,17 @@
     },
     {
       "date": "2026-11-13",
-      "n_names": 29,
+      "n_names": 30,
       "ape_gain_vs_anchor": 0.0,
-      "ape_gain_vs_rw": -0.0010129782462345225,
-      "crps_gain_vs_anchor": -2.8138362839477682e-05,
-      "direction_gain_vs_anchor": -0.0036049167437754437,
-      "anchor_gain_vs_rw": -0.0010129782462345225,
+      "ape_gain_vs_rw": -0.0008446717430438739,
+      "crps_gain_vs_anchor": -3.373100697833323e-05,
+      "direction_gain_vs_anchor": -0.0029585626772711815,
+      "anchor_gain_vs_rw": -0.0008446717430438739,
       "rank_ic": null,
-      "llm_cover80": 0.7241379310344828,
-      "llm_mape": 0.015878486396000983,
-      "anchor_mape": 0.015878486396000983,
-      "rw_mape": 0.01486550814976646,
+      "llm_cover80": 0.7,
+      "llm_mape": 0.01615384970471299,
+      "anchor_mape": 0.01615384970471299,
+      "rw_mape": 0.015309177961669118,
       "n_moved": 0
     }
   ],
@@ -695,9 +695,9 @@
       "moved": 1
     },
     "META": {
-      "n": 33,
-      "llm": 0.019266718078423534,
-      "anchor": 0.019266627682159608,
+      "n": 34,
+      "llm": 0.01941003183074523,
+      "anchor": 0.01940994409319495,
       "moved": 0
     },
     "MSFT": {
@@ -768,17 +768,17 @@
     }
   },
   "mean": {
-    "llm_mape": 0.015800890939569847,
-    "anchor_mape": 0.01577580506533025,
-    "rw_mape": 0.016562848916654955,
-    "llm_cover80": 0.7938916256157635,
+    "llm_mape": 0.015808758462675904,
+    "anchor_mape": 0.015783672588436305,
+    "rw_mape": 0.016575525196995032,
+    "llm_cover80": 0.7932019704433497,
     "n_moved": 1.0571428571428572
   },
   "pending": {
-    "date": "2026-11-13",
-    "n": 30,
+    "date": "2026-11-16",
+    "n": 29,
     "n_moved": 1,
-    "n_live": 30
+    "n_live": 29
   },
   "state": {
     "llm_enabled": true,
@@ -802,9 +802,9 @@
       "rationale": "The failure cases show positive overnight gaps systematically followed by negative realized moves off the anchor (and vice versa), indicating the pre-open anchor overshoots and regular sessions mean-revert the gap. This strategy exploits that by fading unexplained overnight gaps while still respecting genuine catalysts, directly targeting the directional errors the current always-zero behavior leaves on the table.",
       "stats": {
         "n": 30,
-        "mean": -8.158e-05,
-        "lo": -0.00039161,
-        "hi": 0.00022845,
+        "mean": -8.358e-05,
+        "lo": -0.00039276,
+        "hi": 0.00022561,
         "decision": "undecided",
         "alpha": 0.025
       }
@@ -817,9 +817,9 @@
       "rationale": "The champion moved almost nothing (2.2% of names) and realized moves were overwhelmingly opposite the overnight gap, so the market is systematically unwinding gaps the strategy left untouched at 0. This variant tells the analyst to actively fade sizeable, catalyst-free gaps while still staying flat on tiny gaps and genuine pending catalysts, differing from p1 by conditioning the fade on catalyst presence rather than blanket gap-fading.",
       "stats": {
         "n": 29,
-        "mean": -1.942e-05,
-        "lo": -0.00033529,
-        "hi": 0.00029646,
+        "mean": -1.924e-05,
+        "lo": -0.00033508,
+        "hi": 0.00029659,
         "decision": "undecided",
         "alpha": 0.008333333333333333
       }
