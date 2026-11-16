@@ -111,3 +111,4 @@ Append-only insights. Newest at the bottom.
 - (2026-11-11) When 4+ analysts agree 'up' purely on recent momentum + a tiny (<0.5%) premarket gap after a +6-8% multi-day run, cap the blend near prior close and overweight contrarian — crowded extrapolation after extended runs reverts more often than it continues.
 - (2026-11-12) On days with a positive premarket gap and 4/5 analysts agreeing on direction, confidence-weighting the blend (downweighting the lone contrarian) should reduce APE versus a flat mean — test on the trailing 108-day sample.
 - (2026-11-13) When RSI>60 AND price >4% above SMA20 with a small (<0.4%) premarket gap, weight the contrarian/down vote higher — hypothesis: this regime beats the bullish-mean blend on directional hit-rate.
+- (2026-11-16) 2026-11-16: FAIL, beat baseline; closest macro, worst technical.

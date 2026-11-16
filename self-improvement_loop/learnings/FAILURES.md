@@ -330,3 +330,9 @@ The miss was **pure magnitude, not direction** — all analysts were up, but the
 ## 2026-11-11 — FAIL (APE 2.62%)
 - Predicted 273.14 vs actual 266.17 (prior 270.87); dir hit: False; beat baseline: False; closest analyst: contrarian.
 **What went wrong:** The blend was a one-sided long consensus (273.14) built entirely on trailing momentum; AMZN instead mean-reverted hard to 266.17, reversing the +8% run. **Root cause:** herding — momentum/macro/technical/news all cited the *same* signals (5d +8%, +0.4% gap, price above SMAs), so the mean aggregator just averaged five correlated bullish bets with no independent diversity, and the judge added +0.12σ *into* the crowd rather than hedging it. Price being 6% above SMA20/50 was the exhaustion tell everyone dismissed as 'constructive.' **One change:** when the top-weighted analysts share identical bullish rationale AND price sits >5% above SMA20 after a >6% 5-day move, down-weight the correlated longs and lean the blend toward contrarian (the highest-hit-rate directional analyst here at 27%), anchoring near prior close instead of extrapolating the gap.
+
+## 2026-11-16 — FAIL (APE 2.25%)
+- Predicted 263.56 vs actual 257.75 (prior 266.66); dir hit: True; beat baseline: True; closest analyst: macro.
+- **What went wrong:** right direction, magnitude off; final blend 263.56 missed by 2.25%.
+- **Likely culprit:** analyst `technical` was furthest from actual and pulled the blend.
+- **Try next:** reduce weight on `technical` under today's conditions and lean on `macro`.
