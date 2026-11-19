@@ -185,3 +185,7 @@ Every missed prediction (>1% error), newest at the bottom. The tail of this file
 ## 2026-11-16 — FAIL (APE 2.82%)
 - Predicted 265.03 vs actual 257.75 (prior center 264.33, σ 2.63%); adjustment 0.1σ; caps: []; dir hit: True; beat baseline: True.
 - Miss was magnitude-only; the adjustment was too timid or the prior center was off.
+
+## 2026-11-18 — FAIL (APE 2.82%)
+- Predicted 260.2 vs actual 267.74 (prior center 260.2, σ 2.53%); adjustment 0.0σ; caps: []; dir hit: True; beat baseline: True.
+- Miss was magnitude-only; the adjustment was too timid or the prior center was off.

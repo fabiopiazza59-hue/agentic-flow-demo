@@ -3,8 +3,8 @@
 _Auto-generated each scoring run from the full scored history._
 
 ## What keeps going wrong
-- 62 of 111 scored predictions FAILED (>1% error); mean error on misses 2.43%.
-- Directional misses: 32; magnitude-only misses: 30.
+- 63 of 112 scored predictions FAILED (>1% error); mean error on misses 2.44%.
+- Directional misses: 32; magnitude-only misses: 31.
 - Overconfident misses (conf ≥ 0.6): 7.
 
 ## Unreliable under these conditions

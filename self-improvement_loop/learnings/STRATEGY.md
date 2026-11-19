@@ -113,3 +113,4 @@ Append-only insights. Newest at the bottom.
 - (2026-11-13) When RSI>60 AND price >4% above SMA20 with a small (<0.4%) premarket gap, weight the contrarian/down vote higher — hypothesis: this regime beats the bullish-mean blend on directional hit-rate.
 - (2026-11-16) 2026-11-16: FAIL, beat baseline; closest macro, worst technical.
 - (2026-11-17) 2026-11-17: PASS, did not beat baseline; closest None, worst None.
+- (2026-11-18) 2026-11-18: FAIL, beat baseline; closest None, worst None.
