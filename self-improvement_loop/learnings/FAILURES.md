@@ -342,3 +342,9 @@ The miss was **pure magnitude, not direction** — all analysts were up, but the
 - **What went wrong:** right direction, magnitude off; final blend 260.2 missed by 2.82%.
 - **Likely culprit:** analyst `None` was furthest from actual and pulled the blend.
 - **Try next:** reduce weight on `None` under today's conditions and lean on `None`.
+
+## 2026-11-19 — FAIL (APE 5.42%)
+- Predicted 271.32 vs actual 257.37 (prior 267.74); dir hit: False; beat baseline: False; closest analyst: None.
+- **What went wrong:** wrong direction; final blend 271.32 missed by 5.42%.
+- **Likely culprit:** analyst `None` was furthest from actual and pulled the blend.
+- **Try next:** reduce weight on `None` under today's conditions and lean on `None`.
