@@ -3,20 +3,20 @@
 _30 US large caps a session. Every name's free baseline is its latest pre-open trade (the anchor); the LLM may move it by at most ±0.5σ. Verdicts average each metric over the names of a session and read an anytime-valid 95% confidence sequence on that daily series, so they stay valid although this page is regenerated daily. Pre-open forecasts only. Design: [spec/panel.md](spec/panel.md)._
 
 ## Verdict
-❌ **No edge yet** — the LLM's gain over the free baseline is not distinguishable from noise (42 sessions, 1258 name-forecasts; mean daily APE gain -0.002%, CS [-0.011%, +0.008%]).
+❌ **No edge yet** — the LLM's gain over the free baseline is not distinguishable from noise (43 sessions, 1288 name-forecasts; mean daily APE gain -0.002%, CS [-0.011%, +0.008%]).
 
-**Pending (2026-11-25):** 30 names, 30 anchored on a live pre-open trade, the LLM moved 0 off their anchor.
+**Pending (2026-11-27):** 30 names, 30 anchored on a live pre-open trade, the LLM moved 0 off their anchor.
 
 | Daily metric (mean over names) | Mean | 95% CS | Verdict |
 |---|---|---|---|
 | APE gain: LLM vs free baseline | -0.002% | [-0.011%, +0.008%] | ≈ not distinguishable |
 | CRPS gain: LLM vs free baseline | -0.001% | [-0.009%, +0.007%] | ≈ not distinguishable |
 | Rank IC (adjustment vs realized move off the anchor) | -0.019 | [-0.239, +0.200] | ≈ not distinguishable |
-| Direction (Brier of P(up)) vs free baseline | -0.0011 | [-0.003, +0.001] | ≈ not distinguishable |
-| APE gain: LLM vs prior close | 0.119% | [-0.031%, +0.268%] | ≈ not distinguishable |
-| APE gain: anchor vs prior close (the free information itself) | 0.120% | [-0.026%, +0.267%] | ≈ not distinguishable |
+| Direction (Brier of P(up)) vs free baseline | -0.001 | [-0.003, +0.001] | ≈ not distinguishable |
+| APE gain: LLM vs prior close | 0.107% | [-0.043%, +0.258%] | ≈ not distinguishable |
+| APE gain: anchor vs prior close (the free information itself) | 0.109% | [-0.039%, +0.256%] | ≈ not distinguishable |
 
-MAPE — LLM 1.69%, free baseline 1.69%, prior close 1.81%; LLM 80% interval coverage 78.85%; names moved per session 0.9. LLM is **on**.
+MAPE — LLM 1.69%, free baseline 1.69%, prior close 1.80%; LLM 80% interval coverage 78.72%; names moved per session 0.9. LLM is **on**.
 
 ## Prompt evolution — shadow challengers, promoted only on proof
 
@@ -25,42 +25,42 @@ _Challenger prompts run on the same snapshot without shipping. One replaces the 
 | Variant | Status | Parent | Sessions | Gain vs champion | CS (α_k) | Note |
 |---|---|---|---|---|---|---|
 | p0 | champion | — | — | — | — | seed: the hand-written panel prompt |
-| p1 | challenger | p0 | 37 | -0.010% | [-0.036%, +0.017%] (α=0.0250) | The failure cases show positive overnight gaps systematically followed by negative realized moves off the anchor (and vi |
-| p2 | challenger | p0 | 36 | -0.003% | [-0.028%, +0.023%] (α=0.0083) | The champion moved almost nothing (2.2% of names) and realized moves were overwhelmingly opposite the overnight gap, so  |
+| p1 | challenger | p0 | 38 | -0.010% | [-0.035%, +0.016%] (α=0.0250) | The failure cases show positive overnight gaps systematically followed by negative realized moves off the anchor (and vi |
+| p2 | challenger | p0 | 37 | -0.003% | [-0.027%, +0.022%] (α=0.0083) | The champion moved almost nothing (2.2% of names) and realized moves were overwhelmingly opposite the overnight gap, so  |
 
 ## Per name (pre-open forecasts)
 
 | Name | Sessions | LLM MAPE | Free-baseline MAPE | Days moved |
 |---|---|---|---|---|
-| AAPL | 42 | 1.17% | 1.16% | 1 |
-| ADBE | 42 | 1.94% | 1.94% | 0 |
-| AMD | 42 | 3.90% | 3.93% | 3 |
-| AMZN | 42 | 1.88% | 1.88% | 0 |
-| AVGO | 42 | 2.63% | 2.63% | 5 |
-| BAC | 42 | 1.12% | 1.13% | 1 |
-| CAT | 42 | 2.53% | 2.51% | 1 |
-| COST | 42 | 0.92% | 0.91% | 1 |
-| CRM | 42 | 1.80% | 1.80% | 0 |
-| CVX | 42 | 1.25% | 1.26% | 1 |
-| DIS | 42 | 1.14% | 1.14% | 2 |
-| GOOGL | 42 | 1.46% | 1.48% | 2 |
-| HD | 42 | 1.34% | 1.35% | 1 |
-| JNJ | 42 | 1.47% | 1.46% | 1 |
-| JPM | 42 | 1.14% | 1.13% | 1 |
-| KO | 42 | 0.87% | 0.86% | 1 |
-| LLY | 42 | 1.41% | 1.43% | 3 |
-| MA | 42 | 1.20% | 1.21% | 1 |
-| META | 40 | 2.03% | 2.03% | 0 |
-| MSFT | 42 | 1.45% | 1.44% | 2 |
-| NFLX | 42 | 1.63% | 1.63% | 0 |
-| NVDA | 42 | 3.00% | 2.95% | 5 |
-| ORCL | 42 | 3.54% | 3.50% | 2 |
-| PEP | 42 | 1.15% | 1.15% | 0 |
-| PG | 42 | 1.10% | 1.11% | 1 |
-| TSLA | 42 | 2.27% | 2.27% | 0 |
-| UNH | 42 | 1.82% | 1.81% | 1 |
-| V | 42 | 1.14% | 1.14% | 0 |
-| WMT | 42 | 1.16% | 1.17% | 1 |
-| XOM | 42 | 1.30% | 1.31% | 1 |
+| AAPL | 43 | 1.16% | 1.16% | 1 |
+| ADBE | 43 | 1.95% | 1.95% | 0 |
+| AMD | 43 | 3.92% | 3.94% | 3 |
+| AMZN | 43 | 1.84% | 1.84% | 0 |
+| AVGO | 43 | 2.66% | 2.66% | 5 |
+| BAC | 43 | 1.10% | 1.11% | 1 |
+| CAT | 43 | 2.57% | 2.55% | 1 |
+| COST | 43 | 0.91% | 0.91% | 1 |
+| CRM | 43 | 1.85% | 1.85% | 0 |
+| CVX | 43 | 1.25% | 1.26% | 1 |
+| DIS | 43 | 1.17% | 1.17% | 2 |
+| GOOGL | 43 | 1.45% | 1.46% | 2 |
+| HD | 43 | 1.37% | 1.37% | 1 |
+| JNJ | 43 | 1.48% | 1.47% | 1 |
+| JPM | 43 | 1.12% | 1.12% | 1 |
+| KO | 43 | 0.88% | 0.87% | 1 |
+| LLY | 43 | 1.42% | 1.44% | 3 |
+| MA | 43 | 1.22% | 1.23% | 1 |
+| META | 41 | 2.11% | 2.11% | 0 |
+| MSFT | 43 | 1.44% | 1.43% | 2 |
+| NFLX | 43 | 1.63% | 1.63% | 0 |
+| NVDA | 43 | 2.97% | 2.92% | 5 |
+| ORCL | 43 | 3.47% | 3.44% | 2 |
+| PEP | 43 | 1.12% | 1.12% | 0 |
+| PG | 43 | 1.08% | 1.09% | 1 |
+| TSLA | 43 | 2.26% | 2.26% | 0 |
+| UNH | 43 | 1.82% | 1.81% | 1 |
+| V | 43 | 1.15% | 1.15% | 0 |
+| WMT | 43 | 1.16% | 1.17% | 1 |
+| XOM | 43 | 1.28% | 1.29% | 1 |
 
 _Research experiment, not financial advice._

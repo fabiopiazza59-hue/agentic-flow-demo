@@ -1,40 +1,40 @@
 {
-  "n_sessions": 42,
-  "n_forecasts": 1258,
+  "n_sessions": 43,
+  "n_forecasts": 1288,
   "n_late_rows": 0,
   "cs": {
     "ape_gain_vs_anchor": {
-      "n": 42,
-      "mean": -1.659e-05,
-      "lo": -0.00011474,
-      "hi": 8.157e-05,
+      "n": 43,
+      "mean": -1.619e-05,
+      "lo": -0.00011187,
+      "hi": 7.948e-05,
       "alpha": 0.05,
       "t_star": 120,
       "decision": "undecided"
     },
     "ape_gain_vs_rw": {
-      "n": 42,
-      "mean": 0.00118582,
-      "lo": -0.00031257,
-      "hi": 0.00268421,
+      "n": 43,
+      "mean": 0.001072,
+      "lo": -0.0004317,
+      "hi": 0.0025757,
       "alpha": 0.05,
       "t_star": 120,
       "decision": "undecided"
     },
     "crps_gain_vs_anchor": {
-      "n": 42,
-      "mean": -9.19e-06,
-      "lo": -8.746e-05,
-      "hi": 6.908e-05,
+      "n": 43,
+      "mean": -8.98e-06,
+      "lo": -8.526e-05,
+      "hi": 6.731e-05,
       "alpha": 0.05,
       "t_star": 120,
       "decision": "undecided"
     },
     "direction_gain_vs_anchor": {
-      "n": 42,
-      "mean": -0.00106992,
-      "lo": -0.00280395,
-      "hi": 0.00066412,
+      "n": 43,
+      "mean": -0.00104497,
+      "lo": -0.00273681,
+      "hi": 0.00064687,
       "alpha": 0.05,
       "t_star": 120,
       "decision": "undecided"
@@ -49,10 +49,10 @@
       "decision": "undecided"
     },
     "anchor_gain_vs_rw": {
-      "n": 42,
-      "mean": 0.00120241,
-      "lo": -0.00026384,
-      "hi": 0.00266865,
+      "n": 43,
+      "mean": 0.00108819,
+      "lo": -0.0003854,
+      "hi": 0.00256179,
       "alpha": 0.05,
       "t_star": 120,
       "decision": "undecided"
@@ -688,199 +688,214 @@
       "anchor_mape": 0.013324219073860843,
       "rw_mape": 0.021821428273312536,
       "n_moved": 0
+    },
+    {
+      "date": "2026-11-25",
+      "n_names": 30,
+      "ape_gain_vs_anchor": 2.2820158239724904e-07,
+      "ape_gain_vs_rw": -0.0037085125527183643,
+      "crps_gain_vs_anchor": 1.1279259894136917e-08,
+      "direction_gain_vs_anchor": 2.676924873212805e-06,
+      "anchor_gain_vs_rw": -0.0037087407543007615,
+      "rank_ic": null,
+      "llm_cover80": 0.7333333333333333,
+      "llm_mape": 0.017572725215801263,
+      "anchor_mape": 0.01757295341738366,
+      "rw_mape": 0.0138642126630829,
+      "n_moved": 0
     }
   ],
   "per_name": {
     "AAPL": {
-      "n": 42,
-      "llm": 0.011657446325526873,
-      "anchor": 0.011615527070798503,
+      "n": 43,
+      "llm": 0.01164010367763907,
+      "anchor": 0.011599159289299733,
       "moved": 1
     },
     "ADBE": {
-      "n": 42,
-      "llm": 0.01944331661367245,
-      "anchor": 0.019443676576243723,
+      "n": 43,
+      "llm": 0.019537507942097056,
+      "anchor": 0.019537859533445744,
       "moved": 0
     },
     "AMD": {
-      "n": 42,
-      "llm": 0.03903135772818684,
-      "anchor": 0.039275075822251995,
+      "n": 43,
+      "llm": 0.03916435836312378,
+      "anchor": 0.03940240859453625,
       "moved": 3
     },
     "AMZN": {
-      "n": 42,
-      "llm": 0.018780316370782275,
-      "anchor": 0.018779901299108035,
+      "n": 43,
+      "llm": 0.01837591415964812,
+      "anchor": 0.018375508740803514,
       "moved": 0
     },
     "AVGO": {
-      "n": 42,
-      "llm": 0.02626910765998319,
-      "anchor": 0.02632240797750729,
+      "n": 43,
+      "llm": 0.02659350038611485,
+      "anchor": 0.026645561161370946,
       "moved": 5
     },
     "BAC": {
-      "n": 42,
-      "llm": 0.011242223688991365,
-      "anchor": 0.0113349726458054,
+      "n": 43,
+      "llm": 0.011023896620434225,
+      "anchor": 0.011114488624764211,
       "moved": 1
     },
     "CAT": {
-      "n": 42,
-      "llm": 0.02529259513046856,
-      "anchor": 0.02511350924911143,
+      "n": 43,
+      "llm": 0.025657828537451504,
+      "anchor": 0.025482907444032914,
       "moved": 1
     },
     "COST": {
-      "n": 42,
-      "llm": 0.00916781144178275,
-      "anchor": 0.009139765731266203,
+      "n": 43,
+      "llm": 0.009129428827520696,
+      "anchor": 0.009102035342830115,
       "moved": 1
     },
     "CRM": {
-      "n": 42,
-      "llm": 0.018017057513092852,
-      "anchor": 0.01801754648879075,
+      "n": 43,
+      "llm": 0.018497817904500932,
+      "anchor": 0.01849829550867097,
       "moved": 0
     },
     "CVX": {
-      "n": 42,
-      "llm": 0.012456919321871237,
-      "anchor": 0.01255576847251077,
+      "n": 43,
+      "llm": 0.012473699431509356,
+      "anchor": 0.012570249764692157,
       "moved": 1
     },
     "DIS": {
-      "n": 42,
-      "llm": 0.011438590471326095,
-      "anchor": 0.011365235757200711,
+      "n": 43,
+      "llm": 0.011746565502540645,
+      "anchor": 0.011674916711999574,
       "moved": 2
     },
     "GOOGL": {
-      "n": 42,
-      "llm": 0.014586489753247445,
-      "anchor": 0.014768664719967179,
+      "n": 43,
+      "llm": 0.014454196079203138,
+      "anchor": 0.014632134418789855,
       "moved": 2
     },
     "HD": {
-      "n": 42,
-      "llm": 0.013397937627879573,
-      "anchor": 0.013452864795637324,
+      "n": 43,
+      "llm": 0.013681819401370665,
+      "anchor": 0.013735469193134049,
       "moved": 1
     },
     "JNJ": {
-      "n": 42,
-      "llm": 0.014672232315486802,
-      "anchor": 0.014582808376370049,
+      "n": 43,
+      "llm": 0.014819156882812207,
+      "anchor": 0.01473181257018654,
       "moved": 1
     },
     "JPM": {
-      "n": 42,
-      "llm": 0.011395180052457224,
-      "anchor": 0.011323334096182533,
+      "n": 43,
+      "llm": 0.011243245662137835,
+      "anchor": 0.01117307054205558,
       "moved": 1
     },
     "KO": {
-      "n": 42,
-      "llm": 0.00868751677377199,
-      "anchor": 0.008591086961293543,
+      "n": 43,
+      "llm": 0.00876429478525856,
+      "anchor": 0.00867010752655868,
       "moved": 1
     },
     "LLY": {
-      "n": 42,
-      "llm": 0.014123659672181038,
-      "anchor": 0.014273465715625997,
+      "n": 43,
+      "llm": 0.014209131133513235,
+      "anchor": 0.01435545331548273,
       "moved": 3
     },
     "MA": {
-      "n": 42,
-      "llm": 0.012043460416446591,
-      "anchor": 0.012097723807091306,
+      "n": 43,
+      "llm": 0.012200326203599447,
+      "anchor": 0.012253327654926842,
       "moved": 1
     },
     "META": {
-      "n": 40,
-      "llm": 0.020328079411498428,
-      "anchor": 0.020328118802545904,
+      "n": 41,
+      "llm": 0.021079599239625445,
+      "anchor": 0.021079637669915663,
       "moved": 0
     },
     "MSFT": {
-      "n": 42,
-      "llm": 0.014531880827248858,
-      "anchor": 0.014443480530184408,
+      "n": 43,
+      "llm": 0.01435674372191791,
+      "anchor": 0.014270399245715423,
       "moved": 2
     },
     "NFLX": {
-      "n": 42,
-      "llm": 0.016325784869249203,
-      "anchor": 0.016328025148655483,
+      "n": 43,
+      "llm": 0.016333647053155567,
+      "anchor": 0.016335835233040774,
       "moved": 0
     },
     "NVDA": {
-      "n": 42,
-      "llm": 0.030035255138111065,
-      "anchor": 0.029523930893945116,
+      "n": 43,
+      "llm": 0.029693464676083487,
+      "anchor": 0.029194031693409773,
       "moved": 5
     },
     "ORCL": {
-      "n": 42,
-      "llm": 0.0353971606832851,
-      "anchor": 0.03501100817184231,
+      "n": 43,
+      "llm": 0.03474187545136105,
+      "anchor": 0.034364703230882046,
       "moved": 2
     },
     "PEP": {
-      "n": 42,
-      "llm": 0.011495544890233498,
-      "anchor": 0.011496053133970806,
+      "n": 43,
+      "llm": 0.011228207820399459,
+      "anchor": 0.011228863454921292,
       "moved": 0
     },
     "PG": {
-      "n": 42,
-      "llm": 0.011016013128910308,
-      "anchor": 0.011096792105732651,
+      "n": 43,
+      "llm": 0.01083634882083194,
+      "anchor": 0.01091524921679795,
       "moved": 1
     },
     "TSLA": {
-      "n": 42,
-      "llm": 0.022723356965331766,
-      "anchor": 0.02272398784204251,
+      "n": 43,
+      "llm": 0.022632323029004472,
+      "anchor": 0.0226329392341638,
       "moved": 0
     },
     "UNH": {
-      "n": 42,
-      "llm": 0.018192985487588048,
-      "anchor": 0.018100874979172437,
+      "n": 43,
+      "llm": 0.018165562231903114,
+      "anchor": 0.018075593828334378,
       "moved": 1
     },
     "V": {
-      "n": 42,
-      "llm": 0.011385647421828743,
-      "anchor": 0.0113854971319487,
+      "n": 43,
+      "llm": 0.011531304333530676,
+      "anchor": 0.011531157538764122,
       "moved": 0
     },
     "WMT": {
-      "n": 42,
-      "llm": 0.011622598625170896,
-      "anchor": 0.01166213170442055,
+      "n": 43,
+      "llm": 0.011627271620845928,
+      "anchor": 0.011665885326159543,
       "moved": 1
     },
     "XOM": {
-      "n": 42,
-      "llm": 0.01296225003337909,
-      "anchor": 0.013064650604449845,
+      "n": 43,
+      "llm": 0.012768195459188381,
+      "anchor": 0.012868214621629586,
       "moved": 1
     }
   },
   "mean": {
-    "llm_mape": 0.016912143783523344,
-    "anchor_mape": 0.016895558488458706,
-    "rw_mape": 0.018097965153046694,
-    "llm_cover80": 0.7885057471264368,
-    "n_moved": 0.9047619047619048
+    "llm_mape": 0.01692750614241353,
+    "anchor_mape": 0.016911311858898822,
+    "rw_mape": 0.01799950579281498,
+    "llm_cover80": 0.7872226677358996,
+    "n_moved": 0.8837209302325582
   },
   "pending": {
-    "date": "2026-11-25",
+    "date": "2026-11-27",
     "n": 30,
     "n_moved": 0,
     "n_live": 30
@@ -888,7 +903,7 @@
   "state": {
     "llm_enabled": true,
     "why": "undecided",
-    "n_sessions": 42
+    "n_sessions": 43
   },
   "evolution": [
     {
@@ -906,10 +921,10 @@
       "why": null,
       "rationale": "The failure cases show positive overnight gaps systematically followed by negative realized moves off the anchor (and vice versa), indicating the pre-open anchor overshoots and regular sessions mean-revert the gap. This strategy exploits that by fading unexplained overnight gaps while still respecting genuine catalysts, directly targeting the directional errors the current always-zero behavior leaves on the table.",
       "stats": {
-        "n": 37,
-        "mean": -9.797e-05,
-        "lo": -0.000362,
-        "hi": 0.00016606,
+        "n": 38,
+        "mean": -9.54e-05,
+        "lo": -0.00035196,
+        "hi": 0.00016117,
         "decision": "undecided",
         "alpha": 0.025
       }
@@ -921,10 +936,10 @@
       "why": null,
       "rationale": "The champion moved almost nothing (2.2% of names) and realized moves were overwhelmingly opposite the overnight gap, so the market is systematically unwinding gaps the strategy left untouched at 0. This variant tells the analyst to actively fade sizeable, catalyst-free gaps while still staying flat on tiny gaps and genuine pending catalysts, differing from p1 by conditioning the fade on catalyst presence rather than blanket gap-fading.",
       "stats": {
-        "n": 36,
-        "mean": -2.822e-05,
-        "lo": -0.0002815,
-        "hi": 0.00022507,
+        "n": 37,
+        "mean": -2.746e-05,
+        "lo": -0.00027333,
+        "hi": 0.00021841,
         "decision": "undecided",
         "alpha": 0.008333333333333333
       }
