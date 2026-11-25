@@ -118,3 +118,4 @@ Append-only insights. Newest at the bottom.
 - (2026-11-20) 2026-11-20: FAIL, beat baseline; closest None, worst None.
 - (2026-11-23) 2026-11-23: FAIL, beat baseline; closest None, worst None.
 - (2026-11-24) 2026-11-24: PASS, beat baseline; closest None, worst None.
+- (2026-11-25) 2026-11-25: PASS, beat baseline; closest None, worst None.
