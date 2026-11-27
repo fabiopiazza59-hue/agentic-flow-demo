@@ -3,8 +3,8 @@
 _Auto-generated each scoring run from the full scored history._
 
 ## What keeps going wrong
-- 66 of 117 scored predictions FAILED (>1% error); mean error on misses 2.49%.
-- Directional misses: 33; magnitude-only misses: 33.
+- 67 of 118 scored predictions FAILED (>1% error); mean error on misses 2.5%.
+- Directional misses: 33; magnitude-only misses: 34.
 - Overconfident misses (conf ≥ 0.6): 7.
 
 ## Unreliable under these conditions
@@ -12,5 +12,5 @@ _Auto-generated each scoring run from the full scored history._
 - (Offline summary — richer pattern analysis runs when an API key is set.)
 
 ## Fixes to try next
-- Tighten direction calls; down-weight `macro` until its MAPE improves.
+- Tighten magnitude/sizing; down-weight `macro` until its MAPE improves.
 - Lower confidence on uncertain setups (calibration).
